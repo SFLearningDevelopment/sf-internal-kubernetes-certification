@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes Basic Level Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #326ce5 0%, #0d47a1 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.2em; margin-bottom: 8px; }
+        .header p { font-size: 1.1em; opacity: 0.9; }
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            background: rgba(255,255,255,0.15);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+        .timer-bar {
+            background: #1e3a5f;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .timer {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #60a5fa;
+        }
+        .timer.warning { color: #fbbf24; }
+        .timer.danger { color: #f87171; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .progress-info {
+            color: #94a3b8;
+            font-size: 0.95em;
+        }
+        .progress-bar-container {
+            background: #1e3a5f;
+            padding: 0 30px 15px;
+        }
+        .progress-bar {
+            background: #0f2027;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #326ce5, #60a5fa);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .nav-grid {
+            background: #1a2f4a;
+            padding: 15px 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.85em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #2d4a6b;
+            color: #94a3b8;
+        }
+        .nav-btn.answered { background: #326ce5; color: white; }
+        .nav-btn.flagged { background: #f59e0b; color: white; }
+        .nav-btn.current { outline: 3px solid #60a5fa; }
+        .nav-btn.answered.flagged { background: #d97706; color: white; }
+        .nav-legend {
+            background: #1a2f4a;
+            padding: 0 30px 15px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8em;
+            color: #94a3b8;
+        }
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+        }
+        .question-panel {
+            background: white;
+            padding: 35px;
+            min-height: 400px;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+        .question-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .q-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+        .badge-mcq { background: #dbeafe; color: #1d4ed8; }
+        .badge-fill { background: #dcfce7; color: #166534; }
+        .badge-tf { background: #fef9c3; color: #854d0e; }
+        .badge-domain { background: #f3e8ff; color: #6b21a8; }
+        .flag-btn {
+            background: none;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: #64748b;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .flag-btn.flagged {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .question-number {
+            font-size: 0.95em;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+        .question-text {
+            font-size: 1.2em;
+            color: #1e293b;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        .options-list { list-style: none; }
+        .option-item {
+            margin-bottom: 12px;
+        }
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+        .option-label:hover { border-color: #326ce5; background: #eff6ff; }
+        .option-label input[type="radio"] { margin-top: 3px; accent-color: #326ce5; flex-shrink: 0; }
+        .option-label.selected { border-color: #326ce5; background: #eff6ff; }
+        .fill-input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1.05em;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+        .fill-input:focus { border-color: #326ce5; }
+        .tf-options {
+            display: flex;
+            gap: 15px;
+        }
+        .tf-label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .tf-label:hover { border-color: #326ce5; background: #eff6ff; }
+        .tf-label.selected { border-color: #326ce5; background: #eff6ff; }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 35px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .btn-primary {
+            background: linear-gradient(135deg, #326ce5, #0d47a1);
+            color: white;
+            box-shadow: 0 4px 12px rgba(50,108,229,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-1px); }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #991b1b);
+            color: white;
+            box-shadow: 0 4px 12px rgba(220,38,38,0.3);
+        }
+        .btn-danger:hover { transform: translateY(-1px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .footer-bar {
+            background: #1e3a5f;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0 0 20px 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .answered-count { color: #94a3b8; font-size: 0.95em; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+        }
+        .modal h2 { font-size: 1.6em; margin-bottom: 15px; color: #1e293b; }
+        .modal p { color: #64748b; line-height: 1.6; margin-bottom: 20px; }
+        .modal-stats {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95em;
+        }
+        .modal-stat:last-child { border-bottom: none; }
+        .modal-stat span:last-child { font-weight: 700; }
+        .modal-buttons { display: flex; gap: 12px; justify-content: flex-end; }
+        code {
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⎈ Kubernetes Basic Level Test</h1>
+        <p>Certified Kubernetes Administrator — Foundation Knowledge</p>
+        <div class="header-meta">
+            <span class="meta-item">📋 40 Questions</span>
+            <span class="meta-item">⏱ 60 Minutes</span>
+            <span class="meta-item">✅ Pass Mark: 66%</span>
+            <span class="meta-item">🟢 Basic Level</span>
+        </div>
+    </div>
+
+    <div class="timer-bar">
+        <div>⏱ Time Remaining: <span class="timer" id="timer">60:00</span></div>
+        <div class="progress-info" id="progressInfo">Question 1 of 40</div>
+    </div>
+
+    <div class="progress-bar-container">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <div class="nav-grid" id="navGrid"></div>
+
+    <div class="nav-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#2d4a6b"></div> Not visited</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#326ce5"></div> Answered</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Flagged</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d97706"></div> Answered & Flagged</div>
+    </div>
+
+    <div class="question-panel" id="questionPanel"></div>
+
+    <div class="nav-buttons">
+        <button class="btn btn-secondary" id="prevBtn" onclick="navigate(-1)">← Previous</button>
+        <button class="btn btn-danger" onclick="openSubmitModal()">Submit Test</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="navigate(1)">Next →</button>
+    </div>
+
+    <div class="footer-bar">
+        <div class="answered-count" id="answeredCount">Answered: 0 / 40</div>
+        <div class="answered-count" id="flaggedCount">Flagged: 0</div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="submitModal">
+    <div class="modal">
+        <h2>📋 Submit Test?</h2>
+        <p>Are you sure you want to submit? Please review your answers before submitting.</p>
+        <div class="modal-stats" id="modalStats"></div>
+        <div class="modal-buttons">
+            <button class="btn btn-secondary" onclick="closeSubmitModal()">Review More</button>
+            <button class="btn btn-primary" onclick="submitTest()">Submit Now</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const questions = [
+    // ─── CLUSTER ARCHITECTURE (Q1–10) ───────────────────────────────────────
+    {
+        id: 1, type: "mcq", domain: "Cluster Architecture",
+        question: "What is the primary role of the Kubernetes API Server?",
+        options: [
+            "A. Schedule pods to nodes",
+            "B. Act as the front-end for the Kubernetes control plane and expose the Kubernetes API",
+            "C. Store cluster state in etcd",
+            "D. Monitor node health"
+        ],
+        answer: "B",
+        explanation: "The API Server is the central management entity and front-end for the Kubernetes control plane. All communication goes through it."
+    },
+    {
+        id: 2, type: "mcq", domain: "Cluster Architecture",
+        question: "Which component is responsible for scheduling pods onto nodes?",
+        options: [
+            "A. kubelet",
+            "B. kube-proxy",
+            "C. kube-scheduler",
+            "D. controller-manager"
+        ],
+        answer: "C",
+        explanation: "The kube-scheduler watches for newly created pods with no assigned node and selects the best node for them to run on."
+    },
+    {
+        id: 3, type: "mcq", domain: "Cluster Architecture",
+        question: "Where does Kubernetes store all cluster state data?",
+        options: [
+            "A. The API Server's in-memory cache",
+            "B. etcd",
+            "C. The kubelet database",
+            "D. A ConfigMap called cluster-state"
+        ],
+        answer: "B",
+        explanation: "etcd is a consistent and highly-available key-value store used as Kubernetes' backing store for all cluster data."
+    },
+    {
+        id: 4, type: "mcq", domain: "Cluster Architecture",
+        question: "Which component runs on every node and ensures containers are running in a pod?",
+        options: [
+            "A. kube-proxy",
+            "B. kube-scheduler",
+            "C. kubelet",
+            "D. container-runtime"
+        ],
+        answer: "C",
+        explanation: "The kubelet is an agent that runs on each node. It ensures that containers described in PodSpecs are running and healthy."
+    },
+    {
+        id: 5, type: "tf", domain: "Cluster Architecture",
+        question: "The kube-controller-manager runs all controller processes as a single binary.",
+        options: ["True", "False"],
+        answer: "True",
+        explanation: "The kube-controller-manager bundles many individual controller processes (node controller, replication controller, etc.) into a single binary."
+    },
+    {
+        id: 6, type: "mcq", domain: "Cluster Architecture",
+        question: "What is the function of kube-proxy on a Kubernetes node?",
+        options: [
+            "A. Pulls container images",
+            "B. Maintains network rules on nodes to allow communication to pods",
+            "C. Schedules pods to available nodes",
+            "D. Manages etcd replication"
+        ],
+        answer: "B",
+        explanation: "kube-proxy maintains network rules on nodes, enabling network communication to pods from inside or outside the cluster."
+    },
+    {
+        id: 7, type: "fill", domain: "Cluster Architecture",
+        question: "The Kubernetes command-line tool used to interact with the cluster is called ______.",
+        answer: "kubectl",
+        explanation: "kubectl is the CLI tool for running commands against Kubernetes clusters."
+    },
+    {
+        id: 8, type: "mcq", domain: "Cluster Architecture",
+        question: "Which of the following best describes a Kubernetes Node?",
+        options: [
+            "A. A logical grouping of pods",
+            "B. A worker machine (physical or virtual) that runs pods",
+            "C. The API endpoint for cluster management",
+            "D. A persistent storage unit"
+        ],
+        answer: "B",
+        explanation: "A Node is a worker machine in Kubernetes. It may be a VM or physical machine, and it runs the services necessary to run pods."
+    },
+    {
+        id: 9, type: "mcq", domain: "Cluster Architecture",
+        question: "What tool is commonly used to bootstrap a Kubernetes cluster?",
+        options: [
+            "A. kubectl",
+            "B. helm",
+            "C. kubeadm",
+            "D. kubefed"
+        ],
+        answer: "C",
+        explanation: "kubeadm is the official tool for bootstrapping a Kubernetes cluster following best practices."
+    },
+    {
+        id: 10, type: "mcq", domain: "Cluster Architecture",
+        question: "Which control plane component detects and responds to cluster events (e.g., starting a new pod when a deployment's replicas field is unsatisfied)?",
+        options: [
+            "A. kube-scheduler",
+            "B. kube-controller-manager",
+            "C. API Server",
+            "D. kubelet"
+        ],
+        answer: "B",
+        explanation: "The kube-controller-manager runs controller loops that watch cluster state and make changes to move the current state toward the desired state."
+    },
+    // ─── WORKLOADS & SCHEDULING (Q11–18) ─────────────────────────────────────
+    {
+        id: 11, type: "mcq", domain: "Workloads & Scheduling",
+        question: "What is the smallest deployable unit in Kubernetes?",
+        options: [
+            "A. Container",
+            "B. Pod",
+            "C. Deployment",
+            "D. ReplicaSet"
+        ],
+        answer: "B",
+        explanation: "A Pod is the smallest deployable unit in Kubernetes. It can contain one or more containers that share network and storage."
+    },
+    {
+        id: 12, type: "mcq", domain: "Workloads & Scheduling",
+        question: "Which workload resource ensures a specified number of pod replicas are running at any given time?",
+        options: [
+            "A. DaemonSet",
+            "B. StatefulSet",
+            "C. ReplicaSet",
+            "D. Job"
+        ],
+        answer: "C",
+        explanation: "A ReplicaSet's purpose is to maintain a stable set of replica pods running at any given time."
+    },
+    {
+        id: 13, type: "mcq", domain: "Workloads & Scheduling",
+        question: "Which kubectl command creates a deployment named 'nginx' using the nginx image?",
+        options: [
+            "A. kubectl run nginx --image=nginx",
+            "B. kubectl create deployment nginx --image=nginx",
+            "C. kubectl apply deployment nginx --image=nginx",
+            "D. kubectl new deployment nginx --image=nginx"
+        ],
+        answer: "B",
+        explanation: "The correct command to create a deployment imperatively is: kubectl create deployment <name> --image=<image>"
+    },
+    {
+        id: 14, type: "fill", domain: "Workloads & Scheduling",
+        question: "The kubectl command to scale a deployment named 'my-app' to 5 replicas is: kubectl ______ deployment my-app --replicas=5",
+        answer: "scale",
+        explanation: "kubectl scale deployment my-app --replicas=5 scales the deployment to the specified number of replicas."
+    },
+    {
+        id: 15, type: "mcq", domain: "Workloads & Scheduling",
+        question: "Which workload is best suited for running a pod on every node in the cluster?",
+        options: [
+            "A. Deployment",
+            "B. ReplicaSet",
+            "C. DaemonSet",
+            "D. StatefulSet"
+        ],
+        answer: "C",
+        explanation: "A DaemonSet ensures that all (or some) nodes run a copy of a pod, commonly used for log collectors and monitoring agents."
+    },
+    {
+        id: 16, type: "mcq", domain: "Workloads & Scheduling",
+        question: "What happens to pods managed by a Deployment when the Deployment is deleted?",
+        options: [
+            "A. Pods continue running independently",
+            "B. Pods are immediately deleted",
+            "C. Pods are moved to a default namespace",
+            "D. Pods are converted to standalone pods"
+        ],
+        answer: "B",
+        explanation: "When a Deployment is deleted, all pods managed by it are also deleted as part of the cascading deletion."
+    },
+    {
+        id: 17, type: "mcq", domain: "Workloads & Scheduling",
+        question: "Which field in a Pod spec defines which node the pod should run on?",
+        options: [
+            "A. nodeSelector",
+            "B. nodeName",
+            "C. nodeAffinity",
+            "D. targetNode"
+        ],
+        answer: "B",
+        explanation: "The nodeName field directly specifies the node where the pod should be scheduled, bypassing the scheduler."
+    },
+    {
+        id: 18, type: "tf", domain: "Workloads & Scheduling",
+        question: "A pod with restartPolicy: Never will be restarted automatically if it fails.",
+        options: ["True", "False"],
+        answer: "False",
+        explanation: "With restartPolicy: Never, the pod will not be restarted if it exits, regardless of success or failure."
+    },
+    // ─── SERVICES & NETWORKING (Q19–26) ──────────────────────────────────────
+    {
+        id: 19, type: "mcq", domain: "Services & Networking",
+        question: "Which Service type makes a service accessible from outside the cluster using a cloud provider's load balancer?",
+        options: [
+            "A. ClusterIP",
+            "B. NodePort",
+            "C. LoadBalancer",
+            "D. ExternalName"
+        ],
+        answer: "C",
+        explanation: "LoadBalancer service type exposes the service externally using a cloud provider's load balancer."
+    },
+    {
+        id: 20, type: "mcq", domain: "Services & Networking",
+        question: "What is the default Service type in Kubernetes?",
+        options: [
+            "A. NodePort",
+            "B. LoadBalancer",
+            "C. ClusterIP",
+            "D. ExternalName"
+        ],
+        answer: "C",
+        explanation: "ClusterIP is the default service type. It exposes the service on a cluster-internal IP, reachable only within the cluster."
+    },
+    {
+        id: 21, type: "fill", domain: "Services & Networking",
+        question: "The Kubernetes DNS service resolves a service named 'my-svc' in namespace 'prod' using the FQDN: my-svc.prod.svc.______",
+        answer: "cluster.local",
+        explanation: "The default cluster domain in Kubernetes is cluster.local, making the full FQDN: my-svc.prod.svc.cluster.local"
+    },
+    {
+        id: 22, type: "mcq", domain: "Services & Networking",
+        question: "What is the valid port range for NodePort services?",
+        options: [
+            "A. 1–1024",
+            "B. 8000–9000",
+            "C. 30000–32767",
+            "D. 443–8443"
+        ],
+        answer: "C",
+        explanation: "NodePort services use ports in the range 30000-32767 by default, allocating a port on every node."
+    },
+    {
+        id: 23, type: "mcq", domain: "Services & Networking",
+        question: "Which object defines rules for allowing or denying traffic to/from pods?",
+        options: [
+            "A. ResourceQuota",
+            "B. NetworkPolicy",
+            "C. PodSecurityPolicy",
+            "D. LimitRange"
+        ],
+        answer: "B",
+        explanation: "NetworkPolicy is a specification of how groups of pods are allowed to communicate with each other and other network endpoints."
+    },
+    {
+        id: 24, type: "mcq", domain: "Services & Networking",
+        question: "What does an Ingress resource do in Kubernetes?",
+        options: [
+            "A. Manages egress traffic from pods",
+            "B. Exposes HTTP/HTTPS routes from outside the cluster to services",
+            "C. Creates internal load balancers",
+            "D. Defines DNS entries for pods"
+        ],
+        answer: "B",
+        explanation: "An Ingress manages external access to services in a cluster, typically HTTP/HTTPS, providing load balancing, SSL termination, and name-based virtual hosting."
+    },
+    {
+        id: 25, type: "fill", domain: "Services & Networking",
+        question: "The field used in a Service spec to match pods with a specific label is called ______.",
+        answer: "selector",
+        explanation: "The selector field in a Service spec determines which pods the service routes traffic to, based on their labels."
+    },
+    {
+        id: 26, type: "mcq", domain: "Services & Networking",
+        question: "Which kubectl command exposes a deployment named 'web' on port 80?",
+        options: [
+            "A. kubectl expose deployment web --port=80",
+            "B. kubectl service deployment web --port=80",
+            "C. kubectl create service web --port=80",
+            "D. kubectl network deployment web --port=80"
+        ],
+        answer: "A",
+        explanation: "kubectl expose deployment <name> --port=<port> creates a Service that exposes the deployment on the specified port."
+    },
+    // ─── STORAGE (Q27–30) ─────────────────────────────────────────────────────
+    {
+        id: 27, type: "mcq", domain: "Storage",
+        question: "Which Kubernetes object represents a piece of storage in the cluster provisioned by an administrator?",
+        options: [
+            "A. PersistentVolumeClaim",
+            "B. PersistentVolume",
+            "C. StorageClass",
+            "D. VolumeMount"
+        ],
+        answer: "B",
+        explanation: "A PersistentVolume (PV) is a piece of storage provisioned by an admin or dynamically via StorageClass, with a lifecycle independent of pods."
+    },
+    {
+        id: 28, type: "mcq", domain: "Storage",
+        question: "What does a PersistentVolumeClaim (PVC) represent?",
+        options: [
+            "A. A request for storage by a user/pod",
+            "B. A storage class definition",
+            "C. An NFS mount point",
+            "D. A node's local disk"
+        ],
+        answer: "A",
+        explanation: "A PVC is a request for storage by a user. It is similar to a pod in that pods consume node resources and PVCs consume PV resources."
+    },
+    {
+        id: 29, type: "fill", domain: "Storage",
+        question: "The access mode that allows a volume to be mounted as read-write by a single node is ______.",
+        answer: "ReadWriteOnce",
+        explanation: "ReadWriteOnce (RWO) allows the volume to be mounted as read-write by a single node at a time."
+    },
+    {
+        id: 30, type: "mcq", domain: "Storage",
+        question: "Which volume type stores data only for the lifetime of a pod?",
+        options: [
+            "A. PersistentVolume",
+            "B. emptyDir",
+            "C. hostPath",
+            "D. nfs"
+        ],
+        answer: "B",
+        explanation: "An emptyDir volume is created when a pod is assigned to a node and exists only as long as the pod runs on that node."
+    },
+    // ─── TROUBLESHOOTING (Q31–40) ─────────────────────────────────────────────
+    {
+        id: 31, type: "mcq", domain: "Troubleshooting",
+        question: "Which kubectl command shows the logs of a running pod named 'my-pod'?",
+        options: [
+            "A. kubectl describe pod my-pod",
+            "B. kubectl get pod my-pod --logs",
+            "C. kubectl logs my-pod",
+            "D. kubectl events my-pod"
+        ],
+        answer: "C",
+        explanation: "kubectl logs <pod-name> prints the logs for a container in a pod, useful for debugging."
+    },
+    {
+        id: 32, type: "mcq", domain: "Troubleshooting",
+        question: "A pod is in 'CrashLoopBackOff' state. What is the most likely cause?",
+        options: [
+            "A. The node has insufficient CPU",
+            "B. The pod's container is repeatedly crashing after starting",
+            "C. The image cannot be pulled from the registry",
+            "D. The service has no endpoints"
+        ],
+        answer: "B",
+        explanation: "CrashLoopBackOff means the container is crashing repeatedly. Kubernetes backs off restarts with increasing delays."
+    },
+    {
+        id: 33, type: "fill", domain: "Troubleshooting",
+        question: "To get detailed information about a pod including events, you use the command: kubectl ______ pod my-pod",
+        answer: "describe",
+        explanation: "kubectl describe pod <pod-name> shows detailed information about the pod including its events, which is essential for troubleshooting."
+    },
+    {
+        id: 34, type: "mcq", domain: "Troubleshooting",
+        question: "What does the pod status 'ImagePullBackOff' indicate?",
+        options: [
+            "A. The pod has insufficient memory",
+            "B. Kubernetes cannot pull the container image",
+            "C. The pod is waiting for a PVC to be bound",
+            "D. The node is not ready"
+        ],
+        answer: "B",
+        explanation: "ImagePullBackOff means Kubernetes is unable to pull the container image, often due to a wrong image name, tag, or missing credentials."
+    },
+    {
+        id: 35, type: "mcq", domain: "Troubleshooting",
+        question: "Which command checks the status of all nodes in the cluster?",
+        options: [
+            "A. kubectl get pods --all-namespaces",
+            "B. kubectl describe cluster",
+            "C. kubectl get nodes",
+            "D. kubectl cluster-info"
+        ],
+        answer: "C",
+        explanation: "kubectl get nodes lists all nodes in the cluster along with their status, roles, age, and Kubernetes version."
+    },
+    {
+        id: 36, type: "fill", domain: "Troubleshooting",
+        question: "To follow/stream the logs of a pod in real-time, you add the ______ flag to the kubectl logs command.",
+        answer: "-f",
+        explanation: "kubectl logs -f <pod-name> streams/follows the logs in real-time, similar to 'tail -f'."
+    },
+    {
+        id: 37, type: "mcq", domain: "Troubleshooting",
+        question: "A pod is stuck in 'Pending' state. What is the most common reason?",
+        options: [
+            "A. The container image is too large",
+            "B. The pod cannot be scheduled due to insufficient resources or unmet constraints",
+            "C. The pod's liveness probe is failing",
+            "D. The kubelet service is restarting"
+        ],
+        answer: "B",
+        explanation: "A pending pod usually cannot be scheduled because no node has sufficient resources, or node selectors/tolerations don't match any available nodes."
+    },
+    {
+        id: 38, type: "mcq", domain: "Troubleshooting",
+        question: "Which kubectl command runs a temporary interactive pod for debugging?",
+        options: [
+            "A. kubectl debug node/my-node",
+            "B. kubectl run tmp --image=busybox --rm -it -- sh",
+            "C. kubectl exec -it my-pod -- bash",
+            "D. kubectl attach my-pod"
+        ],
+        answer: "B",
+        explanation: "kubectl run with --rm and -it flags creates a temporary interactive pod that is deleted when you exit, useful for debugging."
+    },
+    {
+        id: 39, type: "fill", domain: "Troubleshooting",
+        question: "To execute a command inside a running container in pod 'my-pod', you use: kubectl ______ -it my-pod -- /bin/bash",
+        answer: "exec",
+        explanation: "kubectl exec -it <pod-name> -- <command> allows you to execute commands inside a running container."
+    },
+    {
+        id: 40, type: "mcq", domain: "Troubleshooting",
+        question: "Which command shows recent events in a specific namespace 'production'?",
+        options: [
+            "A. kubectl logs -n production",
+            "B. kubectl get events -n production",
+            "C. kubectl describe namespace production",
+            "D. kubectl cluster-info production"
+        ],
+        answer: "B",
+        explanation: "kubectl get events -n <namespace> shows recent events in that namespace, which is very useful for troubleshooting issues."
+    }
+];
+
+let currentQ = 0;
+let answers = new Array(40).fill(null);
+let flagged = new Array(40).fill(false);
+let timeLeft = 3600;
+let timerInterval;
+
+function init() {
+    buildNavGrid();
+    renderQuestion();
+    startTimer();
+}
+
+function buildNavGrid() {
+    const grid = document.getElementById('navGrid');
+    grid.innerHTML = '';
+    questions.forEach((_, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn' + (i === currentQ ? ' current' : '');
+        btn.textContent = i + 1;
+        btn.id = 'nav-' + i;
+        btn.onclick = () => goToQuestion(i);
+        grid.appendChild(btn);
+    });
+}
+
+function updateNavBtn(index) {
+    const btn = document.getElementById('nav-' + index);
+    if (!btn) return;
+    btn.className = 'nav-btn';
+    if (answers[index] !== null) btn.classList.add('answered');
+    if (flagged[index]) btn.classList.add('flagged');
+    if (index === currentQ) btn.classList.add('current');
+}
+
+function renderQuestion() {
+    const q = questions[currentQ];
+    const panel = document.getElementById('questionPanel');
+
+    const typeLabels = { mcq: 'Multiple Choice', fill: 'Fill in the Blank', tf: 'True / False' };
+    const typeBadges = { mcq: 'badge-mcq', fill: 'badge-fill', tf: 'badge-tf' };
+
+    let answerHTML = '';
+    if (q.type === 'mcq') {
+        answerHTML = '<ul class="options-list">' + q.options.map((opt, i) => {
+            const letter = ['A','B','C','D'][i];
+            const selected = answers[currentQ] === letter ? 'selected' : '';
+            return `<li class="option-item">
+                <label class="option-label ${selected}">
+                    <input type="radio" name="q${currentQ}" value="${letter}" ${answers[currentQ] === letter ? 'checked' : ''} onchange="saveAnswer('${letter}')">
+                    ${opt}
+                </label>
+            </li>`;
+        }).join('') + '</ul>';
+    } else if (q.type === 'tf') {
+        answerHTML = '<div class="tf-options">' + q.options.map(opt => {
+            const selected = answers[currentQ] === opt ? 'selected' : '';
+            return `<label class="tf-label ${selected}">
+                <input type="radio" name="q${currentQ}" value="${opt}" ${answers[currentQ] === opt ? 'checked' : ''} onchange="saveAnswer('${opt}')" style="display:none">
+                ${opt === 'True' ? '✅' : '❌'} ${opt}
+            </label>`;
+        }).join('') + '</div>';
+    } else {
+        const val = answers[currentQ] || '';
+        answerHTML = `<input type="text" class="fill-input" placeholder="Type your answer here..." value="${val}" oninput="saveAnswer(this.value)" id="fillInput">`;
+    }
+
+    panel.innerHTML = `
+        <div class="question-header">
+            <div class="question-meta">
+                <span class="q-badge ${typeBadges[q.type]}">${typeLabels[q.type]}</span>
+                <span class="q-badge badge-domain">${q.domain}</span>
+            </div>
+            <button class="flag-btn ${flagged[currentQ] ? 'flagged' : ''}" onclick="toggleFlag()">
+                ${flagged[currentQ] ? '🚩 Flagged' : '⚑ Flag for Review'}
+            </button>
+        </div>
+        <div class="question-number">Question ${currentQ + 1} of ${questions.length}</div>
+        <div class="question-text">${q.question}</div>
+        ${answerHTML}
+    `;
+
+    document.getElementById('prevBtn').disabled = currentQ === 0;
+    document.getElementById('nextBtn').disabled = currentQ === questions.length - 1;
+    document.getElementById('progressInfo').textContent = `Question ${currentQ + 1} of ${questions.length}`;
+    document.getElementById('progressFill').style.width = ((currentQ + 1) / questions.length * 100) + '%';
+    updateCounts();
+    questions.forEach((_, i) => updateNavBtn(i));
+}
+
+function saveAnswer(val) {
+    answers[currentQ] = val;
+    updateCounts();
+    updateNavBtn(currentQ);
+    document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+    document.querySelectorAll('.tf-label').forEach(l => l.classList.remove('selected'));
+    if (val) {
+        document.querySelectorAll(`input[name="q${currentQ}"]`).forEach(inp => {
+            if (inp.value === val) {
+                inp.closest('label')?.classList.add('selected');
+            }
+        });
+    }
+}
+
+function toggleFlag() {
+    flagged[currentQ] = !flagged[currentQ];
+    updateNavBtn(currentQ);
+    updateCounts();
+    renderQuestion();
+}
+
+function navigate(dir) {
+    currentQ = Math.max(0, Math.min(questions.length - 1, currentQ + dir));
+    renderQuestion();
+}
+
+function goToQuestion(index) {
+    currentQ = index;
+    renderQuestion();
+}
+
+function updateCounts() {
+    const answeredCount = answers.filter(a => a !== null).length;
+    const flaggedCount = flagged.filter(f => f).length;
+    document.getElementById('answeredCount').textContent = `Answered: ${answeredCount} / ${questions.length}`;
+    document.getElementById('flaggedCount').textContent = `Flagged: ${flaggedCount}`;
+}
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        timeLeft--;
+        const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const secs = (timeLeft % 60).toString().padStart(2, '0');
+        const el = document.getElementById('timer');
+        el.textContent = `${mins}:${secs}`;
+        el.className = 'timer';
+        if (timeLeft <= 600) el.classList.add('warning');
+        if (timeLeft <= 120) el.classList.add('danger');
+        if (timeLeft <= 0) { clearInterval(timerInterval); submitTest(); }
+    }, 1000);
+}
+
+function openSubmitModal() {
+    const answered = answers.filter(a => a !== null).length;
+    const unanswered = questions.length - answered;
+    const flaggedCount = flagged.filter(f => f).length;
+    document.getElementById('modalStats').innerHTML = `
+        <div class="modal-stat"><span>Total Questions</span><span>${questions.length}</span></div>
+        <div class="modal-stat"><span>Answered</span><span style="color:#16a34a">${answered}</span></div>
+        <div class="modal-stat"><span>Unanswered</span><span style="color:${unanswered > 0 ? '#dc2626' : '#16a34a'}">${unanswered}</span></div>
+        <div class="modal-stat"><span>Flagged for Review</span><span style="color:#d97706">${flaggedCount}</span></div>
+    `;
+    document.getElementById('submitModal').classList.add('active');
+}
+
+function closeSubmitModal() {
+    document.getElementById('submitModal').classList.remove('active');
+}
+
+function submitTest() {
+    clearInterval(timerInterval);
+    const timeTaken = 3600 - timeLeft;
+    const mins = Math.floor(timeTaken / 60);
+    const secs = timeTaken % 60;
+    const results = {
+        answers: answers,
+        questions: questions,
+        timeTaken: `${mins}m ${secs}s`,
+        level: 'Basic'
+    };
+    localStorage.setItem('k8s_test_results', JSON.stringify(results));
+    window.location.href = 'kubernetes-results.html';
+}
+
+init();
+</script>
+</body>
+</html>
