@@ -6,8 +6,9 @@
     <title>Kubernetes Basic Course - Dashboard</title>
     <style>
         :root {
-            --primary: #326ce5;
-            --primary-dark: #0d47a1;
+            --primary: #0078D4;        /* SourceFuse Blue */
+            --primary-dark: #005A9E;
+            --accent: #FF4D4D;         /* SourceFuse Orange/Red */
             --success: #16a34a;
             --warning: #f59e0b;
             --danger: #dc2626;
@@ -16,7 +17,7 @@
             --text-dark: #0f172a;
             --text-light: #64748b;
             --border: #e2e8f0;
-        }
+}
 
         [data-theme="dark"] {
             --bg-light: #1e293b;
@@ -356,7 +357,28 @@
             background: #fee2e2;
             color: #991b1b;
         }
-
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-placeholder {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        .logo-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
         [data-theme="dark"] .badge-locked {
             background: #7f1d1d;
             color: #fca5a5;
@@ -377,10 +399,15 @@
 </head>
 <body>
     <div class="header">
-        <div class="header-content">
+    <div class="header-content">
+        <div class="logo-container">
+            <div class="logo-placeholder">
+                <img src="sourcefuse-logo.png" alt="SourceFuse" id="logo-img">
+            </div>
             <h1>⎈ Kubernetes Basic Course</h1>
-            <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
         </div>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+    </div>
     </div>
 
     <div class="container">
