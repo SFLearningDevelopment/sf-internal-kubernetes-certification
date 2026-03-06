@@ -635,17 +635,68 @@
                         • Run your actual applications (pods)<br>
                         • Components: kubelet, kube-proxy, container runtime
                     </div>
-
+                    <div class="architecture-visual">
+                    <div class="arch-title">🏗️ Kubernetes Architecture</div>
+                    <div class="arch-grid">
+                        <div class="arch-column control-plane">
+                            <div class="arch-column-title">Control Plane</div>
+                            <div class="arch-subtitle">The Brain 🧠</div>
+                            <div class="component-box">📡 API Server</div>
+                            <div class="component-box">💾 etcd</div>
+                            <div class="component-box">📅 Scheduler</div>
+                            <div class="component-box">🎛️ Controller Manager</div>
+                        </div>
+                        <div class="arch-column worker-nodes">
+                            <div class="arch-column-title">Worker Nodes</div>
+                            <div class="arch-subtitle">The Muscle 💪</div>
+                            <div class="component-box">📦 Pods</div>
+                            <div class="component-box">🤖 kubelet</div>
+                            <div class="component-box">🌐 kube-proxy</div>
+                            <div class="component-box">🔧 Container Runtime</div>
+                        </div>
+                    </div>
+                    </div>
                     <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
                     <p>Think of Kubernetes like an <strong>orchestra</strong>:</p>
-                    <ul style="margin-left: 25px; margin-top: 10px;">
-                        <li><strong>API Server</strong> = The conductor (coordinates everything)</li>
-                        <li><strong>etcd</strong> = Sheet music (stores the score/state)</li>
-                        <li><strong>Scheduler</strong> = Stage manager (assigns musicians to positions)</li>
-                        <li><strong>Controllers</strong> = Section leaders (ensure musicians play correctly)</li>
-                        <li><strong>Worker Nodes</strong> = Musicians (do the actual work)</li>
-                    </ul>
-
+                    
+                    <div class="analogy-visual">
+                        <div class="analogy-title">🎼 Kubernetes as an Orchestra</div>
+                        
+                        <div class="analogy-row">
+                            <div class="k8s-comp">API Server</div>
+                            <div class="arrow">→</div>
+                            <div class="orchestra-comp">🎼 Conductor</div>
+                            <div class="comp-description">Coordinates everything</div>
+                        </div>
+                        
+                        <div class="analogy-row">
+                            <div class="k8s-comp">etcd</div>
+                            <div class="arrow">→</div>
+                            <div class="orchestra-comp">📜 Sheet Music</div>
+                            <div class="comp-description">Stores the score/state</div>
+                        </div>
+                        
+                        <div class="analogy-row">
+                            <div class="k8s-comp">Scheduler</div>
+                            <div class="arrow">→</div>
+                            <div class="orchestra-comp">🎭 Stage Manager</div>
+                            <div class="comp-description">Assigns positions</div>
+                        </div>
+                        
+                        <div class="analogy-row">
+                            <div class="k8s-comp">Controllers</div>
+                            <div class="arrow">→</div>
+                            <div class="orchestra-comp">👥 Section Leaders</div>
+                            <div class="comp-description">Ensure correct performance</div>
+                        </div>
+                        
+                        <div class="analogy-row">
+                            <div class="k8s-comp">Worker Nodes</div>
+                            <div class="arrow">→</div>
+                            <div class="orchestra-comp">🎺🎻 Musicians</div>
+                            <div class="comp-description">Do the actual work</div>
+                        </div>
+                    </div>
                     <h3 style="margin-top: 25px;">⚠️ Common Pitfall</h3>
                     <div class="danger-box">
                         <strong>Mistake:</strong> Confusing "cluster" with "node"<br>
