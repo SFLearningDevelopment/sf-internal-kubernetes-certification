@@ -419,17 +419,18 @@
             padding: 18px 22px;
             border-radius: 8px;
             margin-top: 25px;
+            color: #78350f;
         }
-
+        
         [data-theme="dark"] .test-questions {
             background: #78350f;
             border-color: #fbbf24;
+            color: #fef3c7;
         }
-
         .test-questions h4 { margin-bottom: 12px; color: #92400e; }
         [data-theme="dark"] .test-questions h4 { color: #fef3c7; }
 
-        .test-questions ul { margin-left: 20px; }
+        .test-questions ul { margin-left: 20px; color: inherit;}
 
         .aws-practice {
             background: linear-gradient(135deg, #fff7ed, #ffedd5);
@@ -711,7 +712,7 @@ kubectl get pod my-app -o wide
 
                     <div class="test-questions">
                         <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
+                        <ul style="color: #78350f;">
                             <li>Q11: What is the smallest deployable unit in Kubernetes?</li>
                         </ul>
                     </div>
