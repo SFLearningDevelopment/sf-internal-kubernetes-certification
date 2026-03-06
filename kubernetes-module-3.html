@@ -801,7 +801,7 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
             </div>
         </div>
 
-        <!-- Sections 3.3 through 3.8 - Placeholders -->
+        <!-- Section 3.3 -->
         <div class="accordion-item" data-section="3.3">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
@@ -812,13 +812,112 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
             </div>
             <div class="accordion-content">
                 <div class="accordion-body">
-                    <p><em>Content for DNS and FQDN format following the pattern...</em></p>
+                    <h3>📘 Kubernetes DNS</h3>
+                    <p>Kubernetes automatically creates <strong>DNS records</strong> for Services, allowing pods to discover and communicate with services by name instead of IP addresses.</p>
+        
+                    <div class="info-box">
+                        <strong>Key Benefits:</strong><br>
+                        • Services get automatic DNS names<br>
+                        • Pods can use service names instead of IPs<br>
+                        • DNS updates automatically when services change<br>
+                        • Works across namespaces
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🌐 DNS Naming Format (FQDN)</h3>
+                    <p>Every Kubernetes Service gets a Fully Qualified Domain Name (FQDN) in this format:</p>
+        
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <service-name>.<namespace>.svc.cluster.local
+        
+        Examples:
+        webapp.default.svc.cluster.local
+        database.production.svc.cluster.local
+        api.backend.svc.cluster.local
+                    </div>
+        
+                    <div class="info-box">
+                        <strong>FQDN Breakdown:</strong><br>
+                        • <code class="command">service-name</code> — Name of the Service<br>
+                        • <code class="command">namespace</code> — Kubernetes namespace<br>
+                        • <code class="command">svc</code> — Indicates it's a Service<br>
+                        • <code class="command">cluster.local</code> — Default cluster domain
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔍 Short Names vs Full Names</h3>
+                    <p>Pods can use shortened DNS names depending on the namespace:</p>
+        
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Same namespace - use short name
+        curl http://webapp
+        
+        # Same namespace - use namespace
+        curl http://webapp.default
+        
+        # Different namespace - use full FQDN
+        curl http://webapp.production.svc.cluster.local
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">💻 Testing DNS Resolution</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Create a test service
+        kubectl create service clusterip test-svc --tcp=80:80
+        
+        # Run a debug pod to test DNS
+        kubectl run debug --image=busybox -it --rm -- sh
+        
+        # Inside the pod, test DNS:
+        nslookup test-svc
+        nslookup test-svc.default
+        nslookup test-svc.default.svc.cluster.local
+        
+        # Test connectivity
+        wget -O- http://test-svc
+                    </div>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ Try It on AWS/EKS</h4>
+                        <p><strong>Test service discovery with DNS:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Create deployment and service
+        kubectl create deployment nginx --image=nginx
+        kubectl expose deployment nginx --port=80
+        
+        # Create test pod in same namespace
+        kubectl run test --image=busybox -it --rm -- sh
+        
+        # Inside the test pod:
+        wget -O- http://nginx          # Short name works!
+        nslookup nginx                 # See DNS resolution
+        
+        # Exit the pod
+        exit
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> DNS is built-in, no additional cost</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. DNS only works for Services, not Pods</strong><br>
+                        Individual pod IPs don't get DNS names (use Services)<br><br>
+                        
+                        <strong>2. Cross-namespace requires full name</strong><br>
+                        <code class="command">webapp</code> won't work across namespaces — use <code class="command">webapp.other-ns</code><br><br>
+                        
+                        <strong>3. DNS propagation isn't instant</strong><br>
+                        New services may take a few seconds to be resolvable
+                    </div>
+        
                     <div class="test-questions">
                         <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
+                        <ul style="color: inherit;">
                             <li>Q21: Kubernetes DNS FQDN format (Fill in blank)</li>
                         </ul>
                     </div>
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-3.3" onchange="updateProgress()">
                         <label for="check-3.3">✅ Mark section 3.3 as completed</label>
@@ -826,58 +925,246 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                 </div>
             </div>
         </div>
-
-        <div class="accordion-item" data-section="3.4">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>3.4 Service Selectors & Labels</span>
-                    <span class="badge badge-danger">Critical</span>
+            <!-- Section 3.4 -->
+            <div class="accordion-item" data-section="3.4">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="accordion-title">
+                        <span>3.4 Service Selectors & Labels</span>
+                        <span class="badge badge-danger">Critical</span>
+                    </div>
+                    <span class="accordion-icon">▼</span>
                 </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p><em>Content for selectors...</em></p>
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q25: Service selector field (Fill in blank)</li>
-                            <li>Q26: kubectl expose command</li>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>📘 How Services Find Pods</h3>
+                        <p>Services use <strong>label selectors</strong> to identify which Pods should receive traffic. This is the core mechanism of Kubernetes networking.</p>
+            
+                        <div class="info-box">
+                            <strong>Label Selector Workflow:</strong><br>
+                            1. Pods have labels (key-value pairs)<br>
+                            2. Services define selectors (which labels to match)<br>
+                            3. Any Pod with matching labels joins the Service<br>
+                            4. Service load-balances traffic across matching Pods
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🏷️ Labels on Pods</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: webapp-pod
+              labels:
+                app: webapp      # Label: app=webapp
+                tier: frontend   # Label: tier=frontend
+                version: v1      # Label: version=v1
+            spec:
+              containers:
+              - name: nginx
+                image: nginx
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🎯 Selectors in Services</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            apiVersion: v1
+            kind: Service
+            metadata:
+              name: webapp-service
+            spec:
+              selector:
+                app: webapp      # Matches pods with label app=webapp
+              ports:
+              - port: 80
+                targetPort: 80
+                        </div>
+            
+                        <p style="margin-top: 15px;">This Service will send traffic to <strong>any Pod</strong> that has the label <code class="command">app: webapp</code>, regardless of other labels.</p>
+            
+                        <h3 style="margin-top: 25px;">💻 Working with Labels</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # View pod labels
+            kubectl get pods --show-labels
+            
+            # Filter pods by label
+            kubectl get pods -l app=webapp
+            
+            # Add label to existing pod
+            kubectl label pod my-pod environment=production
+            
+            # Remove label from pod
+            kubectl label pod my-pod environment-
+            
+            # View service endpoints (shows which pods are selected)
+            kubectl get endpoints webapp-service
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🔄 Dynamic Pod Selection</h3>
+                        <p>The beauty of selectors: they're <strong>dynamic</strong>!</p>
+                        <ul style="margin-left: 25px; margin-top: 10px;">
+                            <li>Add a pod with matching labels → automatically joins the service</li>
+                            <li>Remove the label → pod removed from service immediately</li>
+                            <li>No need to update the service configuration</li>
                         </ul>
-                    </div>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-3.4" onchange="updateProgress()">
-                        <label for="check-3.4">✅ Mark section 3.4 as completed</label>
+            
+                        <div class="aws-practice">
+                            <h4>🛠️ Try It on AWS/EKS</h4>
+                            <p><strong>See label selectors in action:</strong></p>
+                            <div class="code-block">
+                                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # Create deployment with labels
+            kubectl create deployment webapp --image=nginx
+            kubectl label deployment webapp app=frontend
+            
+            # Create service with selector
+            kubectl expose deployment webapp --port=80 --selector=app=frontend
+            
+            # Check which pods are selected
+            kubectl get endpoints webapp
+            
+            # Scale deployment - new pods automatically join service
+            kubectl scale deployment webapp --replicas=3
+            
+            # Check endpoints again - 3 pods now!
+            kubectl get endpoints webapp
+                            </div>
+                            <p style="margin-top: 10px;"><strong>💰 Cost:</strong> No additional cost</p>
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                        <div class="danger-box">
+                            <strong>1. Labels must match exactly</strong><br>
+                            <code class="command">app: webapp</code> ≠ <code class="command">app: Webapp</code> (case-sensitive)<br><br>
+                            
+                            <strong>2. Service with no matching pods = no endpoints</strong><br>
+                            Check: <code class="command">kubectl get endpoints &lt;service-name&gt;</code><br><br>
+                            
+                            <strong>3. Multiple selectors = AND logic</strong><br>
+                            Pods must match ALL selectors, not just one
+                        </div>
+            
+                        <div class="test-questions">
+                            <h4>🎯 This Section Covers Test Questions:</h4>
+                            <ul style="color: inherit;">
+                                <li>Q25: Service selector field (Fill in blank)</li>
+                                <li>Q26: kubectl expose command</li>
+                            </ul>
+                        </div>
+            
+                        <div class="section-complete">
+                            <input type="checkbox" id="check-3.4" onchange="updateProgress()">
+                            <label for="check-3.4">✅ Mark section 3.4 as completed</label>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="accordion-item" data-section="3.5">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>3.5 NetworkPolicy — Traffic Control</span>
-                    <span class="badge badge-warning">Important</span>
+            
+            <!-- Section 3.5 -->
+            <div class="accordion-item" data-section="3.5">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="accordion-title">
+                        <span>3.5 NetworkPolicy — Traffic Control</span>
+                        <span class="badge badge-warning">Important</span>
+                    </div>
+                    <span class="accordion-icon">▼</span>
                 </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p><em>Content for NetworkPolicy...</em></p>
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q23: Which object defines rules for traffic control?</li>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>📘 What is NetworkPolicy?</h3>
+                        <p>NetworkPolicy is a Kubernetes resource that defines <strong>rules for controlling network traffic</strong> between Pods, similar to a firewall.</p>
+            
+                        <div class="info-box">
+                            <strong>Key Concepts:</strong><br>
+                            • Controls ingress (incoming) and egress (outgoing) traffic<br>
+                            • Applied to Pods using label selectors<br>
+                            • Default behavior: all traffic allowed (if no policies exist)<br>
+                            • Requires a CNI plugin that supports NetworkPolicy (Calico, Cilium, etc.)
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                        <p>Think of NetworkPolicy as <strong>building security</strong>:</p>
+                        <ul style="margin-left: 25px; margin-top: 10px;">
+                            <li>By default, anyone can enter any room (no NetworkPolicy)</li>
+                            <li>You add badge readers (NetworkPolicy)</li>
+                            <li>Only employees with matching badges (labels) can enter</li>
+                            <li>You control which rooms they can access (ingress/egress rules)</li>
                         </ul>
-                    </div>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-3.5" onchange="updateProgress()">
-                        <label for="check-3.5">✅ Mark section 3.5 as completed</label>
+            
+                        <h3 style="margin-top: 25px;">💻 Basic NetworkPolicy Example</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            apiVersion: networking.k8s.io/v1
+            kind: NetworkPolicy
+            metadata:
+              name: allow-frontend
+            spec:
+              podSelector:
+                matchLabels:
+                  app: database    # Apply to pods with label app=database
+              policyTypes:
+              - Ingress
+              ingress:
+              - from:
+                - podSelector:
+                    matchLabels:
+                      app: frontend  # Only allow traffic from frontend pods
+                ports:
+                - protocol: TCP
+                  port: 5432
+                        </div>
+            
+                        <p style="margin-top: 15px;">This policy allows <strong>only</strong> pods with label <code class="command">app: frontend</code> to connect to database pods on port 5432.</p>
+            
+                        <h3 style="margin-top: 25px;">🚫 Deny All Traffic (Default Deny)</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            apiVersion: networking.k8s.io/v1
+            kind: NetworkPolicy
+            metadata:
+              name: default-deny-all
+            spec:
+              podSelector: {}  # Empty selector = applies to all pods
+              policyTypes:
+              - Ingress
+              - Egress
+            # No ingress/egress rules = deny all traffic
+                        </div>
+            
+                        <div class="warning-box">
+                            <strong>⚠️ Important:</strong> NetworkPolicy requires a compatible CNI plugin!<br>
+                            • AWS EKS default (VPC CNI) does NOT support NetworkPolicy<br>
+                            • You need to install Calico or Cilium on EKS<br>
+                            • Minikube supports NetworkPolicy by default
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                        <div class="danger-box">
+                            <strong>1. NetworkPolicy is not global</strong><br>
+                            Policies only affect pods in the same namespace<br><br>
+                            
+                            <strong>2. Policies are additive</strong><br>
+                            Multiple policies = union of all rules (not intersection)<br><br>
+                            
+                            <strong>3. No policy = all traffic allowed</strong><br>
+                            You must explicitly create deny rules
+                        </div>
+            
+                        <div class="test-questions">
+                            <h4>🎯 This Section Covers Test Questions:</h4>
+                            <ul style="color: inherit;">
+                                <li>Q23: Which object defines rules for traffic control?</li>
+                            </ul>
+                        </div>
+            
+                        <div class="section-complete">
+                            <input type="checkbox" id="check-3.5" onchange="updateProgress()">
+                            <label for="check-3.5">✅ Mark section 3.5 as completed</label>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
+            
         <div class="accordion-item" data-section="3.6">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
