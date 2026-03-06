@@ -1024,7 +1024,133 @@ kubectl get pod my-app -o wide
             </div>
             <div class="accordion-content">
                 <div class="accordion-body">
-                    <p><em>Content for DaemonSets...</em></p>
+                    <h3>📘 What is a DaemonSet?</h3>
+                    <p>A DaemonSet ensures that <strong>all (or some) nodes run a copy of a Pod</strong>. As nodes are added to the cluster, Pods are added to them. As nodes are removed, those Pods are garbage collected.</p>
+        
+                    <div class="info-box">
+                        <strong>Common Use Cases:</strong><br>
+                        • <strong>Logging agents:</strong> Fluentd, Logstash on every node<br>
+                        • <strong>Monitoring agents:</strong> Prometheus node exporter, Datadog agent<br>
+                        • <strong>Storage daemons:</strong> Ceph, GlusterFS on every node<br>
+                        • <strong>Network plugins:</strong> kube-proxy, CNI plugins
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                    <p>Think of a DaemonSet as <strong>security cameras in a building</strong>:</p>
+                    <ul style="margin-left: 25px; margin-top: 10px;">
+                        <li>Every floor (node) needs exactly one camera (pod)</li>
+                        <li>When a new floor is built, install a camera automatically</li>
+                        <li>If a floor is demolished, remove its camera</li>
+                        <li>You don't need multiple cameras per floor</li>
+                    </ul>
+        
+                    <h3 style="margin-top: 25px;">💻 DaemonSet Example</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: apps/v1
+        kind: DaemonSet
+        metadata:
+          name: fluentd-daemonset
+        spec:
+          selector:
+            matchLabels:
+              name: fluentd
+          template:
+            metadata:
+              labels:
+                name: fluentd
+            spec:
+              containers:
+              - name: fluentd
+                image: fluentd:latest
+                volumeMounts:
+                - name: varlog
+                  mountPath: /var/log
+              volumes:
+              - name: varlog
+                hostPath:
+                  path: /var/log
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔍 DaemonSet vs Deployment</h3>
+                    <div class="info-box">
+                        <strong>DaemonSet:</strong><br>
+                        • One pod per node (automatically)<br>
+                        • Used for node-level services<br>
+                        • No replica count needed<br><br>
+                        
+                        <strong>Deployment:</strong><br>
+                        • Multiple pods across nodes<br>
+                        • Used for application workloads<br>
+                        • You specify replica count
+                    </div>
+        
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Create DaemonSet
+        kubectl apply -f daemonset.yaml
+        
+        # Check DaemonSet
+        kubectl get daemonsets
+        
+        # See which nodes have the pod
+        kubectl get pods -o wide
+                    </div>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ Try It on AWS/EKS</h4>
+                        <p><strong>Deploy a monitoring agent on all nodes:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Create a simple DaemonSet
+        kubectl apply -f - <<EOF
+        apiVersion: apps/v1
+        kind: DaemonSet
+        metadata:
+          name: node-monitor
+        spec:
+          selector:
+            matchLabels:
+              app: node-monitor
+          template:
+            metadata:
+              labels:
+                app: node-monitor
+            spec:
+              containers:
+              - name: monitor
+                image: busybox
+                command: ["sh", "-c", "while true; do echo 'Monitoring...'; sleep 30; done"]
+        EOF
+        
+        # Check that one pod runs on each node
+        kubectl get pods -o wide
+        
+        # Check DaemonSet status
+        kubectl get daemonset node-monitor
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> Minimal (one small pod per node)</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. DaemonSets ignore pod scheduling preferences by default</strong><br>
+                        They run on ALL nodes unless you use nodeSelector or taints/tolerations<br><br>
+                        
+                        <strong>2. DaemonSet pods run even on master nodes</strong><br>
+                        Unless master nodes have taints that prevent scheduling<br><br>
+                        
+                        <strong>3. You cannot scale DaemonSets</strong><br>
+                        One pod per node is the rule — scaling doesn't apply
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Q15: Which resource ensures one pod runs on every node?</li>
+                        </ul>
+                    </div>
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-2.6" onchange="updateProgress()">
                         <label for="check-2.6">✅ Mark section 2.6 as completed</label>
@@ -1043,7 +1169,122 @@ kubectl get pod my-app -o wide
             </div>
             <div class="accordion-content">
                 <div class="accordion-body">
-                    <p><em>Content for scheduling...</em></p>
+                    <h3>📘 Manual Pod Scheduling</h3>
+                    <p>By default, the kube-scheduler assigns pods to nodes. But you can <strong>manually control</strong> where pods run using <code class="command">nodeName</code> or <code class="command">nodeSelector</code>.</p>
+        
+                    <h3 style="margin-top: 25px;">1️⃣ Using nodeName (Direct Assignment)</h3>
+                    <div class="info-box">
+                        <strong>nodeName</strong> — Assign pod to a specific node<br>
+                        • Bypasses the scheduler entirely<br>
+                        • Pod scheduled immediately to the named node<br>
+                        • If node doesn't exist or is unavailable, pod fails<br>
+                        • Use with caution!
+                    </div>
+        
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: nginx-manual
+        spec:
+          nodeName: worker-node-1  # Pod MUST run on this node
+          containers:
+          - name: nginx
+            image: nginx
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">2️⃣ Using nodeSelector (Label-Based)</h3>
+                    <div class="info-box">
+                        <strong>nodeSelector</strong> — Assign pod to nodes with specific labels<br>
+                        • More flexible than nodeName<br>
+                        • Scheduler finds a node matching the labels<br>
+                        • Pod won't schedule if no nodes match<br>
+                        • Recommended approach
+                    </div>
+        
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # First, label your nodes
+        kubectl label nodes worker-node-1 disktype=ssd
+        kubectl label nodes worker-node-2 disktype=hdd
+        
+        # Create pod with nodeSelector
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: nginx-ssd
+        spec:
+          nodeSelector:
+            disktype: ssd  # Pod runs only on nodes with this label
+          containers:
+          - name: nginx
+            image: nginx
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔍 nodeName vs nodeSelector</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Check node labels
+        kubectl get nodes --show-labels
+        
+        # Add label to node
+        kubectl label nodes <node-name> environment=production
+        
+        # Remove label from node
+        kubectl label nodes <node-name> environment-
+                    </div>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ Try It on AWS/EKS</h4>
+                        <p><strong>Schedule pods to specific node types:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Get your EKS nodes
+        kubectl get nodes
+        
+        # Label a node (use actual node name)
+        kubectl label nodes <your-node-name> workload=frontend
+        
+        # Create pod with nodeSelector
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: frontend-app
+        spec:
+          nodeSelector:
+            workload: frontend
+          containers:
+          - name: nginx
+            image: nginx
+        EOF
+        
+        # Verify pod is on the labeled node
+        kubectl get pod frontend-app -o wide
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> No additional cost</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. nodeName bypasses scheduler completely</strong><br>
+                        Pod fails if node doesn't exist or has no capacity<br><br>
+                        
+                        <strong>2. Pod stays Pending if nodeSelector doesn't match</strong><br>
+                        Check node labels: <code class="command">kubectl get nodes --show-labels</code><br><br>
+                        
+                        <strong>3. nodeSelector is simple but limited</strong><br>
+                        For complex rules, use Node Affinity (not covered in basic test)
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Q17: Fill in the blank - To schedule a pod on a specific node, use the ______ field.</li>
+                        </ul>
+                    </div>
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-2.7" onchange="updateProgress()">
                         <label for="check-2.7">✅ Mark section 2.7 as completed</label>
@@ -1062,7 +1303,132 @@ kubectl get pod my-app -o wide
             </div>
             <div class="accordion-content">
                 <div class="accordion-body">
-                    <p><em>Content for restart policies...</em></p>
+                    <h3>📘 What is restartPolicy?</h3>
+                    <p>The <code class="command">restartPolicy</code> defines what Kubernetes should do when a container in a pod exits or fails.</p>
+        
+                    <div class="info-box">
+                        <strong>Three Restart Policies:</strong><br>
+                        • <strong>Always</strong> (default) — Always restart, even on success<br>
+                        • <strong>OnFailure</strong> — Restart only if container exits with error<br>
+                        • <strong>Never</strong> — Never restart, regardless of exit status
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">1️⃣ Always (Default)</h3>
+                    <p>The container will always restart, even if it exits successfully (exit code 0).</p>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: pod-always
+        spec:
+          restartPolicy: Always  # This is the default
+          containers:
+          - name: app
+            image: busybox
+            command: ["sh", "-c", "echo 'Hello'; sleep 10"]
+        # Container will restart after sleeping for 10 seconds
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">2️⃣ OnFailure</h3>
+                    <p>The container restarts <strong>only if it fails</strong> (non-zero exit code). Success = no restart.</p>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: pod-onfailure
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: job
+            image: busybox
+            command: ["sh", "-c", "exit 1"]
+        # Container will restart because exit 1 = failure
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">3️⃣ Never</h3>
+                    <p>The container <strong>never restarts</strong>, regardless of exit status. Used for one-time tasks.</p>
+                    
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: pod-never
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: task
+            image: busybox
+            command: ["sh", "-c", "echo 'Task complete'"]
+        # Container runs once and stops. Never restarts.
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔍 When to Use Which Policy</h3>
+                    <div class="info-box">
+                        <strong>Always:</strong> Long-running applications (web servers, APIs)<br>
+                        <strong>OnFailure:</strong> Batch jobs that should retry on failure<br>
+                        <strong>Never:</strong> One-time initialization tasks, data migrations
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">💻 Testing Restart Policies</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Create pod that fails
+        kubectl run test-restart --image=busybox --restart=OnFailure \
+          -- sh -c "exit 1"
+        
+        # Watch the restarts (RESTARTS column increases)
+        kubectl get pods test-restart --watch
+        
+        # Check restart count
+        kubectl describe pod test-restart | grep -i restart
+                    </div>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ Try It on AWS/EKS</h4>
+                        <p><strong>Test different restart policies:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Test OnFailure - container will restart
+        kubectl run test-fail --image=busybox --restart=OnFailure \
+          -- sh -c "echo 'Attempt'; exit 1"
+        
+        # Watch it restart multiple times
+        kubectl get pods test-fail --watch
+        
+        # Test Never - container runs once
+        kubectl run test-never --image=busybox --restart=Never \
+          -- sh -c "echo 'Done'; exit 0"
+        
+        # Check status (should be Completed)
+        kubectl get pod test-never
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> Minimal resource usage</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. Always restarts even on success</strong><br>
+                        For one-time jobs, use OnFailure or Never<br><br>
+                        
+                        <strong>2. Restart policy applies to ALL containers in pod</strong><br>
+                        You cannot have different policies for different containers<br><br>
+                        
+                        <strong>3. CrashLoopBackOff after multiple failures</strong><br>
+                        Kubernetes adds exponential backoff (10s, 20s, 40s... up to 5min)
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Q18: What is the default restartPolicy for a pod?</li>
+                        </ul>
+                    </div>
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-2.8" onchange="updateProgress()">
                         <label for="check-2.8">✅ Mark section 2.8 as completed</label>
@@ -1070,6 +1436,8 @@ kubectl get pod my-app -o wide
                 </div>
             </div>
         </div>
+            
+            
 
         <!-- Knowledge Check -->
         <div class="knowledge-check" id="knowledge-check">
