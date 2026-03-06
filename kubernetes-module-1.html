@@ -870,87 +870,443 @@ kubectl cluster-info dump
                 </div>
             </div>
         </div>
-
-        <!-- Remaining sections 1.4 through 1.10 would follow the same pattern -->
-        <!-- For brevity, I'll add placeholders for sections 1.4-1.10 -->
-
-        <div class="accordion-item" data-section="1.4">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>1.4 kube-scheduler — The Pod Matchmaker</span>
-                    <span class="badge badge-warning">Important</span>
+            <!-- Section 1.4 -->
+            <div class="accordion-item" data-section="1.4">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="accordion-title">
+                        <span>1.4 kube-scheduler — The Pod Matchmaker</span>
+                        <span class="badge badge-warning">Important</span>
+                    </div>
+                    <span class="accordion-icon">▼</span>
                 </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p>Content for kube-scheduler following the same detailed pattern...</p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-1.4" onchange="updateProgress()">
-                        <label for="check-1.4">✅ Mark section 1.4 as completed</label>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>📘 What is the kube-scheduler?</h3>
+                        <p>The kube-scheduler watches for newly created pods that have no assigned node and selects the <strong>best node</strong> for them to run on.</p>
+            
+                        <div class="info-box">
+                            <strong>Scheduling Process:</strong><br>
+                            1. <strong>Watch:</strong> Detect new pods with no nodeName<br>
+                            2. <strong>Filter:</strong> Remove unsuitable nodes (insufficient resources, taints, etc.)<br>
+                            3. <strong>Score:</strong> Rank remaining nodes by suitability<br>
+                            4. <strong>Bind:</strong> Assign pod to the highest-scoring node
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                        <p>Imagine you're organizing a conference and need to assign speakers to rooms:</p>
+                        <ul style="margin-left: 25px; margin-top: 10px;">
+                            <li><strong>Filter:</strong> Remove rooms that are too small or already full</li>
+                            <li><strong>Score:</strong> Prefer rooms with better A/V equipment, closer to attendees</li>
+                            <li><strong>Bind:</strong> Assign the speaker to the best room</li>
+                        </ul>
+                        <p>The scheduler does the same for pods and nodes!</p>
+            
+                        <h3 style="margin-top: 25px;">🎯 Scheduling Factors</h3>
+                        <p>The scheduler considers many factors when choosing a node:</p>
+            
+                        <div class="info-box">
+                            <strong>Filtering Criteria:</strong><br>
+                            • Does the node have enough CPU/memory?<br>
+                            • Does the node have required volumes?<br>
+                            • Does the pod's nodeSelector match node labels?<br>
+                            • Are there taints that the pod doesn't tolerate?<br><br>
+                            
+                            <strong>Scoring Criteria:</strong><br>
+                            • Resource availability (prefer less-used nodes)<br>
+                            • Pod affinity/anti-affinity rules<br>
+                            • Data locality (prefer nodes with needed data)<br>
+                            • Spread pods across nodes for high availability
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">💻 Watching the Scheduler</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # Watch the scheduler in action
+            kubectl get events --watch
+            
+            # Create a pod and see scheduling events
+            kubectl run nginx --image=nginx
+            
+            # See which node a pod was scheduled to
+            kubectl get pod nginx -o wide
+            
+            # Check pod events (shows scheduling decisions)
+            kubectl describe pod nginx
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🚫 Bypassing the Scheduler</h3>
+                        <p>You can bypass the scheduler using <code class="command">nodeName</code> in the pod spec:</p>
+            
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            apiVersion: v1
+            kind: Pod
+            metadata:
+              name: manual-pod
+            spec:
+              nodeName: worker-node-1  # Bypass scheduler, go directly to this node
+              containers:
+              - name: nginx
+                image: nginx
+                        </div>
+            
+                        <div class="warning-box">
+                            <strong>⚠️ Warning:</strong> Using <code class="command">nodeName</code> bypasses all scheduler checks!<br>
+                            • Pod fails if node doesn't exist<br>
+                            • Pod fails if node has no capacity<br>
+                            • Use only for advanced debugging
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                        <div class="danger-box">
+                            <strong>1. Scheduler doesn't move running pods</strong><br>
+                            Once scheduled, pods stay on their node unless deleted or evicted<br><br>
+                            
+                            <strong>2. Pod stays Pending if no suitable node exists</strong><br>
+                            Check: <code class="command">kubectl describe pod &lt;name&gt;</code> for scheduling failures<br><br>
+                            
+                            <strong>3. You can bypass the scheduler (use carefully!)</strong><br>
+                            Using <code class="command">nodeName</code> in pod spec skips all scheduling logic
+                        </div>
+            
+                        <div class="test-questions">
+                            <h4>🎯 This Section Covers Test Questions:</h4>
+                            <ul style="color: inherit;">
+                                <li>Q2: Which component is responsible for scheduling pods onto nodes?</li>
+                            </ul>
+                        </div>
+            
+                        <div class="section-complete">
+                            <input type="checkbox" id="check-1.4" onchange="updateProgress()">
+                            <label for="check-1.4">✅ Mark section 1.4 as completed</label>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="accordion-item" data-section="1.5">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>1.5 kube-controller-manager — The Reconciliation Loop</span>
-                    <span class="badge badge-warning">Important</span>
+            <!-- Section 1.5 -->
+            <div class="accordion-item" data-section="1.5">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="accordion-title">
+                        <span>1.5 kube-controller-manager — The Reconciliation Loop</span>
+                        <span class="badge badge-warning">Important</span>
+                    </div>
+                    <span class="accordion-icon">▼</span>
                 </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p>Content for controller-manager...</p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-1.5" onchange="updateProgress()">
-                        <label for="check-1.5">✅ Mark section 1.5 as completed</label>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>📘 What is the kube-controller-manager?</h3>
+                        <p>The kube-controller-manager runs multiple <strong>controllers</strong> that watch the cluster state and make changes to move the current state toward the desired state.</p>
+            
+                        <div class="info-box">
+                            <strong>Key Controllers Include:</strong><br>
+                            • <strong>Node Controller:</strong> Monitors node health, marks nodes as unhealthy<br>
+                            • <strong>Replication Controller:</strong> Ensures correct number of pod replicas<br>
+                            • <strong>Endpoints Controller:</strong> Populates Endpoints objects (joins Services & Pods)<br>
+                            • <strong>Service Account Controller:</strong> Creates default ServiceAccounts for namespaces<br>
+                            • <strong>Deployment Controller:</strong> Manages ReplicaSets and rolling updates
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🔄 The Reconciliation Loop</h3>
+                        <p>Controllers continuously run a <strong>reconciliation loop</strong>:</p>
+            
+                        <ol style="margin-left: 25px; margin-top: 10px; line-height: 2;">
+                            <li><strong>Observe:</strong> Read current state from API server</li>
+                            <li><strong>Compare:</strong> Compare current state vs desired state (from etcd)</li>
+                            <li><strong>Act:</strong> Make changes to reconcile the difference</li>
+                            <li><strong>Repeat:</strong> Loop continuously (every few seconds)</li>
+                        </ol>
+            
+                        <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                        <p>Think of controllers as <strong>cruise control in a car</strong>:</p>
+                        <ul style="margin-left: 25px; margin-top: 10px;">
+                            <li><strong>Desired state:</strong> "Drive at 65 mph" (you set the cruise control)</li>
+                            <li><strong>Current state:</strong> Car is going 60 mph (going uphill)</li>
+                            <li><strong>Controller action:</strong> Increase throttle to reach 65 mph</li>
+                            <li><strong>Continuous monitoring:</strong> Keep adjusting to maintain 65 mph</li>
+                        </ul>
+            
+                        <h3 style="margin-top: 25px;">💡 Example: ReplicaSet Controller</h3>
+                        <p>Let's say you create a Deployment with 3 replicas:</p>
+            
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # You create a deployment with 3 replicas
+            kubectl create deployment webapp --image=nginx --replicas=3
+            
+            # Desired state (stored in etcd): 3 pods
+            # Current state: 0 pods
+            
+            # ReplicaSet Controller sees the difference and:
+            # 1. Creates 3 pods
+            # 2. Monitors them continuously
+            # 3. If a pod dies, creates a replacement immediately
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🔍 Seeing Controllers in Action</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # Create deployment with 3 replicas
+            kubectl create deployment test --image=nginx --replicas=3
+            
+            # Watch pods
+            kubectl get pods --watch
+            
+            # In another terminal, delete a pod
+            kubectl delete pod <pod-name>
+            
+            # Controller immediately creates a replacement pod!
+            # This is the ReplicaSet Controller at work
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                        <div class="danger-box">
+                            <strong>1. Controllers react to changes, not commands</strong><br>
+                            They watch state, not kubectl commands<br><br>
+                            
+                            <strong>2. Multiple controllers can conflict</strong><br>
+                            Don't manage the same resources with different controllers<br><br>
+                            
+                            <strong>3. Controller manager is a single binary</strong><br>
+                            All controllers run in one process (kube-controller-manager)
+                        </div>
+            
+                        <div class="test-questions">
+                            <h4>🎯 This Section Covers Test Questions:</h4>
+                            <ul style="color: inherit;">
+                                <li>Q4: Which component continuously monitors cluster state?</li>
+                            </ul>
+                        </div>
+            
+                        <div class="section-complete">
+                            <input type="checkbox" id="check-1.5" onchange="updateProgress()">
+                            <label for="check-1.5">✅ Mark section 1.5 as completed</label>
+                        </div>
+                    </div>
+                </div>
+            </div>        
+            <!-- Section 1.6 -->
+            <div class="accordion-item" data-section="1.6">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="accordion-title">
+                        <span>1.6 kubelet — The Node Agent</span>
+                        <span class="badge badge-danger">Critical</span>
+                    </div>
+                    <span class="accordion-icon">▼</span>
+                </div>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>📘 What is the kubelet?</h3>
+                        <p>The kubelet is an <strong>agent that runs on every worker node</strong>. It ensures that containers are running in pods as specified.</p>
+            
+                        <div class="info-box">
+                            <strong>Key Responsibilities:</strong><br>
+                            • Registers the node with the API server<br>
+                            • Watches for pod assignments to its node<br>
+                            • Pulls container images from registries<br>
+                            • Starts and stops containers<br>
+                            • Reports pod and node status to API server<br>
+                            • Performs health checks (liveness/readiness probes)
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                        <p>Think of kubelet as a <strong>construction site foreman</strong>:</p>
+                        <ul style="margin-left: 25px; margin-top: 10px;">
+                            <li><strong>Receives orders:</strong> "Build these houses (pods) on this lot (node)"</li>
+                            <li><strong>Manages workers:</strong> Tells container runtime to start/stop containers</li>
+                            <li><strong>Reports status:</strong> "Houses are built and occupied" → API server</li>
+                            <li><strong>Health checks:</strong> Regularly inspects buildings, reports issues</li>
+                        </ul>
+            
+                        <h3 style="margin-top: 25px;">🔄 kubelet Workflow</h3>
+                        <ol style="margin-left: 25px; margin-top: 10px; line-height: 2;">
+                            <li>Kubelet watches API server for pods scheduled to its node</li>
+                            <li>When a new pod is assigned, kubelet tells container runtime to pull images</li>
+                            <li>Container runtime starts containers according to pod spec</li>
+                            <li>Kubelet monitors container health continuously</li>
+                            <li>Kubelet reports pod status back to API server</li>
+                        </ol>
+            
+                        <h3 style="margin-top: 25px;">💻 Working with kubelet</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # Check node status (kubelet reports this)
+            kubectl get nodes
+            
+            # Describe node (shows kubelet info)
+            kubectl describe node <node-name>
+            
+            # Check kubelet logs (on the node itself)
+            # SSH to the node first
+            journalctl -u kubelet -f
+            
+            # Check kubelet status
+            systemctl status kubelet
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🔍 What kubelet Does NOT Do</h3>
+                        <div class="warning-box">
+                            <strong>kubelet does NOT:</strong><br>
+                            • Schedule pods (that's the scheduler)<br>
+                            • Make scheduling decisions<br>
+                            • Manage control plane components<br>
+                            • Handle networking between nodes (that's CNI/kube-proxy)
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                        <div class="danger-box">
+                            <strong>1. kubelet only manages pods assigned to its node</strong><br>
+                            It doesn't know about pods on other nodes<br><br>
+                            
+                            <strong>2. If kubelet stops, pods on that node die</strong><br>
+                            Critical component — monitor kubelet health closely<br><br>
+                            
+                            <strong>3. kubelet uses container runtime (Docker, containerd)</strong><br>
+                            If container runtime fails, kubelet can't start containers
+                        </div>
+            
+                        <div class="test-questions">
+                            <h4>🎯 This Section Covers Test Questions:</h4>
+                            <ul style="color: inherit;">
+                                <li>Q5: Which component runs on each worker node?</li>
+                                <li>Q6: What does kubelet do? (True/False)</li>
+                            </ul>
+                        </div>
+            
+                        <div class="section-complete">
+                            <input type="checkbox" id="check-1.6" onchange="updateProgress()">
+                            <label for="check-1.6">✅ Mark section 1.6 as completed</label>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="accordion-item" data-section="1.6">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>1.6 kubelet — The Node Agent</span>
-                    <span class="badge badge-danger">Critical</span>
+            <!-- Section 1.7 -->
+            <div class="accordion-item" data-section="1.7">
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <div class="accordion-title">
+                        <span>1.7 kube-proxy — Network Rules Manager</span>
+                        <span class="badge badge-warning">Important</span>
+                    </div>
+                    <span class="accordion-icon">▼</span>
                 </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p>Content for kubelet...</p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-1.6" onchange="updateProgress()">
-                        <label for="check-1.6">✅ Mark section 1.6 as completed</label>
+                <div class="accordion-content">
+                    <div class="accordion-body">
+                        <h3>📘 What is kube-proxy?</h3>
+                        <p>kube-proxy is a <strong>network proxy that runs on each node</strong>. It maintains network rules that allow network communication to Pods from inside or outside the cluster.</p>
+            
+                        <div class="info-box">
+                            <strong>Key Responsibilities:</strong><br>
+                            • Watches the API server for Services and Endpoints<br>
+                            • Maintains network rules (iptables/ipvs) on nodes<br>
+                            • Enables Service load balancing<br>
+                            • Routes traffic from Service IPs to Pod IPs<br>
+                            • Implements ClusterIP, NodePort, and LoadBalancer services
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                        <p>Think of kube-proxy as a <strong>receptionist at a company</strong>:</p>
+                        <ul style="margin-left: 25px; margin-top: 10px;">
+                            <li><strong>Service:</strong> "I need to speak to the Sales department"</li>
+                            <li><strong>kube-proxy:</strong> "Sales has 3 people (pods) available. I'll connect you to Jane"</li>
+                            <li>Next call → connects to John (load balancing)</li>
+                            <li>If Jane quits (pod dies) → routes calls to John and Sarah only</li>
+                        </ul>
+            
+                        <h3 style="margin-top: 25px;">🔧 How kube-proxy Works</h3>
+                        <p>When you create a Service, kube-proxy sets up network rules:</p>
+            
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # Example: Create a service
+            kubectl create service clusterip my-service --tcp=80:80
+            
+            # What kube-proxy does on each node:
+            # 1. Watches for new Service (my-service)
+            # 2. Gets the Service ClusterIP (e.g., 10.96.0.10)
+            # 3. Creates iptables rules:
+            #    "Traffic to 10.96.0.10:80 → load balance to pod IPs"
+            # 4. Updates rules when pods are added/removed
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">⚙️ kube-proxy Modes</h3>
+                        <div class="info-box">
+                            <strong>Three Operating Modes:</strong><br><br>
+                            
+                            <strong>1. iptables mode (default):</strong><br>
+                            • Uses Linux iptables for packet filtering<br>
+                            • Random load balancing<br>
+                            • Most common mode<br><br>
+                            
+                            <strong>2. ipvs mode:</strong><br>
+                            • Uses IP Virtual Server (better performance)<br>
+                            • More load balancing algorithms<br>
+                            • Requires kernel support<br><br>
+                            
+                            <strong>3. userspace mode (legacy):</strong><br>
+                            • Older, slower mode<br>
+                            • Rarely used today
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">🔍 Checking kube-proxy</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # kube-proxy runs as DaemonSet in kube-system namespace
+            kubectl get pods -n kube-system | grep kube-proxy
+            
+            # Check kube-proxy logs
+            kubectl logs -n kube-system kube-proxy-xxxxx
+            
+            # Check iptables rules created by kube-proxy (on node)
+            # SSH to node first
+            sudo iptables -t nat -L -n | grep <service-name>
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">💻 kube-proxy in Action</h3>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+            # Create deployment and service
+            kubectl create deployment nginx --image=nginx --replicas=3
+            kubectl expose deployment nginx --port=80
+            
+            # Get service ClusterIP
+            kubectl get svc nginx
+            
+            # kube-proxy automatically:
+            # 1. Created iptables rules for the ClusterIP
+            # 2. Routes traffic to the 3 nginx pods
+            # 3. Load balances across all pods
+            
+            # Test from any pod in cluster:
+            kubectl run test --image=busybox -it --rm -- wget -O- http://nginx
+                        </div>
+            
+                        <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                        <div class="danger-box">
+                            <strong>1. kube-proxy is NOT a proxy server</strong><br>
+                            Despite the name, it doesn't proxy traffic — it programs network rules<br><br>
+                            
+                            <strong>2. kube-proxy runs on ALL nodes</strong><br>
+                            It's a DaemonSet — one instance per node<br><br>
+                            
+                            <strong>3. Service networking breaks if kube-proxy fails</strong><br>
+                            Pods can still communicate directly, but Services won't work
+                        </div>
+            
+                        <div class="test-questions">
+                            <h4>🎯 This Section Covers Test Questions:</h4>
+                            <ul style="color: inherit;">
+                                <li>Q9: What does kube-proxy maintain on each node?</li>
+                            </ul>
+                        </div>
+            
+                        <div class="section-complete">
+                            <input type="checkbox" id="check-1.7" onchange="updateProgress()">
+                            <label for="check-1.7">✅ Mark section 1.7 as completed</label>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="accordion-item" data-section="1.7">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>1.7 kube-proxy — Network Rules Manager</span>
-                    <span class="badge badge-warning">Important</span>
-                </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p>Content for kube-proxy...</p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-1.7" onchange="updateProgress()">
-                        <label for="check-1.7">✅ Mark section 1.7 as completed</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section 1.8 - kubectl (showing full detail again as example) -->
+        
+        <!-- Section 1.8 - kubectl  -->
         <div class="accordion-item" data-section="1.8">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
