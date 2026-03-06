@@ -776,6 +776,10 @@
 
         // Update dashboard every 2 seconds if localStorage changes (when user completes sections)
         setInterval(updateDashboard, 2000);
+            // Logo fallback - if image doesn't exist, show text
+            document.getElementById('logo-img').onerror = function() {
+            this.parentElement.innerHTML = '<span style="font-weight:bold;color:#0078D4">SF</span>';
+        };
     </script>
 </body>
 </html>
