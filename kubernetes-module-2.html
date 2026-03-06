@@ -725,6 +725,7 @@ kubectl get pod my-app -o wide
         </div>
 
         <!-- Sections 2.2 through 2.8 - Placeholders -->
+       <!-- Section 2.2 -->
         <div class="accordion-item" data-section="2.2">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
@@ -735,7 +736,70 @@ kubectl get pod my-app -o wide
             </div>
             <div class="accordion-content">
                 <div class="accordion-body">
-                    <p><em>Content for Pod lifecycle (Pending, Running, Succeeded, Failed) following the same detailed pattern...</em></p>
+                    <h3>📘 Understanding Pod Lifecycle</h3>
+                    <p>Pods go through several phases during their lifecycle. Understanding these phases is critical for troubleshooting.</p>
+        
+                    <div class="info-box">
+                        <strong>Pod Phases:</strong><br>
+                        • <strong>Pending:</strong> Pod accepted but not yet running (downloading image, scheduling)<br>
+                        • <strong>Running:</strong> Pod bound to node, at least one container running<br>
+                        • <strong>Succeeded:</strong> All containers terminated successfully<br>
+                        • <strong>Failed:</strong> All containers terminated, at least one failed<br>
+                        • <strong>Unknown:</strong> Pod state cannot be determined
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔄 Pod Lifecycle Stages</h3>
+                    
+                    <h4 style="margin-top: 15px;">1. Creation</h4>
+                    <p>When you create a pod:</p>
+                    <ol style="margin-left: 25px; margin-top: 10px;">
+                        <li>Pod object created in etcd (status: Pending)</li>
+                        <li>Scheduler assigns pod to a node</li>
+                        <li>Kubelet on the node pulls container image</li>
+                        <li>Container runtime starts the container</li>
+                        <li>Pod status changes to Running</li>
+                    </ol>
+        
+                    <h4 style="margin-top: 15px;">2. Running</h4>
+                    <p>Pod is actively running. You can check logs, exec into containers, and monitor health.</p>
+        
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Check pod status
+        kubectl get pods
+        
+        # Get detailed pod information
+        kubectl describe pod my-pod
+        
+        # View pod logs
+        kubectl logs my-pod
+        
+        # Execute command in pod
+        kubectl exec -it my-pod -- /bin/bash
+                    </div>
+        
+                    <h4 style="margin-top: 15px;">3. Termination</h4>
+                    <p>When a pod is deleted:</p>
+                    <ol style="margin-left: 25px; margin-top: 10px;">
+                        <li>Pod status marked as Terminating</li>
+                        <li>SIGTERM sent to containers (graceful shutdown)</li>
+                        <li>Grace period (default 30s) allows cleanup</li>
+                        <li>SIGKILL sent if containers still running after grace period</li>
+                        <li>Pod removed from API server</li>
+                    </ol>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. Pending pods don't always mean problems</strong><br>
+                        Pending is normal during image download or node selection<br><br>
+                        
+                        <strong>2. Failed pods don't auto-restart by default</strong><br>
+                        Use restartPolicy to control restart behavior<br><br>
+                        
+                        <strong>3. Terminating pods can get stuck</strong><br>
+                        Use <code class="command">kubectl delete pod --force --grace-period=0</code> as last resort
+                    </div>
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-2.2" onchange="updateProgress()">
                         <label for="check-2.2">✅ Mark section 2.2 as completed</label>
@@ -743,7 +807,8 @@ kubectl get pod my-app -o wide
                 </div>
             </div>
         </div>
-
+        
+        <!-- Section 2.3 -->
         <div class="accordion-item" data-section="2.3">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
@@ -754,7 +819,68 @@ kubectl get pod my-app -o wide
             </div>
             <div class="accordion-content">
                 <div class="accordion-body">
-                    <p><em>Content for ReplicaSets...</em></p>
+                    <h3>📘 What is a ReplicaSet?</h3>
+                    <p>A ReplicaSet ensures that a specified number of pod replicas are running at any given time. It's the mechanism behind Deployments.</p>
+        
+                    <div class="info-box">
+                        <strong>Key Functions:</strong><br>
+                        • Maintains a stable set of replica Pods<br>
+                        • Ensures desired number of Pods are always running<br>
+                        • Replaces Pods that fail or are deleted<br>
+                        • Used by Deployments for scaling
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🌍 Real-World Example</h3>
+                    <p>Think of a ReplicaSet as a <strong>factory supervisor</strong>:</p>
+                    <ul style="margin-left: 25px; margin-top: 10px;">
+                        <li>Factory needs exactly 5 workers on the floor</li>
+                        <li>If a worker leaves, supervisor hires a replacement immediately</li>
+                        <li>If there are 6 workers, supervisor sends one home</li>
+                        <li>The supervisor constantly maintains exactly 5 workers</li>
+                    </ul>
+        
+                    <h3 style="margin-top: 25px;">💻 ReplicaSet Example</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: apps/v1
+        kind: ReplicaSet
+        metadata:
+          name: nginx-replicaset
+        spec:
+          replicas: 3  # Desired number of pods
+          selector:
+            matchLabels:
+              app: nginx
+          template:
+            metadata:
+              labels:
+                app: nginx
+            spec:
+              containers:
+              - name: nginx
+                image: nginx:latest
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. Don't create ReplicaSets directly in production</strong><br>
+                        ✅ Use Deployments instead (they manage ReplicaSets for you)<br>
+                        ❌ ReplicaSets don't support rolling updates<br><br>
+                        
+                        <strong>2. Selector must match pod labels</strong><br>
+                        If labels don't match, ReplicaSet won't manage the pods<br><br>
+                        
+                        <strong>3. Deleting a ReplicaSet deletes its Pods</strong><br>
+                        Use <code class="command">--cascade=orphan</code> to keep pods
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Q12: What ensures a specified number of pod replicas are running?</li>
+                        </ul>
+                    </div>
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-2.3" onchange="updateProgress()">
                         <label for="check-2.3">✅ Mark section 2.3 as completed</label>
@@ -762,7 +888,7 @@ kubectl get pod my-app -o wide
                 </div>
             </div>
         </div>
-
+        <!-- Section 2.4 -->
         <div class="accordion-item" data-section="2.4">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
@@ -806,7 +932,7 @@ kubectl get pod my-app -o wide
                 </div>
             </div>
         </div>
-
+        <!-- Section 2.5 -->
         <div class="accordion-item" data-section="2.5">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
@@ -817,7 +943,69 @@ kubectl get pod my-app -o wide
             </div>
             <div class="accordion-content">
                 <div class="accordion-body">
-                    <p><em>Content for scaling...</em></p>
+                    <h3>📘 Scaling in Kubernetes</h3>
+                    <p>Scaling is the process of increasing or decreasing the number of pod replicas to handle varying load.</p>
+        
+                    <div class="info-box">
+                        <strong>Types of Scaling:</strong><br>
+                        • <strong>Manual Scaling:</strong> You manually set replica count<br>
+                        • <strong>Horizontal Pod Autoscaling (HPA):</strong> Automatic based on CPU/memory<br>
+                        • <strong>Vertical Scaling:</strong> Increase pod resources (CPU/RAM)<br>
+                        • <strong>Cluster Autoscaling:</strong> Add/remove nodes automatically
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">💻 Manual Scaling</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Scale deployment to 5 replicas
+        kubectl scale deployment webapp --replicas=5
+        
+        # Scale using YAML file
+        kubectl scale -f deployment.yaml --replicas=3
+        
+        # Check current replicas
+        kubectl get deployment webapp
+                    </div>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ Try It on AWS/EKS</h4>
+                        <p><strong>Scale a deployment and watch it happen:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Create deployment
+        kubectl create deployment nginx --image=nginx --replicas=2
+        
+        # Watch pods in real-time
+        kubectl get pods -w
+        
+        # In another terminal, scale up
+        kubectl scale deployment nginx --replicas=5
+        
+        # Scale down
+        kubectl scale deployment nginx --replicas=1
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> More replicas = more resource usage (minimal on existing nodes)</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. Scaling to 0 is allowed</strong><br>
+                        <code class="command">--replicas=0</code> stops all pods but keeps the deployment<br><br>
+                        
+                        <strong>2. Manual scaling overrides HPA</strong><br>
+                        If HPA is enabled, manual scaling creates conflicts<br><br>
+                        
+                        <strong>3. Nodes must have capacity</strong><br>
+                        Scaling fails if nodes don't have enough CPU/memory
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Q14: Which command scales a deployment?</li>
+                        </ul>
+                    </div>
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-2.5" onchange="updateProgress()">
                         <label for="check-2.5">✅ Mark section 2.5 as completed</label>
@@ -825,7 +1013,7 @@ kubectl get pod my-app -o wide
                 </div>
             </div>
         </div>
-
+        <!-- Section 2.6 -->
         <div class="accordion-item" data-section="2.6">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
@@ -844,7 +1032,7 @@ kubectl get pod my-app -o wide
                 </div>
             </div>
         </div>
-
+        <!-- Section 2.7 -->
         <div class="accordion-item" data-section="2.7">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
@@ -863,7 +1051,7 @@ kubectl get pod my-app -o wide
                 </div>
             </div>
         </div>
-
+        <!-- Section 2.8 -->
         <div class="accordion-item" data-section="2.8">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
