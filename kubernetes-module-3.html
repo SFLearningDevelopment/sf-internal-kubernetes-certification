@@ -1164,69 +1164,476 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                     </div>
                 </div>
             </div>
+<!-- Section 3.6 -->
+<div class="accordion-item" data-section="3.6">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>3.6 Ingress — HTTP/HTTPS Routing</span>
+            <span class="badge badge-warning">Important</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 What is Ingress?</h3>
+            <p>Ingress is an API object that manages <strong>external access to services</strong> in a cluster, typically HTTP/HTTPS. It provides load balancing, SSL termination, and name-based virtual hosting.</p>
+
+            <div class="info-box">
+                <strong>Ingress vs Service (LoadBalancer):</strong><br>
+                • <strong>Service LoadBalancer:</strong> One external IP per service (expensive!)<br>
+                • <strong>Ingress:</strong> Single entry point for multiple services (cost-effective)<br>
+                • <strong>Ingress:</strong> Supports path-based and host-based routing<br>
+                • <strong>Ingress:</strong> Can handle SSL/TLS termination
+            </div>
+
+            <h3 style="margin-top: 25px;">🏗️ Ingress Architecture</h3>
+            <p>Ingress requires two components:</p>
+            <ol style="margin-left: 25px; margin-top: 10px;">
+                <li><strong>Ingress Resource:</strong> Defines the routing rules (YAML)</li>
+                <li><strong>Ingress Controller:</strong> Implements the rules (nginx, traefik, AWS ALB, etc.)</li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong> Ingress resources do nothing without an Ingress Controller!<br>
+                You must install a controller first (nginx, traefik, AWS Load Balancer Controller, etc.)
+            </div>
+
+            <h3 style="margin-top: 25px;">💻 Simple Ingress Example</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simple-ingress
+spec:
+  rules:
+  - host: myapp.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: webapp-service
+            port:
+              number: 80
+            </div>
+
+            <p style="margin-top: 15px;">This routes <code class="command">myapp.example.com</code> traffic to <code class="command">webapp-service</code> on port 80.</p>
+
+            <h3 style="margin-top: 25px;">🔀 Path-Based Routing</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: path-based-ingress
+spec:
+  rules:
+  - host: myapp.example.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: api-service
+            port:
+              number: 8080
+      - path: /web
+        pathType: Prefix
+        backend:
+          service:
+            name: web-service
+            port:
+              number: 80
+            </div>
+
+            <p style="margin-top: 15px;">Routes:</p>
+            <ul style="margin-left: 25px;">
+                <li><code class="command">myapp.example.com/api</code> → api-service</li>
+                <li><code class="command">myapp.example.com/web</code> → web-service</li>
+            </ul>
+
+            <h3 style="margin-top: 25px;">🌐 Host-Based Routing</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: host-based-ingress
+spec:
+  rules:
+  - host: api.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: api-service
+            port:
+              number: 80
+  - host: web.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-service
+            port:
+              number: 80
+            </div>
+
+            <p style="margin-top: 15px;">Routes:</p>
+            <ul style="margin-left: 25px;">
+                <li><code class="command">api.example.com</code> → api-service</li>
+                <li><code class="command">web.example.com</code> → web-service</li>
+            </ul>
+
+            <div class="aws-practice">
+                <h4>🛠️ AWS/EKS - Using AWS Load Balancer Controller</h4>
+                <p><strong>Install AWS Load Balancer Controller first:</strong></p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Install AWS Load Balancer Controller (one-time setup)
+# Follow: https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html
+
+# Create Ingress (creates AWS ALB automatically)
+kubectl apply -f - <<EOF
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webapp-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+spec:
+  ingressClassName: alb
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: webapp
+            port:
+              number: 80
+EOF
+
+# Check Ingress status (get ALB URL)
+kubectl get ingress webapp-ingress
+                </div>
+                <p style="margin-top: 10px;"><strong>💰 Cost:</strong> AWS ALB ~$0.0225/hour + LCU charges</p>
+            </div>
+
+            <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+            <div class="danger-box">
+                <strong>1. No Ingress Controller = Ingress does nothing</strong><br>
+                Install nginx-ingress or AWS Load Balancer Controller first<br><br>
+                
+                <strong>2. DNS must point to Ingress</strong><br>
+                Create DNS records pointing to the Ingress Controller's external IP/hostname<br><br>
+                
+                <strong>3. pathType matters!</strong><br>
+                • <code class="command">Prefix</code> matches /path and /path/*<br>
+                • <code class="command">Exact</code> only matches /path exactly
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul style="color: inherit;">
+                    <li>Q24: What does an Ingress resource do?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-3.6" onchange="updateProgress()">
+                <label for="check-3.6">✅ Mark section 3.6 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Section 3.7 -->
+<div class="accordion-item" data-section="3.7">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>3.7 Endpoints & EndpointSlices</span>
+            <span class="badge badge-primary">Foundation</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 What are Endpoints?</h3>
+            <p>Endpoints are Kubernetes objects that track the <strong>IP addresses of Pods</strong> that match a Service's selector. They're the bridge between Services and Pods.</p>
+
+            <div class="info-box">
+                <strong>How it works:</strong><br>
+                1. Service has a selector (e.g., <code class="command">app: webapp</code>)<br>
+                2. Kubernetes finds all matching Pods<br>
+                3. Creates an Endpoint object with Pod IPs and ports<br>
+                4. Service uses Endpoints to route traffic
+            </div>
+
+            <h3 style="margin-top: 25px;">🔍 Viewing Endpoints</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# List all endpoints
+kubectl get endpoints
+
+# Describe a specific endpoint
+kubectl describe endpoint webapp-service
+
+# Get endpoint details in YAML
+kubectl get endpoint webapp-service -o yaml
+            </div>
+
+            <h3 style="margin-top: 25px;">💻 Example Output</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+$ kubectl get endpoints webapp-service
+
+NAME             ENDPOINTS                           AGE
+webapp-service   10.244.1.5:80,10.244.2.3:80        5m
+
+# Two pods (IPs: 10.244.1.5 and 10.244.2.3) are serving this service
+            </div>
+
+            <h3 style="margin-top: 25px;">🆕 EndpointSlices (Newer)</h3>
+            <p>EndpointSlices are a <strong>scalable replacement</strong> for Endpoints, introduced in Kubernetes 1.17+.</p>
+
+            <div class="info-box">
+                <strong>Why EndpointSlices?</strong><br>
+                • <strong>Scalability:</strong> Better for services with 100+ endpoints<br>
+                • <strong>Efficiency:</strong> Reduces API server load<br>
+                • <strong>Network topology:</strong> Supports zone-aware routing<br>
+                • <strong>Dual-stack:</strong> Supports IPv4 and IPv6
+            </div>
+
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# View EndpointSlices
+kubectl get endpointslices
+
+# Describe EndpointSlice
+kubectl describe endpointslice webapp-service-abc123
+            </div>
+
+            <h3 style="margin-top: 25px;">🐛 Troubleshooting with Endpoints</h3>
+            <p>Endpoints are crucial for debugging Service issues:</p>
+
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Problem: Service not working
+# Step 1: Check if endpoints exist
+kubectl get endpoints my-service
+
+# If ENDPOINTS column is empty or shows <none>:
+# → Service selector doesn't match any pods
+# → Check pod labels vs service selector
+
+# Step 2: Verify pod labels
+kubectl get pods --show-labels
+
+# Step 3: Check service selector
+kubectl describe service my-service | grep Selector
+            </div>
+
+            <div class="warning-box">
+                <strong>Common Issue:</strong> Service with no endpoints<br>
+                <strong>Cause:</strong> Service selector doesn't match any pod labels<br>
+                <strong>Fix:</strong> Update labels or selector to match
+            </div>
+
+            <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+            <div class="danger-box">
+                <strong>1. Empty endpoints = service broken</strong><br>
+                Always check: <code class="command">kubectl get endpoints</code><br><br>
+                
+                <strong>2. Endpoints update automatically</strong><br>
+                When pods restart, endpoint IPs change automatically<br><br>
+                
+                <strong>3. You rarely create Endpoints manually</strong><br>
+                Kubernetes manages them — manual creation is advanced use case
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-3.7" onchange="updateProgress()">
+                <label for="check-3.7">✅ Mark section 3.7 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Section 3.8 -->
+<div class="accordion-item" data-section="3.8">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>3.8 Network Troubleshooting</span>
+            <span class="badge badge-primary">Foundation</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 Common Network Issues</h3>
+            <p>Networking problems are among the most common in Kubernetes. Here's how to diagnose and fix them.</p>
+
+            <h3 style="margin-top: 25px;">🔍 Diagnostic Workflow</h3>
+            <ol style="margin-left: 25px; margin-top: 10px; line-height: 2;">
+                <li><strong>Can pods communicate with each other?</strong></li>
+                <li><strong>Can pods reach services by name?</strong></li>
+                <li><strong>Can services reach their backend pods?</strong></li>
+                <li><strong>Can external traffic reach the service?</strong></li>
+            </ol>
+
+            <h3 style="margin-top: 25px;">🛠️ Essential Troubleshooting Commands</h3>
             
-        <div class="accordion-item" data-section="3.6">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>3.6 Ingress — HTTP/HTTPS Routing</span>
-                    <span class="badge badge-warning">Important</span>
-                </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p><em>Content for Ingress...</em></p>
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q24: What does an Ingress resource do?</li>
-                        </ul>
-                    </div>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-3.6" onchange="updateProgress()">
-                        <label for="check-3.6">✅ Mark section 3.6 as completed</label>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <h4 style="margin-top: 15px;">1. Test Pod-to-Pod Connectivity</h4>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Create a test pod
+kubectl run test --image=busybox -it --rm -- sh
 
-        <div class="accordion-item" data-section="3.7">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>3.7 Endpoint & EndpointSlices</span>
-                    <span class="badge badge-primary">Foundation</span>
-                </div>
-                <span class="accordion-icon">▼</span>
-            </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p><em>Content for Endpoints...</em></p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-3.7" onchange="updateProgress()">
-                        <label for="check-3.7">✅ Mark section 3.7 as completed</label>
-                    </div>
-                </div>
-            </div>
-        </div>
+# Inside the pod, ping another pod's IP
+ping <pod-ip>
 
-        <div class="accordion-item" data-section="3.8">
-            <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div class="accordion-title">
-                    <span>3.8 Network Troubleshooting</span>
-                    <span class="badge badge-primary">Foundation</span>
-                </div>
-                <span class="accordion-icon">▼</span>
+# Test HTTP connectivity
+wget -O- http://<pod-ip>:80
             </div>
-            <div class="accordion-content">
-                <div class="accordion-body">
-                    <p><em>Content for network troubleshooting...</em></p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-3.8" onchange="updateProgress()">
-                        <label for="check-3.8">✅ Mark section 3.8 as completed</label>
-                    </div>
+
+            <h4 style="margin-top: 15px;">2. Test Service DNS Resolution</h4>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# From a test pod:
+nslookup webapp-service
+nslookup webapp-service.default.svc.cluster.local
+
+# Test service connectivity
+wget -O- http://webapp-service
+curl http://webapp-service
+            </div>
+
+            <h4 style="margin-top: 15px;">3. Check Service Endpoints</h4>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# View service endpoints
+kubectl get endpoints webapp-service
+
+# If empty, service has no backend pods
+# Check selector and pod labels
+kubectl describe service webapp-service
+kubectl get pods --show-labels
+            </div>
+
+            <h4 style="margin-top: 15px;">4. Verify Network Policies</h4>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# List network policies
+kubectl get networkpolicies
+
+# Check if policies are blocking traffic
+kubectl describe networkpolicy <policy-name>
+            </div>
+
+            <h3 style="margin-top: 25px;">🐛 Common Issues & Solutions</h3>
+
+            <div class="danger-box">
+                <strong>Issue 1: "Service not reachable"</strong><br>
+                ✅ Check: <code class="command">kubectl get endpoints &lt;service&gt;</code><br>
+                ✅ Verify: Service selector matches pod labels<br>
+                ✅ Ensure: Pods are in Running state
+            </div>
+
+            <div class="danger-box" style="margin-top: 15px;">
+                <strong>Issue 2: "DNS resolution fails"</strong><br>
+                ✅ Check: CoreDNS pods are running: <code class="command">kubectl get pods -n kube-system | grep dns</code><br>
+                ✅ Verify: Service exists: <code class="command">kubectl get svc</code><br>
+                ✅ Test: From another pod, not from host
+            </div>
+
+            <div class="danger-box" style="margin-top: 15px;">
+                <strong>Issue 3: "Connection timeout"</strong><br>
+                ✅ Check: Pod is Running: <code class="command">kubectl get pods</code><br>
+                ✅ Check: Container port matches service targetPort<br>
+                ✅ Check: NetworkPolicy isn't blocking traffic
+            </div>
+
+            <div class="danger-box" style="margin-top: 15px;">
+                <strong>Issue 4: "External traffic not reaching service"</strong><br>
+                ✅ For NodePort: Ensure security group allows NodePort range (30000-32767)<br>
+                ✅ For LoadBalancer: Check external IP is assigned: <code class="command">kubectl get svc</code><br>
+                ✅ For Ingress: Verify Ingress Controller is running
+            </div>
+
+            <h3 style="margin-top: 25px;">💻 Debug Pod Template</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Create a debug pod with networking tools
+kubectl run netdebug --image=nicolaka/netshoot -it --rm -- bash
+
+# Inside the pod, you have access to:
+# - curl, wget
+# - ping, traceroute
+# - nslookup, dig
+# - netstat, ss
+# - tcpdump
+
+# Example tests:
+curl http://webapp-service
+nslookup webapp-service
+ping 10.244.1.5
+            </div>
+
+            <div class="aws-practice">
+                <h4>🛠️ Try It on AWS/EKS</h4>
+                <p><strong>Complete network troubleshooting workflow:</strong></p>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# 1. Create test deployment and service
+kubectl create deployment nginx --image=nginx
+kubectl expose deployment nginx --port=80
+
+# 2. Create debug pod
+kubectl run debug --image=busybox -it --rm -- sh
+
+# Inside debug pod:
+# 3. Test DNS
+nslookup nginx
+
+# 4. Test connectivity
+wget -O- http://nginx
+
+# 5. Exit and check endpoints
+exit
+kubectl get endpoints nginx
+
+# 6. Check service details
+kubectl describe service nginx
                 </div>
+            </div>
+
+            <h3 style="margin-top: 25px;">📋 Troubleshooting Checklist</h3>
+            <div class="success-box">
+                <strong>✅ Network Troubleshooting Checklist:</strong><br>
+                □ Are pods Running? (<code class="command">kubectl get pods</code>)<br>
+                □ Do endpoints exist? (<code class="command">kubectl get endpoints</code>)<br>
+                □ Does DNS work? (<code class="command">nslookup service-name</code>)<br>
+                □ Do labels match selector? (<code class="command">kubectl get pods --show-labels</code>)<br>
+                □ Are NetworkPolicies blocking? (<code class="command">kubectl get netpol</code>)<br>
+                □ Is the application listening? (<code class="command">kubectl logs pod-name</code>)<br>
+                □ Are ports correct? (Check service YAML)
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-3.8" onchange="updateProgress()">
+                <label for="check-3.8">✅ Mark section 3.8 as completed</label>
             </div>
         </div>
+    </div>
+</div>    
 
         <!-- Knowledge Check -->
         <div class="knowledge-check" id="knowledge-check">
