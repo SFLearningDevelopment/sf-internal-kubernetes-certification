@@ -610,7 +610,7 @@
                 <div class="accordion-body">
                     <h3>📘 What is Kubernetes?</h3>
                     <p>Kubernetes is an open-source container orchestration platform that automates the deployment, scaling, and management of containerized applications. Think of it as an <strong>operating system for your cluster</strong>.</p>
-
+        
                     <div class="video-section">
                         <button class="video-toggle" onclick="toggleVideo(this)">
                             📺 Watch: Kubernetes Architecture Overview (15:42)
@@ -623,115 +623,90 @@
                             <p class="video-credit">Source: TechWorld with Nana</p>
                         </div>
                     </div>
-
+        
                     <h3 style="margin-top: 25px;">🏗️ High-Level Architecture</h3>
-<p>Kubernetes follows a <strong>control plane + worker nodes</strong> architecture:</p>
-
-<div class="info-box">
-    <strong>Control Plane (Master)</strong> — The brain of the cluster<br>
-    • Makes decisions about the cluster (scheduling, detecting events)<br>
-    • Components: API Server, etcd, Scheduler, Controller Manager<br><br>
-    <strong>Worker Nodes</strong> — The muscle of the cluster<br>
-    • Run your actual applications (pods)<br>
-    • Components: kubelet, kube-proxy, container runtime
-</div>
-
-<div style="background: linear-gradient(135deg, #e6f2ff, #cce5ff); border: 3px solid #0078D4; border-radius: 12px; padding: 30px; margin: 30px 0;">
-    <div style="text-align: center; font-size: 1.4em; font-weight: bold; color: #0078D4; margin-bottom: 25px;">🏗️ Kubernetes Architecture</div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px;">
-        <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-            <div style="font-size: 1.3em; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #0078D4; text-align: center; color: #0078D4;">Control Plane</div>
-            <div style="text-align: center; font-style: italic; color: #64748b; margin-top: 8px; margin-bottom: 15px;">The Brain 🧠</div>
-            <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">📡 API Server</div>
-            <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">💾 etcd</div>
-            <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">📅 Scheduler</div>
-            <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🎛️ Controller Manager</div>
-        </div>
-        <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-            <div style="font-size: 1.3em; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #FF4D4D; text-align: center; color: #FF4D4D;">Worker Nodes</div>
-            <div style="text-align: center; font-style: italic; color: #64748b; margin-top: 8px; margin-bottom: 15px;">The Muscle 💪</div>
-            <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">📦 Pods</div>
-            <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🤖 kubelet</div>
-            <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🌐 kube-proxy</div>
-            <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🔧 Container Runtime</div>
-        </div>
-    </div>
-</div>
-
-<h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
-<p>Think of Kubernetes like an <strong>orchestra</strong>:</p>
-        <div style="background: linear-gradient(135deg, #fff5f5, #ffe6e6); border: 3px solid #FF4D4D; border-radius: 12px; padding: 30px; margin: 30px 0;">
-            <div style="text-align: center; font-size: 1.4em; font-weight: bold; color: #FF4D4D; margin-bottom: 25px;">🎼 Kubernetes as an Orchestra</div>
-            
-            <!-- Row 1 -->
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
-                <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">API Server</div>
-                <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
-                <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">🎼 Conductor</div>
-                <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Coordinates everything</div>
-            </div>
-            
-            <!-- Row 2 -->
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
-                <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">etcd</div>
-                <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
-                <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">📜 Sheet Music</div>
-                <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Stores the score/state</div>
-            </div>
-            
-            <!-- Row 3 -->
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
-                <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">Scheduler</div>
-                <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
-                <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">🎭 Stage Manager</div>
-                <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Assigns positions</div>
-            </div>
-            
-            <!-- Row 4 -->
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
-                <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">Controllers</div>
-                <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
-                <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">👥 Section Leaders</div>
-                <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Ensure correct performance</div>
-            </div>
-            
-            <!-- Row 5 -->
-            <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
-                <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">Worker Nodes</div>
-                <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
-                <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">🎺🎻 Musicians</div>
-                <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Do the actual work</div>
-            </div>
-        </div>
+                    <p>Kubernetes follows a <strong>control plane + worker nodes</strong> architecture:</p>
         
-        <h3 style="margin-top: 25px;">⚠️ Common Pitfall</h3>
-        <div class="danger-box">
-            <strong>Mistake:</strong> Confusing "cluster" with "node"<br>
-            • A <strong>cluster</strong> = Control plane + all worker nodes<br>
-            • A <strong>node</strong> = A single machine (VM or physical) in the cluster
-        </div>
+                    <div class="info-box">
+                        <strong>Control Plane (Master)</strong> — The brain of the cluster<br>
+                        • Makes decisions about the cluster (scheduling, detecting events)<br>
+                        • Components: API Server, etcd, Scheduler, Controller Manager<br><br>
+                        <strong>Worker Nodes</strong> — The muscle of the cluster<br>
+                        • Run your actual applications (pods)<br>
+                        • Components: kubelet, kube-proxy, container runtime
+                    </div>
         
-        <div class="test-questions">
-            <h4>🎯 This Section Covers Test Questions:</h4>
-            <ul>
-                <li>Q1: What is the primary role of the Kubernetes API Server?</li>
-                <li>Q8: Which of the following best describes a Kubernetes Node?</li>
-            </ul>
-        </div>
+                    <div style="background: linear-gradient(135deg, #e6f2ff, #cce5ff); border: 3px solid #0078D4; border-radius: 12px; padding: 30px; margin: 30px 0;">
+                        <div style="text-align: center; font-size: 1.4em; font-weight: bold; color: #0078D4; margin-bottom: 25px;">🏗️ Kubernetes Architecture</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px;">
+                            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                                <div style="font-size: 1.3em; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #0078D4; text-align: center; color: #0078D4;">Control Plane</div>
+                                <div style="text-align: center; font-style: italic; color: #64748b; margin-top: 8px; margin-bottom: 15px;">The Brain 🧠</div>
+                                <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">📡 API Server</div>
+                                <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">💾 etcd</div>
+                                <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">📅 Scheduler</div>
+                                <div style="background: #0078D4; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🎛️ Controller Manager</div>
+                            </div>
+                            <div style="background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+                                <div style="font-size: 1.3em; font-weight: bold; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid #FF4D4D; text-align: center; color: #FF4D4D;">Worker Nodes</div>
+                                <div style="text-align: center; font-style: italic; color: #64748b; margin-top: 8px; margin-bottom: 15px;">The Muscle 💪</div>
+                                <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">📦 Pods</div>
+                                <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🤖 kubelet</div>
+                                <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🌐 kube-proxy</div>
+                                <div style="background: #FF4D4D; color: white; padding: 15px; border-radius: 8px; margin: 12px 0; text-align: center; font-weight: 600;">🔧 Container Runtime</div>
+                            </div>
+                        </div>
+                    </div>
         
-        <div class="section-complete">
-            <input type="checkbox" id="check-1.1" onchange="updateProgress()">
-            <label for="check-1.1">✅ Mark section 1.1 as completed</label>
-        </div>
-    
-    <div style="display: grid; grid-template-columns: 2fr auto 2fr 3fr; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; bac
+                    <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                    <p>Think of Kubernetes like an <strong>orchestra</strong>:</p>
+        
+                    <div style="background: linear-gradient(135deg, #fff5f5, #ffe6e6); border: 3px solid #FF4D4D; border-radius: 12px; padding: 30px; margin: 30px 0;">
+                        <div style="text-align: center; font-size: 1.4em; font-weight: bold; color: #FF4D4D; margin-bottom: 25px;">🎼 Kubernetes as an Orchestra</div>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
+                            <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">API Server</div>
+                            <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
+                            <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">🎼 Conductor</div>
+                            <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Coordinates everything</div>
+                        </div>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
+                            <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">etcd</div>
+                            <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
+                            <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">📜 Sheet Music</div>
+                            <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Stores the score/state</div>
+                        </div>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
+                            <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">Scheduler</div>
+                            <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
+                            <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">🎭 Stage Manager</div>
+                            <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Assigns positions</div>
+                        </div>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
+                            <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">Controllers</div>
+                            <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
+                            <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">👥 Section Leaders</div>
+                            <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Ensure correct performance</div>
+                        </div>
+                        
+                        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 12px; margin: 10px 0; background: white; border-radius: 8px;">
+                            <div style="background: #0078D4; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; flex: 1; min-width: 120px;">Worker Nodes</div>
+                            <div style="font-size: 2em; color: #0078D4; text-align: center; flex: 0 0 auto;">→</div>
+                            <div style="background: #FF4D4D; color: white; padding: 12px 18px; border-radius: 8px; text-align: center; font-weight: 600; font-size: 1.2em; flex: 1; min-width: 120px;">🎺🎻 Musicians</div>
+                            <div style="color: #0f172a; font-style: italic; flex: 2; min-width: 150px;">Do the actual work</div>
+                        </div>
+                    </div>
+        
                     <h3 style="margin-top: 25px;">⚠️ Common Pitfall</h3>
                     <div class="danger-box">
                         <strong>Mistake:</strong> Confusing "cluster" with "node"<br>
                         • A <strong>cluster</strong> = Control plane + all worker nodes<br>
                         • A <strong>node</strong> = A single machine (VM or physical) in the cluster
                     </div>
-
+        
                     <div class="test-questions">
                         <h4>🎯 This Section Covers Test Questions:</h4>
                         <ul>
@@ -739,15 +714,14 @@
                             <li>Q8: Which of the following best describes a Kubernetes Node?</li>
                         </ul>
                     </div>
-
+        
                     <div class="section-complete">
                         <input type="checkbox" id="check-1.1" onchange="updateProgress()">
                         <label for="check-1.1">✅ Mark section 1.1 as completed</label>
                     </div>
                 </div>
             </div>
-        </div>
-
+        </div>        
         <!-- Section 1.2 -->
         <div class="accordion-item" data-section="1.2">
             <div class="accordion-header" onclick="toggleAccordion(this)">
