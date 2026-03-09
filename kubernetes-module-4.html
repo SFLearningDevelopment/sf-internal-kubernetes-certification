@@ -700,8 +700,629 @@ kubectl logs cache-pod -c reader
             </div>
         </div>
 
-        <!-- Continuing with sections 4.2, 4.3, 4.4 in next message due to length -->
-        <!-- Placeholder notice -->
+        <!-- Section 4.2 -->
+        <div class="accordion-item" data-section="4.2">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-title">
+                    <span>4.2 PersistentVolumes (PV) — Cluster Storage</span>
+                    <span class="badge badge-danger">Critical</span>
+                </div>
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <h3>📘 What is a PersistentVolume?</h3>
+                    <p>A PersistentVolume (PV) is a <strong>piece of storage in the cluster</strong> that has been provisioned by an administrator or dynamically provisioned using Storage Classes. It's a cluster resource, just like a node.</p>
+        
+                    <div class="info-box">
+                        <strong>Key Characteristics:</strong><br>
+                        • PV exists independently of pods<br>
+                        • Lifecycle independent of any pod using it<br>
+                        • Can be provisioned statically (admin) or dynamically (StorageClass)<br>
+                        • Has a reclaim policy (what happens when released)<br>
+                        • Different access modes and capacity
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                    <p>Think of PersistentVolumes like <strong>rental storage units</strong>:</p>
+                    <ul style="margin-left: 25px; margin-top: 10px;">
+                        <li><strong>PV:</strong> The actual storage unit (exists whether rented or not)</li>
+                        <li><strong>PVC:</strong> Your rental agreement (claims the storage)</li>
+                        <li><strong>Pod:</strong> You (the person using the storage)</li>
+                        <li>When you leave (pod deleted), the storage unit still exists</li>
+                    </ul>
+        
+                    <h3 style="margin-top: 25px;">💻 Creating a PersistentVolume</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: my-pv
+        spec:
+          capacity:
+            storage: 10Gi
+          accessModes:
+            - ReadWriteOnce  # Can be mounted by one node
+          persistentVolumeReclaimPolicy: Retain
+          hostPath:
+            path: /mnt/data  # Example using hostPath (for testing only)
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">📊 Access Modes</h3>
+                    <div class="info-box">
+                        <strong>Three Access Modes:</strong><br><br>
+                        
+                        <strong>ReadWriteOnce (RWO):</strong><br>
+                        • Volume can be mounted as read-write by a single node<br>
+                        • Most common mode<br>
+                        • Example: AWS EBS, Azure Disk<br><br>
+                        
+                        <strong>ReadOnlyMany (ROX):</strong><br>
+                        • Volume can be mounted as read-only by many nodes<br>
+                        • Good for shared configuration<br><br>
+                        
+                        <strong>ReadWriteMany (RWX):</strong><br>
+                        • Volume can be mounted as read-write by many nodes<br>
+                        • Example: AWS EFS, Azure Files, NFS<br>
+                        • Required for stateful apps that scale horizontally
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">♻️ Reclaim Policies</h3>
+                    <div class="info-box">
+                        <strong>What happens when PVC is deleted:</strong><br><br>
+                        
+                        <strong>Retain:</strong> PV kept, data preserved, manual cleanup needed<br>
+                        <strong>Delete:</strong> PV and underlying storage deleted automatically<br>
+                        <strong>Recycle (deprecated):</strong> Data deleted, PV reused
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔍 Checking PersistentVolumes</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # List all PVs in cluster
+        kubectl get pv
+        
+        # Example output:
+        # NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      
+        # my-pv    10Gi       RWO            Retain           Available
+        
+        # Get PV details
+        kubectl describe pv my-pv
+        
+        # Delete PV
+        kubectl delete pv my-pv
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">📈 PV Status</h3>
+                    <p>PersistentVolumes go through different phases:</p>
+                    <ul style="margin-left: 25px; margin-top: 10px;">
+                        <li><strong>Available:</strong> PV is free, not yet bound to a claim</li>
+                        <li><strong>Bound:</strong> PV is bound to a PVC</li>
+                        <li><strong>Released:</strong> PVC deleted, but PV not yet reclaimed</li>
+                        <li><strong>Failed:</strong> PV has failed automatic reclamation</li>
+                    </ul>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ AWS/EKS - Using EBS as PersistentVolume</h4>
+                        <p><strong>On EKS, you typically use dynamic provisioning, but here's static:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # 1. Create an EBS volume first (via AWS Console or CLI)
+        aws ec2 create-volume \
+          --size 10 \
+          --region us-east-1 \
+          --availability-zone us-east-1a \
+          --volume-type gp3
+        
+        # Note the volume ID (e.g., vol-0abc123...)
+        
+        # 2. Create PV pointing to that EBS volume
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: PersistentVolume
+        metadata:
+          name: ebs-pv
+        spec:
+          capacity:
+            storage: 10Gi
+          accessModes:
+            - ReadWriteOnce
+          persistentVolumeReclaimPolicy: Retain
+          awsElasticBlockStore:
+            volumeID: vol-0abc123...  # Your EBS volume ID
+            fsType: ext4
+        EOF
+        
+        # 3. Check PV status
+        kubectl get pv ebs-pv
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> AWS EBS gp3 ~$0.08/GB/month</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. PV is cluster-scoped, not namespaced</strong><br>
+                        PVs are visible across all namespaces<br><br>
+                        
+                        <strong>2. Access mode must match storage type</strong><br>
+                        AWS EBS only supports ReadWriteOnce (single node)<br>
+                        AWS EFS supports ReadWriteMany (multi-node)<br><br>
+                        
+                        <strong>3. Reclaim policy matters!</strong><br>
+                        "Delete" policy removes data permanently when PVC is deleted
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Q27: What is a PersistentVolume in Kubernetes?</li>
+                            <li>Q28: Which access mode allows a volume to be mounted by multiple nodes for reading and writing?</li>
+                        </ul>
+                    </div>
+        
+                    <div class="section-complete">
+                        <input type="checkbox" id="check-4.2" onchange="updateProgress()">
+                        <label for="check-4.2">✅ Mark section 4.2 as completed</label>
+                    </div>
+                </div>
+            </div>
+        </div>    
+
+        <!-- Section 4.3 -->
+        <div class="accordion-item" data-section="4.3">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-title">
+                    <span>4.3 PersistentVolumeClaims (PVC) — Requesting Storage</span>
+                    <span class="badge badge-danger">Critical</span>
+                </div>
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <h3>📘 What is a PersistentVolumeClaim?</h3>
+                    <p>A PersistentVolumeClaim (PVC) is a <strong>request for storage by a user</strong>. It's like a pod: pods consume node resources, PVCs consume PV resources.</p>
+        
+                    <div class="info-box">
+                        <strong>Key Characteristics:</strong><br>
+                        • PVC is namespaced (unlike PV which is cluster-scoped)<br>
+                        • Pods reference PVCs to use storage<br>
+                        • PVC specifies size and access mode needed<br>
+                        • Kubernetes binds PVC to a matching PV automatically<br>
+                        • PVC can trigger dynamic provisioning if no PV matches
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                    <p>Continuing the storage unit analogy:</p>
+                    <ul style="margin-left: 25px; margin-top: 10px;">
+                        <li><strong>PV:</strong> Storage unit available for rent (100 sq ft)</li>
+                        <li><strong>PVC:</strong> Your rental request ("I need 50 sq ft of storage")</li>
+                        <li><strong>Binding:</strong> Storage company assigns you a unit that matches</li>
+                        <li><strong>Pod:</strong> You move your stuff into the storage unit</li>
+                    </ul>
+        
+                    <h3 style="margin-top: 25px;">💻 Creating a PersistentVolumeClaim</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: my-pvc
+        spec:
+          accessModes:
+            - ReadWriteOnce  # Must match available PV
+          resources:
+            requests:
+              storage: 5Gi   # Requesting 5GB
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔗 PVC to PV Binding</h3>
+                    <p>Kubernetes automatically binds PVCs to PVs based on:</p>
+                    <ol style="margin-left: 25px; margin-top: 10px; line-height: 2;">
+                        <li><strong>Access Mode:</strong> PVC and PV access modes must match</li>
+                        <li><strong>Storage Size:</strong> PV must be >= PVC requested size</li>
+                        <li><strong>Storage Class:</strong> If specified, must match</li>
+                        <li><strong>Selector:</strong> Optional label selectors for specific PVs</li>
+                    </ol>
+        
+                    <h3 style="margin-top: 25px;">🔍 Using PVC in a Pod</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: pod-using-pvc
+        spec:
+          containers:
+          - name: app
+            image: nginx
+            volumeMounts:
+            - mountPath: /data
+              name: my-storage
+          volumes:
+          - name: my-storage
+            persistentVolumeClaim:
+              claimName: my-pvc  # Reference the PVC
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">📊 Checking PVC Status</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # List PVCs in current namespace
+        kubectl get pvc
+        
+        # Example output:
+        # NAME     STATUS   VOLUME   CAPACITY   ACCESS MODES
+        # my-pvc   Bound    my-pv    10Gi       RWO
+        
+        # Get detailed PVC information
+        kubectl describe pvc my-pvc
+        
+        # Delete PVC (also releases the PV based on reclaim policy)
+        kubectl delete pvc my-pvc
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🎯 PVC Status</h3>
+                    <div class="info-box">
+                        <strong>PVC States:</strong><br>
+                        • <strong>Pending:</strong> No suitable PV found yet<br>
+                        • <strong>Bound:</strong> Successfully bound to a PV<br>
+                        • <strong>Lost:</strong> PV exists but is not available
+                    </div>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ Try It on AWS/EKS</h4>
+                        <p><strong>Complete workflow: PV → PVC → Pod</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Step 1: Create PVC (dynamic provisioning on EKS)
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: ebs-claim
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 4Gi
+        EOF
+        
+        # Step 2: Check PVC status (should auto-provision EBS volume)
+        kubectl get pvc ebs-claim
+        # Wait for STATUS: Bound
+        
+        # Step 3: Check auto-created PV
+        kubectl get pv
+        
+        # Step 4: Create pod using the PVC
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          name: app-with-storage
+        spec:
+          containers:
+          - name: app
+            image: nginx
+            volumeMounts:
+            - mountPath: /usr/share/nginx/html
+              name: storage
+          volumes:
+          - name: storage
+            persistentVolumeClaim:
+              claimName: ebs-claim
+        EOF
+        
+        # Step 5: Verify pod is running
+        kubectl get pod app-with-storage
+        
+        # Step 6: Write data to the volume
+        kubectl exec app-with-storage -- sh -c "echo 'Hello from PVC' > /usr/share/nginx/html/index.html"
+        
+        # Step 7: Delete pod (data persists!)
+        kubectl delete pod app-with-storage
+        
+        # Step 8: Create new pod with same PVC
+        kubectl run app2 --image=nginx --overrides='
+        {
+          "spec": {
+            "containers": [{
+              "name": "app2",
+              "image": "nginx",
+              "volumeMounts": [{
+                "mountPath": "/usr/share/nginx/html",
+                "name": "storage"
+              }]
+            }],
+            "volumes": [{
+              "name": "storage",
+              "persistentVolumeClaim": {
+                "claimName": "ebs-claim"
+              }
+            }]
+          }
+        }'
+        
+        # Step 9: Data is still there!
+        kubectl exec app2 -- cat /usr/share/nginx/html/index.html
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> EBS volume continues charging even when pod is deleted (until PVC is deleted)</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. PVC stays Pending if no matching PV</strong><br>
+                        Check: <code class="command">kubectl describe pvc &lt;name&gt;</code> for events<br>
+                        Reasons: No PV with enough capacity, wrong access mode, no StorageClass<br><br>
+                        
+                        <strong>2. PVC is namespaced, PV is not</strong><br>
+                        PVC in namespace "app" can only be used by pods in "app" namespace<br><br>
+                        
+                        <strong>3. Deleting PVC may delete underlying storage</strong><br>
+                        Check PV's reclaimPolicy before deleting PVC!<br>
+                        • Retain = data safe<br>
+                        • Delete = data gone forever
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Q29: How do pods request storage in Kubernetes?</li>
+                        </ul>
+                    </div>
+        
+                    <div class="section-complete">
+                        <input type="checkbox" id="check-4.3" onchange="updateProgress()">
+                        <label for="check-4.3">✅ Mark section 4.3 as completed</label>
+                    </div>
+                </div>
+            </div>
+        </div>            
+        
+        <!-- Section 4.4 -->
+        <div class="accordion-item" data-section="4.4">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="accordion-title">
+                    <span>4.4 Storage Classes & Dynamic Provisioning</span>
+                    <span class="badge badge-warning">Important</span>
+                </div>
+                <span class="accordion-icon">▼</span>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-body">
+                    <h3>📘 What is a StorageClass?</h3>
+                    <p>A StorageClass provides a way to describe different <strong>"classes" of storage</strong>. It enables <strong>dynamic provisioning</strong> - automatically creating PVs when PVCs are created.</p>
+        
+                    <div class="info-box">
+                        <strong>Why StorageClass?</strong><br>
+                        • Eliminates need for admins to pre-create PVs manually<br>
+                        • Automatically provisions storage when PVC is created<br>
+                        • Different classes for different performance/cost tiers<br>
+                        • Example: "fast-ssd", "slow-hdd", "standard"<br>
+                        • Cloud providers offer default StorageClasses
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🌍 Real-World Analogy</h3>
+                    <p>Think of StorageClass like <strong>car rental tiers</strong>:</p>
+                    <ul style="margin-left: 25px; margin-top: 10px;">
+                        <li><strong>StorageClass "economy":</strong> Basic storage (slow, cheap)</li>
+                        <li><strong>StorageClass "premium":</strong> Fast SSD storage (expensive)</li>
+                        <li><strong>PVC:</strong> "I need a premium car" (request)</li>
+                        <li><strong>Dynamic Provisioning:</strong> Rental company automatically provides a premium car</li>
+                    </ul>
+        
+                    <h3 style="margin-top: 25px;">💻 StorageClass Example</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          name: fast-ssd
+        provisioner: kubernetes.io/aws-ebs  # AWS EBS provisioner
+        parameters:
+          type: gp3           # EBS volume type
+          iopsPerGB: "10"
+          encrypted: "true"
+        volumeBindingMode: WaitForFirstConsumer
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔄 Static vs Dynamic Provisioning</h3>
+        
+                    <h4 style="margin-top: 15px;">Static Provisioning (Manual)</h4>
+                    <div class="info-box">
+                        1. Admin creates PV manually<br>
+                        2. User creates PVC<br>
+                        3. Kubernetes binds PVC to existing PV<br>
+                        4. Pod uses PVC<br><br>
+                        <strong>Problem:</strong> Admin must pre-create all PVs
+                    </div>
+        
+                    <h4 style="margin-top: 15px;">Dynamic Provisioning (Automatic)</h4>
+                    <div class="info-box">
+                        1. User creates PVC referencing a StorageClass<br>
+                        2. StorageClass automatically provisions a new PV<br>
+                        3. PVC is bound to the new PV<br>
+                        4. Pod uses PVC<br><br>
+                        <strong>Benefit:</strong> No manual admin work!
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🎯 Using Dynamic Provisioning</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Create PVC with StorageClass
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: dynamic-pvc
+        spec:
+          storageClassName: fast-ssd  # Reference StorageClass
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 10Gi
+        
+        # Kubernetes automatically:
+        # 1. Finds StorageClass "fast-ssd"
+        # 2. Uses the provisioner to create a new PV
+        # 3. Binds the PVC to the new PV
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">📊 Check StorageClasses</h3>
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # List all StorageClasses
+        kubectl get storageclass
+        kubectl get sc  # Short form
+        
+        # Example output on EKS:
+        # NAME            PROVISIONER             RECLAIMPOLICY   
+        # gp2 (default)   kubernetes.io/aws-ebs   Delete
+        
+        # Describe StorageClass
+        kubectl describe sc gp2
+        
+        # Set default StorageClass
+        kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">🔍 Default StorageClass</h3>
+                    <p>If a PVC doesn't specify a StorageClass, Kubernetes uses the <strong>default</strong> StorageClass (if one exists).</p>
+        
+                    <div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # PVC without storageClassName uses default
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: auto-pvc
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 5Gi
+        # Uses default StorageClass automatically
+                    </div>
+        
+                    <div class="aws-practice">
+                        <h4>🛠️ AWS/EKS - Dynamic Provisioning with EBS</h4>
+                        <p><strong>EKS comes with a default gp2 StorageClass. Let's use it:</strong></p>
+                        <div class="code-block">
+                            <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        # Step 1: Check available StorageClasses
+        kubectl get sc
+        
+        # Step 2: Create PVC (no PV needed!)
+        kubectl apply -f - <<EOF
+        apiVersion: v1
+        kind: PersistentVolumeClaim
+        metadata:
+          name: ebs-dynamic
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          storageClassName: gp2  # EKS default
+          resources:
+            requests:
+              storage: 8Gi
+        EOF
+        
+        # Step 3: Watch PVC and PV get created automatically
+        kubectl get pvc ebs-dynamic --watch
+        # STATUS changes: Pending → Bound
+        
+        # Step 4: Check the auto-created PV
+        kubectl get pv
+        # You'll see a new PV created automatically!
+        
+        # Step 5: Create pod using the PVC
+        kubectl run app --image=nginx --overrides='
+        {
+          "spec": {
+            "containers": [{
+              "name": "app",
+              "image": "nginx",
+              "volumeMounts": [{
+                "mountPath": "/data",
+                "name": "storage"
+              }]
+            }],
+            "volumes": [{
+              "name": "storage",
+              "persistentVolumeClaim": {
+                "claimName": "ebs-dynamic"
+              }
+            }]
+          }
+        }'
+        
+        # Step 6: Verify
+        kubectl exec app -- df -h | grep /data
+                        </div>
+                        <p style="margin-top: 10px;"><strong>💰 Cost:</strong> EBS gp2 ~$0.10/GB/month (8GB = ~$0.80/month)</p>
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚡ Volume Binding Modes</h3>
+                    <div class="info-box">
+                        <strong>Immediate (default):</strong><br>
+                        • PV created immediately when PVC is created<br>
+                        • May not be in the same zone as the pod<br><br>
+                        
+                        <strong>WaitForFirstConsumer (recommended):</strong><br>
+                        • PV created only when a pod uses the PVC<br>
+                        • Ensures PV is in the same zone as the pod<br>
+                        • Prevents cross-zone mounting errors
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+                    <div class="danger-box">
+                        <strong>1. StorageClass provisioner must exist</strong><br>
+                        EKS needs EBS CSI driver for gp3 volumes (gp2 works by default)<br><br>
+                        
+                        <strong>2. Dynamic PVs inherit StorageClass reclaim policy</strong><br>
+                        Default is usually "Delete" - PV deleted when PVC is deleted!<br><br>
+                        
+                        <strong>3. Different clouds have different provisioners</strong><br>
+                        • AWS: kubernetes.io/aws-ebs (EBS), efs.csi.aws.com (EFS)<br>
+                        • GCP: kubernetes.io/gce-pd<br>
+                        • Azure: kubernetes.io/azure-disk<br><br>
+                        
+                        <strong>4. PVC without StorageClass needs manual PV</strong><br>
+                        If no default StorageClass, PVC stays Pending forever
+                    </div>
+        
+                    <h3 style="margin-top: 25px;">📋 Static vs Dynamic Comparison</h3>
+                    <div class="success-box">
+                        <strong>When to use Static Provisioning:</strong><br>
+                        • Pre-existing storage you want to use<br>
+                        • Special storage requirements<br>
+                        • Testing/development with hostPath<br><br>
+                        
+                        <strong>When to use Dynamic Provisioning:</strong><br>
+                        • Production workloads (recommended)<br>
+                        • Cloud environments (AWS, GCP, Azure)<br>
+                        • When you want automation<br>
+                        • Most common approach today
+                    </div>
+        
+                    <div class="test-questions">
+                        <h4>🎯 This Section Covers Test Questions:</h4>
+                        <ul>
+                            <li>Related to Q27-Q30: General storage concepts</li>
+                        </ul>
+                    </div>
+        
+                    <div class="section-complete">
+                        <input type="checkbox" id="check-4.4" onchange="updateProgress()">
+                        <label for="check-4.4">✅ Mark section 4.4 as completed</label>
+                    </div>
+                </div>
+            </div>
+        </div>     
+
         <p style="margin: 30px 0; padding: 20px; background: var(--bg-light); border-radius: 8px; text-align: center;">
             <strong>📝 Sections 4.2 through 4.4 will be provided in the next response</strong>
         </p>
