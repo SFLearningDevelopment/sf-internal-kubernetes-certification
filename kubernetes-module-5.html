@@ -675,5 +675,742 @@ Terminating         → Finalizers, Grace period
                 </div>
             </div>
         </div>
+<!-- Section 5.2 -->
+<div class="accordion-item" data-section="5.2">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.2 kubectl logs — Reading Application Logs</span>
+            <span class="badge badge-danger">Critical</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 Understanding kubectl logs</h3>
+            <p>The <code class="command">kubectl logs</code> command shows the <strong>stdout/stderr output</strong> from containers. It's your first stop for debugging application issues.</p>
 
-Sections 5.2 through 5.10 will be provided in the next message.
+            <div class="info-box">
+                <strong>What logs show:</strong><br>
+                • Application stdout/stderr output<br>
+                • Errors, warnings, info messages<br>
+                • Stack traces and exceptions<br>
+                • Custom application logging
+            </div>
+
+            <h3 style="margin-top: 25px;">💻 Essential Log Commands</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# View logs from a pod
+kubectl logs my-pod
+
+# View logs from specific container in multi-container pod
+kubectl logs my-pod -c container-name
+
+# Follow logs in real-time (like tail -f)
+kubectl logs -f my-pod
+
+# Get last 100 lines
+kubectl logs my-pod --tail=100
+
+# Logs from previous container instance (after crash)
+kubectl logs my-pod --previous
+
+# Logs with timestamps
+kubectl logs my-pod --timestamps
+
+# Logs from last hour
+kubectl logs my-pod --since=1h
+            </div>
+
+            <h3 style="margin-top: 25px;">🔍 Common Log Patterns</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Search logs for errors
+kubectl logs my-pod | grep -i error
+
+# Count error occurrences
+kubectl logs my-pod | grep -c "ERROR"
+
+# View logs from all pods with label
+kubectl logs -l app=webapp --all-containers=true
+            </div>
+
+            <div class="aws-practice">
+                <h4>🛠️ Try It on AWS/EKS</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Create a pod that logs continuously
+kubectl run logger --image=busybox -- sh -c "while true; do echo $(date) - Hello from logger; sleep 2; done"
+
+# Watch logs in real-time
+kubectl logs -f logger
+
+# In another terminal, check last 10 lines
+kubectl logs logger --tail=10
+
+# Check logs with timestamps
+kubectl logs logger --timestamps --tail=5
+                </div>
+            </div>
+
+            <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+            <div class="danger-box">
+                <strong>1. Logs are lost when containers are deleted</strong><br>
+                Use centralized logging (CloudWatch, ELK, etc.) for production<br><br>
+                
+                <strong>2. --previous only works if pod restarted</strong><br>
+                If pod was deleted and recreated, previous logs are gone<br><br>
+                
+                <strong>3. Multi-container pods require -c flag</strong><br>
+                Without it, you'll get an error
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q31: Which command shows pod logs?</li>
+                    <li>Q32: kubectl logs --previous (True/False)</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.2" onchange="updateProgress()">
+                <label for="check-5.2">✅ Mark section 5.2 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.3 -->
+<div class="accordion-item" data-section="5.3">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.3 kubectl describe — Detailed Resource Info</span>
+            <span class="badge badge-danger">Critical</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 Understanding kubectl describe</h3>
+            <p><code class="command">kubectl describe</code> shows <strong>detailed information</strong> about Kubernetes resources, including events, which are crucial for troubleshooting.</p>
+
+            <div class="info-box">
+                <strong>What describe shows:</strong><br>
+                • Resource metadata and spec<br>
+                • Current status and conditions<br>
+                • <strong>Events (most important for debugging!)</strong><br>
+                • Relationships to other resources
+            </div>
+
+            <h3 style="margin-top: 25px;">💻 Using kubectl describe</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Describe a pod (shows events at bottom)
+kubectl describe pod my-pod
+
+# Describe a node
+kubectl describe node worker-node-1
+
+# Describe a service
+kubectl describe service my-service
+
+# Describe deployment
+kubectl describe deployment my-app
+            </div>
+
+            <h3 style="margin-top: 25px;">🔍 Reading Events</h3>
+            <p>Events are at the bottom of describe output - they show what Kubernetes tried to do:</p>
+
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+Events:
+  Type     Reason     Age   From               Message
+  ----     ------     ----  ----               -------
+  Normal   Scheduled  2m    default-scheduler  Successfully assigned pod
+  Normal   Pulling    2m    kubelet            Pulling image "nginx:latest"
+  Normal   Pulled     1m    kubelet            Successfully pulled image
+  Normal   Created    1m    kubelet            Created container
+  Normal   Started    1m    kubelet            Started container
+            </div>
+
+            <h3 style="margin-top: 25px;">🚨 Common Error Events</h3>
+            <div class="danger-box">
+                <strong>Failed to pull image:</strong><br>
+                • Image name is wrong<br>
+                • Image doesn't exist<br>
+                • No credentials for private registry<br><br>
+                
+                <strong>Failed scheduling:</strong><br>
+                • No nodes have enough CPU/memory<br>
+                • Node selector doesn't match<br>
+                • Taints prevent scheduling<br><br>
+                
+                <strong>Container failed:</strong><br>
+                • Application crashed<br>
+                • Health checks failing<br>
+                • Missing environment variables
+            </div>
+
+            <div class="aws-practice">
+                <h4>🛠️ Try It on AWS/EKS</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Create a pod with a bad image
+kubectl run broken --image=nginx:nonexistent-tag
+
+# Describe it to see the error
+kubectl describe pod broken
+
+# Look for events showing ImagePullBackOff
+# Events section will show:
+# "Failed to pull image ... not found"
+                </div>
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q33: Which command shows detailed pod information including events?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.3" onchange="updateProgress()">
+                <label for="check-5.3">✅ Mark section 5.3 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.4 -->
+<div class="accordion-item" data-section="5.4">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.4 kubectl exec — Interactive Debugging</span>
+            <span class="badge badge-warning">Important</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 Understanding kubectl exec</h3>
+            <p><code class="command">kubectl exec</code> executes commands inside a running container. Use it to <strong>debug from inside the container</strong>.</p>
+
+            <div class="info-box">
+                <strong>Common uses:</strong><br>
+                • Run diagnostic commands inside container<br>
+                • Test network connectivity<br>
+                • Check file systems and permissions<br>
+                • Inspect running processes<br>
+                • Verify environment variables
+            </div>
+
+            <h3 style="margin-top: 25px;">💻 Using kubectl exec</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Run a single command
+kubectl exec my-pod -- ls /app
+
+# Interactive shell (most common)
+kubectl exec -it my-pod -- /bin/bash
+kubectl exec -it my-pod -- sh  # If bash not available
+
+# For multi-container pods
+kubectl exec -it my-pod -c container-name -- /bin/bash
+
+# Run command and see output
+kubectl exec my-pod -- env
+kubectl exec my-pod -- ps aux
+kubectl exec my-pod -- cat /etc/resolv.conf
+            </div>
+
+            <h3 style="margin-top: 25px;">🔧 Common Debugging Commands</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Inside the pod shell:
+
+# Check network connectivity
+ping google.com
+curl http://service-name
+nslookup service-name
+
+# Check processes
+ps aux
+top
+
+# Check disk space
+df -h
+
+# Check environment variables
+env | grep DATABASE
+
+# Test application endpoint
+curl http://localhost:8080/health
+
+# Check listening ports
+netstat -tulpn
+            </div>
+
+            <div class="aws-practice">
+                <h4>🛠️ Try It on AWS/EKS</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Create a pod
+kubectl run debug-pod --image=nginx
+
+# Get a shell inside the pod
+kubectl exec -it debug-pod -- /bin/bash
+
+# Inside the pod, test things:
+# Check what's running
+ps aux
+
+# Test DNS
+nslookup kubernetes.default
+
+# Check environment
+env
+
+# Exit
+exit
+                </div>
+            </div>
+
+            <h3 style="margin-top: 25px;">⚠️ Common Pitfalls</h3>
+            <div class="danger-box">
+                <strong>1. Container must be running</strong><br>
+                Can't exec into CrashLoopBackOff containers<br><br>
+                
+                <strong>2. Not all images have /bin/bash</strong><br>
+                Try /bin/sh or install tools using package managers<br><br>
+                
+                <strong>3. Commands run as container's user</strong><br>
+                May not have root permissions
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q34: Which command executes commands inside a container?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.4" onchange="updateProgress()">
+                <label for="check-5.4">✅ Mark section 5.4 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.5 -->
+<div class="accordion-item" data-section="5.5">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.5 kubectl get events — Cluster-Wide Events</span>
+            <span class="badge badge-primary">Foundation</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 Cluster Events</h3>
+            <p>Events are time-ordered records of what happened in the cluster. They're invaluable for understanding the sequence of actions.</p>
+
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# View all events in current namespace
+kubectl get events
+
+# Sort by timestamp
+kubectl get events --sort-by='.lastTimestamp'
+
+# Watch events in real-time
+kubectl get events --watch
+
+# Events for specific resource
+kubectl get events --field-selector involvedObject.name=my-pod
+
+# All events across all namespaces
+kubectl get events --all-namespaces
+            </div>
+
+            <h3 style="margin-top: 25px;">⚠️ Event Retention</h3>
+            <div class="warning-box">
+                <strong>Important:</strong> Events are automatically deleted after 1 hour by default!<br>
+                For long-term tracking, use a logging solution.
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.5" onchange="updateProgress()">
+                <label for="check-5.5">✅ Mark section 5.5 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.6 -->
+<div class="accordion-item" data-section="5.6">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.6 CrashLoopBackOff — Container Restart Issues</span>
+            <span class="badge badge-danger">Critical</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 What is CrashLoopBackOff?</h3>
+            <p>CrashLoopBackOff means the container keeps <strong>crashing and Kubernetes keeps trying to restart it</strong> with exponential backoff.</p>
+
+            <div class="info-box">
+                <strong>Common Causes:</strong><br>
+                • Application crashes immediately on startup<br>
+                • Missing environment variables or config files<br>
+                • Wrong command or entrypoint<br>
+                • Port already in use<br>
+                • Application needs dependencies that aren't ready
+            </div>
+
+            <h3 style="margin-top: 25px;">🔍 Debugging CrashLoopBackOff</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Step 1: Check pod status
+kubectl get pod my-pod
+# STATUS: CrashLoopBackOff
+
+# Step 2: Check logs from crashed container
+kubectl logs my-pod --previous
+
+# Step 3: Describe pod for events
+kubectl describe pod my-pod
+
+# Step 4: Check if it's a config issue
+kubectl get pod my-pod -o yaml | grep -A 10 env
+            </div>
+
+            <h3 style="margin-top: 25px;">🛠️ Common Fixes</h3>
+            <div class="success-box">
+                <strong>Fix 1: Missing environment variables</strong><br>
+                Add required env vars to pod spec<br><br>
+                
+                <strong>Fix 2: Wrong command</strong><br>
+                Verify command and args in container spec<br><br>
+                
+                <strong>Fix 3: Application not ready</strong><br>
+                Add init containers or readiness probes
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q35: What does CrashLoopBackOff indicate?</li>
+                    <li>Q37: What's the first step when debugging CrashLoopBackOff?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.6" onchange="updateProgress()">
+                <label for="check-5.6">✅ Mark section 5.6 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.7 -->
+<div class="accordion-item" data-section="5.7">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.7 ImagePullBackOff — Image Issues</span>
+            <span class="badge badge-danger">Critical</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 What is ImagePullBackOff?</h3>
+            <p>ImagePullBackOff means Kubernetes <strong>cannot pull the container image</strong> from the registry.</p>
+
+            <div class="info-box">
+                <strong>Common Causes:</strong><br>
+                • Image name is incorrect (typo)<br>
+                • Image doesn't exist in registry<br>
+                • Private registry requires credentials<br>
+                • Network issues reaching registry<br>
+                • Image tag doesn't exist
+            </div>
+
+            <h3 style="margin-top: 25px;">🔍 Debugging ImagePullBackOff</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Check events for error message
+kubectl describe pod my-pod
+
+# Look for:
+# "Failed to pull image... manifest unknown"
+# "Failed to pull image... authentication required"
+
+# Verify image name
+kubectl get pod my-pod -o yaml | grep image:
+
+# Test image pull manually
+docker pull <image-name>
+            </div>
+
+            <h3 style="margin-top: 25px;">🛠️ Solutions</h3>
+            <div class="success-box">
+                <strong>Wrong image name:</strong> Fix the image name in deployment<br>
+                <strong>Private registry:</strong> Add imagePullSecrets<br>
+                <strong>Missing tag:</strong> Specify correct tag or use 'latest'
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q36: What causes ImagePullBackOff?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.7" onchange="updateProgress()">
+                <label for="check-5.7">✅ Mark section 5.7 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.8 -->
+<div class="accordion-item" data-section="5.8">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.8 Pending Pods — Scheduling Issues</span>
+            <span class="badge badge-warning">Important</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 Why Pods Stay Pending</h3>
+            <p>A pod in Pending state means the <strong>scheduler cannot find a suitable node</strong> to run it.</p>
+
+            <div class="info-box">
+                <strong>Common Reasons:</strong><br>
+                • Insufficient CPU or memory on nodes<br>
+                • Node selector doesn't match any node<br>
+                • Taints prevent scheduling<br>
+                • PVC cannot be bound<br>
+                • No nodes available
+            </div>
+
+            <h3 style="margin-top: 25px;">🔍 Debugging Pending Pods</h3>
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Check events
+kubectl describe pod pending-pod
+
+# Common event messages:
+# "0/3 nodes are available: insufficient cpu"
+# "0/3 nodes match node selector"
+# "pod has unbound PersistentVolumeClaims"
+
+# Check node resources
+kubectl top nodes
+kubectl describe nodes
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q38: What should you check when a pod is Pending?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.8" onchange="updateProgress()">
+                <label for="check-5.8">✅ Mark section 5.8 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.9 -->
+<div class="accordion-item" data-section="5.9">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.9 Node Troubleshooting</span>
+            <span class="badge badge-warning">Important</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📘 Checking Node Health</h3>
+            <p>Unhealthy nodes can cause widespread pod failures.</p>
+
+            <div class="code-block">
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+# Check node status
+kubectl get nodes
+
+# STATUS should be "Ready"
+# If "NotReady" or "Unknown", there's a problem
+
+# Describe node for details
+kubectl describe node <node-name>
+
+# Check node conditions
+kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q39: How do you check if a node is healthy?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.9" onchange="updateProgress()">
+                <label for="check-5.9">✅ Mark section 5.9 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5.10 -->
+<div class="accordion-item" data-section="5.10">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+        <div class="accordion-title">
+            <span>5.10 Troubleshooting Checklist</span>
+            <span class="badge badge-success">Reference</span>
+        </div>
+        <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-content">
+        <div class="accordion-body">
+            <h3>📋 Complete Troubleshooting Checklist</h3>
+
+            <div class="success-box">
+                <strong>✅ Step-by-Step Debugging Process:</strong><br><br>
+                
+                <strong>1. Check Pod Status</strong><br>
+                □ <code class="command">kubectl get pods</code><br>
+                □ Is it Running, Pending, CrashLoopBackOff, or ImagePullBackOff?<br><br>
+                
+                <strong>2. Check Logs</strong><br>
+                □ <code class="command">kubectl logs &lt;pod&gt;</code><br>
+                □ <code class="command">kubectl logs &lt;pod&gt; --previous</code> (if crashed)<br><br>
+                
+                <strong>3. Check Events</strong><br>
+                □ <code class="command">kubectl describe pod &lt;pod&gt;</code><br>
+                □ Read events at the bottom<br><br>
+                
+                <strong>4. Check Resources</strong><br>
+                □ <code class="command">kubectl describe node</code><br>
+                □ Are there enough CPU/memory?<br><br>
+                
+                <strong>5. Check Networking</strong><br>
+                □ <code class="command">kubectl get endpoints</code><br>
+                □ Can pods communicate?<br><br>
+                
+                <strong>6. Check Configuration</strong><br>
+                □ Environment variables set correctly?<br>
+                □ ConfigMaps/Secrets mounted?<br>
+                □ Volume mounts working?
+            </div>
+
+            <div class="test-questions">
+                <h4>🎯 This Section Covers Test Questions:</h4>
+                <ul>
+                    <li>Q40: What is the first command to run when debugging?</li>
+                </ul>
+            </div>
+
+            <div class="section-complete">
+                <input type="checkbox" id="check-5.10" onchange="updateProgress()">
+                <label for="check-5.10">✅ Mark section 5.10 as completed</label>
+            </div>
+        </div>
+    </div>
+</div>        
+
+<div class="knowledge-check" id="knowledge-check">
+            <h3>✅ Module 5 Knowledge Check</h3>
+            <!-- Knowledge Check -->
+            <div class="knowledge-check" id="knowledge-check">
+                <h3>✅ Module 5 Knowledge Check</h3>
+                <p style="margin-bottom: 25px;" id="quiz-status">Complete all 10 sections above to unlock the quiz!</p>
+            
+                <div id="quiz-content" style="display:none;">
+                    <p style="margin-bottom: 25px;">Test your troubleshooting skills before taking the final test!</p>
+            
+                    <div class="quiz-question">
+                        <p><strong>1. Which command shows pod logs?</strong></p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">A. kubectl get logs</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, true)">B. kubectl logs</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">C. kubectl describe logs</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">D. kubectl show logs</div>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+            
+                    <div class="quiz-question">
+                        <p><strong>2. What does CrashLoopBackOff indicate?</strong></p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">A. Image cannot be pulled</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, true)">B. Container keeps crashing and restarting</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">C. Pod is pending</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">D. Node is not ready</div>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+            
+                    <div class="quiz-question">
+                        <p><strong>3. Which command shows detailed pod information including events?</strong></p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">A. kubectl get pod</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">B. kubectl logs pod</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, true)">C. kubectl describe pod</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">D. kubectl explain pod</div>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+            
+                    <div class="quiz-question">
+                        <p><strong>4. What's the first step when debugging a CrashLoopBackOff pod?</strong></p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">A. Delete the pod</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, true)">B. Check logs with kubectl logs --previous</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">C. Restart the cluster</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">D. Scale the deployment</div>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+            
+                    <div class="quiz-question">
+                        <p><strong>5. Which command executes commands inside a running container?</strong></p>
+                        <div class="quiz-options">
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">A. kubectl run</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, true)">B. kubectl exec</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">C. kubectl attach</div>
+                            <div class="quiz-option" onclick="checkAnswer(this, false)">D. kubectl shell</div>
+                        </div>
+                        <div class="quiz-feedback"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cheat Sheet --> (already in original file)
+        <div class="cheat-sheet">...</div>
+
+        <!-- Navigation Buttons --> (already in original file)
+        <div class="nav-buttons">...</div>
+
+    </div> <!-- closing container -->
+
+    <script>...</script>
+</body>
+</html>
