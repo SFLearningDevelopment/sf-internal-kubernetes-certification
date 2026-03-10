@@ -1431,44 +1431,246 @@ kubectl get nodes
                 </div>
             </div>
         </div>
-
-        <div class="accordion-item" data-section="1.9">
+        <!-- Section 1.9: kubeadm -->
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
+                    <span class="badge badge-primary">Foundation</span>
                     <span>1.9 kubeadm — Cluster Bootstrapping</span>
-                    <span class="badge badge-primary">Foundation</span>
                 </div>
                 <span class="accordion-icon">▼</span>
             </div>
             <div class="accordion-content">
-                <div class="accordion-body">
-                    <p>Content for kubeadm...</p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-1.9" onchange="updateProgress()">
-                        <label for="check-1.9">✅ Mark section 1.9 as completed</label>
+                <h3>What is kubeadm?</h3>
+                <p>kubeadm is a command-line tool that automates the bootstrapping of Kubernetes clusters. It handles the complex initialization process, sets up the control plane components, and helps nodes join the cluster. Think of kubeadm as the "installer" for Kubernetes — it takes care of certificate generation, component configuration, and cluster setup so you don't have to do it manually.</p>
+        
+                <div class="info-box">
+                    <strong>💡 Analogy:</strong> kubeadm is like a construction foreman who assembles a building's framework. Instead of manually placing each steel beam (configuring etcd, API server, scheduler individually), the foreman (kubeadm) follows a blueprint and assembles everything correctly in the right order.
+                </div>
+        
+                <h4>Key kubeadm Commands:</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    <pre><code># Initialize a new control plane node
+        kubeadm init
+        
+        # Initialize with custom pod network CIDR
+        kubeadm init --pod-network-cidr=10.244.0.0/16
+        
+        # Generate join token for worker nodes
+        kubeadm token create --print-join-command
+        
+        # Join a worker node to the cluster
+        kubeadm join &lt;control-plane-ip&gt;:6443 --token &lt;token&gt; \
+          --discovery-token-ca-cert-hash sha256:&lt;hash&gt;
+        
+        # View cluster configuration
+        kubeadm config view
+        
+        # Upgrade cluster to new Kubernetes version
+        kubeadm upgrade plan
+        kubeadm upgrade apply v1.28.0
+        
+        # Reset node (undo kubeadm init/join)
+        kubeadm reset</code></pre>
+                </div>
+        
+                <h4>What kubeadm Does During <code>init</code>:</h4>
+                <ol>
+                    <li><strong>Preflight checks</strong> — Validates system requirements (CPU, memory, swap, ports)</li>
+                    <li><strong>Certificate generation</strong> — Creates CA and component certificates</li>
+                    <li><strong>Control plane setup</strong> — Starts etcd, API server, controller manager, scheduler</li>
+                    <li><strong>Kubeconfig generation</strong> — Creates admin.conf for kubectl access</li>
+                    <li><strong>Bootstrap tokens</strong> — Generates tokens for node joining</li>
+                    <li><strong>Addon deployment</strong> — Installs CoreDNS and kube-proxy</li>
+                </ol>
+        
+                <div class="info-box">
+                    <strong>🔧 AWS/EKS Practice:</strong><br>
+                    While EKS manages the control plane for you, understanding kubeadm helps when setting up self-managed worker nodes or creating test clusters on EC2.
+                    <div class="code-block" style="margin-top: 10px;">
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                        <pre><code># Common EKS scenario: Add self-managed nodes to EKS cluster
+        # (EKS provides a bootstrap script instead of kubeadm join)
+        
+        # On EC2 instance:
+        /etc/eks/bootstrap.sh my-cluster-name
+        
+        # This is similar to kubeadm join but optimized for EKS</code></pre>
                     </div>
+                </div>
+        
+                <div class="danger-box">
+                    <strong>⚠️ Common Pitfalls:</strong>
+                    <ul>
+                        <li><strong>Swap enabled:</strong> kubeadm requires swap to be disabled. Run <code>swapoff -a</code> and remove swap from <code>/etc/fstab</code></li>
+                        <li><strong>Wrong pod network CIDR:</strong> Must match your CNI plugin requirements. Flannel uses <code>10.244.0.0/16</code>, Calico uses <code>192.168.0.0/16</code></li>
+                        <li><strong>Firewall blocking ports:</strong> Ensure ports 6443 (API), 2379-2380 (etcd), 10250 (kubelet) are open</li>
+                        <li><strong>Lost join token:</strong> Tokens expire after 24 hours. Generate new token with <code>kubeadm token create</code></li>
+                        <li><strong>Forgetting to apply CNI:</strong> Nodes stay NotReady until you install a pod network (<code>kubectl apply -f calico.yaml</code>)</li>
+                    </ul>
+                </div>
+        
+                <div class="test-questions">
+                    <h4>🎯 This Section Covers:</h4>
+                    <ul>
+                        <li>What does <code>kubeadm init</code> do?</li>
+                        <li>How do you generate a new join token?</li>
+                        <li>Why might nodes stay in NotReady state after joining?</li>
+                        <li>What is the purpose of <code>--pod-network-cidr</code> flag?</li>
+                    </ul>
+                </div>
+        
+                <div class="section-complete">
+                    <input type="checkbox" id="check-1.9" onchange="updateProgress()">
+                    <label for="check-1.9">✅ Mark section as completed</label>
                 </div>
             </div>
         </div>
 
-        <div class="accordion-item" data-section="1.10">
+        <!-- Section 1.10: Nodes -->
+        <div class="accordion-item">
             <div class="accordion-header" onclick="toggleAccordion(this)">
                 <div class="accordion-title">
-                    <span>1.10 Nodes — Worker Machines</span>
                     <span class="badge badge-primary">Foundation</span>
+                    <span>1.10 Nodes — Worker Machines</span>
                 </div>
                 <span class="accordion-icon">▼</span>
             </div>
             <div class="accordion-content">
-                <div class="accordion-body">
-                    <p>Content for Nodes...</p>
-                    <div class="section-complete">
-                        <input type="checkbox" id="check-1.10" onchange="updateProgress()">
-                        <label for="check-1.10">✅ Mark section 1.10 as completed</label>
+                <h3>What are Nodes?</h3>
+                <p>Nodes are the worker machines in a Kubernetes cluster — physical servers, VMs, or cloud instances where your containerized applications actually run. Each node runs the kubelet (agent), container runtime (Docker/containerd), and kube-proxy (network rules). The control plane schedules pods onto nodes based on resource availability and constraints.</p>
+        
+                <div class="info-box">
+                    <strong>💡 Analogy:</strong> If the Kubernetes cluster is a shipping company, nodes are the warehouses where packages (containers) are stored and processed. The control plane is headquarters deciding which warehouse gets which packages, but the actual work happens at the warehouses (nodes).
+                </div>
+        
+                <h4>Node Components:</h4>
+                <ul>
+                    <li><strong>kubelet</strong> — Agent that ensures containers are running in pods</li>
+                    <li><strong>Container runtime</strong> — Docker, containerd, or CRI-O that runs containers</li>
+                    <li><strong>kube-proxy</strong> — Maintains network rules for pod communication</li>
+                </ul>
+        
+                <h4>Node States:</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    <pre><code># View all nodes
+        kubectl get nodes
+        
+        # Output shows:
+        NAME           STATUS   ROLES           AGE   VERSION
+        control-plane  Ready    control-plane   5d    v1.28.0
+        worker-1       Ready    &lt;none&gt;          5d    v1.28.0
+        worker-2       NotReady &lt;none&gt;          5d    v1.28.0
+        
+        # Detailed node information
+        kubectl describe node worker-1
+        
+        # Node conditions (Ready, MemoryPressure, DiskPressure, PIDPressure)
+        kubectl get nodes -o wide</code></pre>
+                </div>
+        
+                <h4>Node Conditions:</h4>
+                <ul>
+                    <li><strong>Ready</strong> — Node is healthy and can accept pods</li>
+                    <li><strong>NotReady</strong> — kubelet stopped reporting or node has critical issues</li>
+                    <li><strong>MemoryPressure</strong> — Node is running low on memory</li>
+                    <li><strong>DiskPressure</strong> — Node is running low on disk space</li>
+                    <li><strong>PIDPressure</strong> — Too many processes running on node</li>
+                    <li><strong>NetworkUnavailable</strong> — Network is not configured correctly</li>
+                </ul>
+        
+                <h4>Node Management Commands:</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    <pre><code># Drain node (evict all pods before maintenance)
+        kubectl drain worker-1 --ignore-daemonsets --delete-emptydir-data
+        
+        # Cordon node (mark as unschedulable, existing pods stay)
+        kubectl cordon worker-1
+        
+        # Uncordon node (allow scheduling again)
+        kubectl uncordon worker-1
+        
+        # Delete node from cluster
+        kubectl delete node worker-1
+        
+        # View node resource usage
+        kubectl top nodes
+        
+        # Label a node
+        kubectl label nodes worker-1 disktype=ssd
+        
+        # Taint a node (prevent pod scheduling unless tolerated)
+        kubectl taint nodes worker-1 key=value:NoSchedule</code></pre>
+                </div>
+        
+                <h4>Node Capacity vs Allocatable:</h4>
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                    <pre><code># Node has total resources (Capacity) and available resources (Allocatable)
+        # Allocatable = Capacity - System Reserved - Kubelet Reserved
+        
+        Capacity:
+          cpu: "4"
+          memory: "8Gi"
+          pods: "110"
+        
+        Allocatable:
+          cpu: "3800m"     # 200m reserved for system
+          memory: "7.5Gi"  # 500Mi reserved for kubelet
+          pods: "110"</code></pre>
+                </div>
+        
+                <div class="info-box">
+                    <strong>🔧 AWS/EKS Practice:</strong><br>
+                    In EKS, worker nodes are EC2 instances that join your cluster.
+                    <div class="code-block" style="margin-top: 10px;">
+                        <button class="copy-btn" onclick="copyCode(this)">📋 Copy</button>
+                        <pre><code># View EKS nodes
+        kubectl get nodes
+        
+        # EKS nodes are labeled with instance type
+        kubectl get nodes --show-labels | grep instance-type
+        
+        # Common labels:
+        # node.kubernetes.io/instance-type=t3.medium
+        # topology.kubernetes.io/zone=us-east-1a
+        # eks.amazonaws.com/nodegroup=my-nodegroup
+        
+        # Drain node before terminating EC2 instance
+        kubectl drain ip-10-0-1-234.ec2.internal --ignore-daemonsets</code></pre>
                     </div>
                 </div>
+        
+                <div class="danger-box">
+                    <strong>⚠️ Common Pitfalls:</strong>
+                    <ul>
+                        <li><strong>Deleting node without draining:</strong> Pods are abruptly terminated. Always drain first.</li>
+                        <li><strong>Forgetting to uncordon:</strong> Node stays unschedulable after maintenance. Remember to uncordon.</li>
+                        <li><strong>NotReady ignored:</strong> Pods on NotReady nodes may still be running but unreachable. Investigate immediately.</li>
+                        <li><strong>Resource overcommit:</strong> Scheduling pods beyond allocatable resources causes node pressure and evictions.</li>
+                        <li><strong>Taint without toleration:</strong> Pods won't schedule on tainted nodes unless they have matching tolerations.</li>
+                    </ul>
+                </div>
+        
+                <div class="test-questions">
+                    <h4>🎯 This Section Covers:</h4>
+                    <ul>
+                        <li>What's the difference between <code>drain</code> and <code>cordon</code>?</li>
+                        <li>What does NotReady status mean?</li>
+                        <li>What is the difference between Capacity and Allocatable?</li>
+                        <li>How do you prevent new pods from scheduling on a node?</li>
+                    </ul>
+                </div>
+        
+                <div class="section-complete">
+                    <input type="checkbox" id="check-1.10" onchange="updateProgress()">
+                    <label for="check-1.10">✅ Mark section as completed</label>
+                </div>
             </div>
-        </div>
+        </div>        
 
         <!-- Knowledge Check -->
         <div class="knowledge-check" id="knowledge-check">
