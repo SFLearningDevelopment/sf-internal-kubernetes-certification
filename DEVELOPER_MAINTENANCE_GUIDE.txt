@@ -1,0 +1,513 @@
+KUBERNETES COURSE - DEVELOPER MAINTENANCE GUIDE
+===============================================
+
+TABLE OF CONTENTS
+-----------------
+1. Cache Busting Strategy
+2. When Code Changes Are Made
+3. GitHub Pages Deployment
+4. Testing Changes Locally
+5. Common Maintenance Tasks
+6. Troubleshooting
+
+
+==================================================
+1. CACHE BUSTING STRATEGY
+==================================================
+
+WHY CACHE BUSTING?
+------------------
+- Browsers cache HTML/CSS/JS files to load pages faster
+- When you update course content, users might see old cached versions
+- Cache busting forces browsers to load fresh files
+
+HOW IT WORKS:
+-------------
+- Append version parameters (?v=1, ?v=2, etc.) to file URLs
+- When you update a file, increment its version number everywhere it's referenced
+
+EXAMPLE:
+--------
+Before update:
+  <a href="kubernetes-module-1.html?v=1">Module 1</a>
+
+After updating Module 1 content:
+  <a href="kubernetes-module-1.html?v=2">Module 1</a>
+
+
+==================================================
+2. WHEN CODE CHANGES ARE MADE
+==================================================
+
+STEP 1: IDENTIFY WHICH FILES WERE CHANGED
+------------------------------------------
+Common file types:
+- Module HTML files (kubernetes-module-1.html, kubernetes-module-2.html, etc.)
+- Dashboard (course-dashboard.html)
+- Test files (kubernetes-basic-test.html, kubernetes-results.html)
+- Shared CSS/JS (if you extract styles to external files)
+
+
+STEP 2: INCREMENT VERSION NUMBERS
+----------------------------------
+
+SCENARIO A: MODULE CONTENT UPDATED (e.g., Module 1)
+----------------------------------------------------
+Files to update:
+
+1. course-dashboard.html - Update all Module 1 links:
+   Find and replace:
+     kubernetes-module-1.html?v=1
+   With:
+     kubernetes-module-1.html?v=2
+
+2. kubernetes-module-2.html - Update "Previous Module" button:
+     <a href="kubernetes-module-1.html?v=2" class="btn btn-secondary">← Module 1</a>
+
+3. kubernetes-module-1.html itself - Update its own navigation:
+   • Breadcrumb: <a href="course-dashboard.html?v=1">← Dashboard</a>
+   • Navigation buttons to dashboard and next module
+
+
+SCENARIO B: DASHBOARD UPDATED
+------------------------------
+Files to update:
+
+1. All module files (kubernetes-module-1.html through kubernetes-module-5.html):
+   • Update breadcrumb: <a href="course-dashboard.html?v=2">← Dashboard</a>
+   • Update nav buttons: <a href="course-dashboard.html?v=2" class="btn">← Dashboard</a>
+
+2. Test results page (kubernetes-results.html):
+   • Update link: <a href="course-dashboard.html?v=2">Back to Dashboard</a>
+
+
+SCENARIO C: TEST FILES UPDATED
+-------------------------------
+Files to update:
+
+1. course-dashboard.html - Update test link:
+     <a href="kubernetes-basic-test.html?v=2" class="quick-link-item">
+
+2. All module files - If they link to test:
+     window.location.href = 'kubernetes-basic-test.html?v=2';
+
+
+STEP 3: VERSION TRACKING TABLE
+-------------------------------
+Keep this table updated in your project notes:
+
+File                          | Current Version | Last Updated | Changes Made
+------------------------------|-----------------|--------------|------------------
+course-dashboard.html         | v1              | 2026-03-10   | Initial release
+kubernetes-module-1.html      | v2              | 2026-03-10   | Added sections 1.9, 1.10
+kubernetes-module-2.html      | v1              | 2026-03-09   | Initial release
+kubernetes-module-3.html      | v1              | 2026-03-09   | Initial release
+kubernetes-module-4.html      | v1              | 2026-03-09   | Initial release
+kubernetes-module-5.html      | v1              | 2026-03-09   | Fixed duplicate quiz bug
+kubernetes-basic-test.html    | v1              | 2026-03-06   | Initial release
+kubernetes-results.html       | v1              | 2026-03-06   | Initial release
+
+
+STEP 4: TEST BEFORE COMMITTING
+-------------------------------
+
+LOCAL TESTING:
+--------------
+1. Clear browser cache:
+   • Chrome: Ctrl+Shift+Delete (Windows) / Cmd+Shift+Delete (Mac)
+   • Select "Cached images and files"
+   • Click "Clear data"
+
+2. Hard refresh the page:
+   • Windows: Ctrl+Shift+R or Ctrl+F5
+   • Mac: Cmd+Shift+R
+
+3. Test critical paths:
+   • Navigate from dashboard → module → back to dashboard
+   • Check localStorage persistence (complete a section, refresh, verify checkbox stays checked)
+   • Test knowledge check unlock functionality
+   • Verify progress bars update correctly
+
+BROWSER DEVELOPER CONSOLE CHECKS:
+----------------------------------
+// Check localStorage is working
+localStorage.getItem('k8s_course_progress')
+// Should return: '{"check-1.1":true,"check-1.2":true,...}'
+
+// Check if old cache is being used
+// Open Network tab, reload page, check if files show (from cache) or 200 status
+
+
+==================================================
+3. GITHUB PAGES DEPLOYMENT
+==================================================
+
+STANDARD DEPLOYMENT WORKFLOW
+-----------------------------
+Step 1: Stage your changes
+  git add .
+
+Step 2: Commit with descriptive message
+  git commit -m "Update Module 1: Add sections 1.9 (kubeadm) and 1.10 (Nodes), increment cache version to v2"
+
+Step 3: Push to main branch
+  git push origin main
+
+GitHub Pages will auto-deploy in 1-2 minutes
+
+
+POST-DEPLOYMENT VERIFICATION
+-----------------------------
+Wait 2-3 minutes for GitHub Pages to rebuild, then:
+
+1. Visit the live site:
+   https://sflearningdevelopment.github.io/sf-internal-kubernetes-certification/course-dashboard.html
+
+2. Hard refresh with cache clearing:
+   • Ctrl+Shift+R (Windows) / Cmd+Shift+R (Mac)
+
+3. Check browser URL for version parameter:
+   • When clicking Module 1, URL should show:
+     https://...github.io/.../kubernetes-module-1.html?v=2
+
+4. Verify in Incognito/Private mode (bypasses all cache):
+   • Chrome: Ctrl+Shift+N (Windows) / Cmd+Shift+N (Mac)
+   • Navigate to your site and test
+
+
+GITHUB PAGES SETTINGS
+----------------------
+Ensure these settings are correct in your repository:
+
+1. Go to Settings → Pages
+2. Source: Deploy from a branch
+3. Branch: main (or gh-pages if using separate branch)
+4. Folder: / (root) or /docs depending on your setup
+5. Custom domain: (if applicable)
+
+
+==================================================
+4. TESTING CHANGES LOCALLY
+==================================================
+
+OPTION 1: SIMPLE HTTP SERVER (PYTHON)
+--------------------------------------
+# Navigate to your project directory
+cd /path/to/sf-internal-kubernetes-certification
+
+# Python 3
+python -m http.server 8000
+
+# Python 2
+python -m SimpleHTTPServer 8000
+
+# Open browser to:
+http://localhost:8000/course-dashboard.html
+
+
+OPTION 2: LIVE SERVER (VS CODE EXTENSION)
+------------------------------------------
+1. Install "Live Server" extension in VS Code
+2. Right-click course-dashboard.html
+3. Select "Open with Live Server"
+4. Browser opens automatically with auto-reload on file changes
+
+
+OPTION 3: NODE.JS HTTP-SERVER
+------------------------------
+# Install globally
+npm install -g http-server
+
+# Run in project directory
+http-server -p 8000
+
+# Open browser to:
+http://localhost:8000/course-dashboard.html
+
+
+==================================================
+5. COMMON MAINTENANCE TASKS
+==================================================
+
+TASK 1: ADDING A NEW SECTION TO A MODULE
+-----------------------------------------
+Example: Adding section 2.9 to Module 2
+
+Steps:
+1. Write the HTML content following the existing section pattern
+2. Insert into kubernetes-module-2.html in the correct accordion position
+3. Update progress tracking JavaScript (if changing total section count):
+   • In the module file: const totalSections = 9; // Was 8, now 9
+4. Update dashboard module structure:
+   • In course-dashboard.html:
+     const moduleStructure = {
+       1: { sections: 10, name: "Cluster Architecture" },
+       2: { sections: 9, name: "Workloads & Scheduling" }, // Changed from 8
+       ...
+     };
+5. Increment cache version for Module 2 (?v=1 → ?v=2)
+
+
+TASK 2: FIXING A BUG IN JAVASCRIPT
+-----------------------------------
+Example: Progress bar calculation bug
+
+Steps:
+1. Identify the affected file(s)
+2. Make the fix
+3. Increment version for ALL files that use the fixed JS:
+   • If it's inline <script> in a module → increment that module's version
+   • If it's in dashboard → increment dashboard version
+4. Test thoroughly in browser console
+5. Clear localStorage if structure changed: localStorage.clear()
+
+
+TASK 3: UPDATING VIDEO EMBEDS
+------------------------------
+Example: Changing a YouTube video ID
+
+Steps:
+1. Find the video embed in the module HTML:
+   <iframe src="https://www.youtube.com/embed/OLD_VIDEO_ID"></iframe>
+2. Replace with new video ID:
+   <iframe src="https://www.youtube.com/embed/NEW_VIDEO_ID"></iframe>
+3. Update video index on dashboard (if video duration/title changed)
+4. Increment module version (?v=1 → ?v=2)
+
+
+TASK 4: UPDATING STYLES/CSS
+----------------------------
+If CSS is inline in <style> tags:
+- Make CSS changes
+- Increment version for that specific file
+
+If CSS is extracted to external file:
+- Create versioned CSS filename: styles-v2.css
+- Update all HTML files to reference new version:
+  <link rel="stylesheet" href="styles-v2.css">
+- Keep old version (styles-v1.css) for 1-2 weeks for users with cached HTML
+
+
+TASK 5: CHANGING COURSE STRUCTURE
+----------------------------------
+Example: Adding Module 6
+
+Steps:
+1. Create new module file: kubernetes-module-6.html
+2. Update dashboard:
+   const moduleStructure = {
+     // ... existing modules
+     6: { sections: 8, name: "Security" }
+   };
+   const totalSections = 48; // Was 40
+3. Add module card to dashboard HTML
+4. Update Module 5 navigation to point to Module 6
+5. Update all cache versions for affected files
+
+
+==================================================
+6. TROUBLESHOOTING
+==================================================
+
+PROBLEM: CHANGES NOT APPEARING ON GITHUB PAGES
+-----------------------------------------------
+Solutions:
+
+1. Check GitHub Actions/Pages build status:
+   • Go to repository → Actions tab
+   • Look for failed builds (red X)
+   • Click on failed build to see error logs
+
+2. Verify files were committed:
+   git status
+   git log --oneline -5
+
+3. Hard refresh with cache clear:
+   • Ctrl+Shift+Delete → Clear cache
+   • Ctrl+Shift+R → Hard refresh
+
+4. Wait longer:
+   • GitHub Pages can take 2-10 minutes to rebuild
+   • Check repository → Settings → Pages for build timestamp
+
+5. Test in Incognito mode:
+   • Completely bypasses cache
+   • If it works in Incognito, it's a cache issue
+
+
+PROBLEM: PROGRESS NOT SAVING (LOCALSTORAGE ISSUES)
+---------------------------------------------------
+Solutions:
+
+1. Check browser console for errors:
+   • Press F12 → Console tab
+   • Look for red error messages
+
+2. Verify localStorage is enabled:
+   // In browser console
+   typeof(Storage) !== "undefined"
+   // Should return: true
+
+3. Check for quota errors:
+   // localStorage has 5-10MB limit
+   JSON.stringify(localStorage).length
+   // Should be much less than 5000000 (5MB)
+
+4. Clear and reset:
+   localStorage.clear()
+   location.reload()
+
+
+PROBLEM: QUIZ/KNOWLEDGE CHECK NOT UNLOCKING
+--------------------------------------------
+Solutions:
+
+1. Verify all sections have checkboxes:
+   <!-- Each section must have this -->
+   <input type="checkbox" id="check-X.Y" onchange="updateProgress()">
+
+2. Check totalSections count matches actual sections:
+   // In module file
+   const totalSections = 10; // Must match number of sections
+
+3. Test unlock logic in console:
+   // Check completed count
+   const progress = JSON.parse(localStorage.getItem('k8s_course_progress') || '{}');
+   Object.keys(progress).filter(k => k.startsWith('check-1.') && progress[k]).length
+   // Should return number of completed sections
+
+
+PROBLEM: MODULE SHOWS BLANK/PLACEHOLDER CONTENT
+------------------------------------------------
+Causes:
+- Section content was never written (like old 1.9 and 1.10)
+- HTML structure broken (missing closing tags)
+- Accordion JavaScript not working
+
+Solutions:
+
+1. Check for placeholder text:
+   <!-- Bad - placeholder -->
+   Content for kubeadm...
+   
+   <!-- Good - actual content -->
+   <h3>What is kubeadm?</h3>
+   <p>kubeadm is a command-line tool...</p>
+
+2. Validate HTML structure:
+   • Use online HTML validator
+   • Check all <div> tags are closed
+   • Verify accordion structure is intact
+
+3. Check accordion JavaScript:
+   // Should be at bottom of module file
+   function toggleAccordion(header) {
+     // ... implementation
+   }
+
+
+PROBLEM: VERSION NUMBERS GETTING OUT OF SYNC
+---------------------------------------------
+Prevention:
+
+Keep a VERSION_TRACKING.md file in your repository with this content:
+
+# File Version Tracking
+
+Last updated: 2026-03-10
+
+| File | Version | Changes |
+|------|---------|---------|
+| course-dashboard.html | v1 | Initial release |
+| kubernetes-module-1.html | v2 | Added sections 1.9, 1.10 |
+| kubernetes-module-2.html | v1 | Initial release |
+...
+
+## Update Checklist
+When updating Module X:
+- [ ] Increment version in dashboard module card
+- [ ] Increment version in dashboard quiz button
+- [ ] Increment version in Module X-1 "Next" button
+- [ ] Increment version in Module X+1 "Previous" button
+- [ ] Update this tracking file
+
+
+==================================================
+FILE STRUCTURE REFERENCE
+==================================================
+
+sf-internal-kubernetes-certification/
+├── course-dashboard.html          # Main landing page
+├── kubernetes-module-1.html       # Module 1 (10 sections)
+├── kubernetes-module-2.html       # Module 2 (8 sections)
+├── kubernetes-module-3.html       # Module 3 (8 sections)
+├── kubernetes-module-4.html       # Module 4 (4 sections)
+├── kubernetes-module-5.html       # Module 5 (10 sections)
+├── kubernetes-basic-test.html     # 30-question test
+├── kubernetes-results.html        # Test results page
+├── sourcefuse-logo.png            # Logo file (optional)
+├── README.md                      # Project overview
+├── DEVELOPER_MAINTENANCE_GUIDE.txt # This file
+└── VERSION_TRACKING.md            # Version history (recommended)
+
+
+==================================================
+QUICK REFERENCE CHECKLIST
+==================================================
+
+BEFORE EVERY CODE CHANGE:
+-------------------------
+☐ Identify which files will be modified
+☐ Note current version numbers
+☐ Create backup if making major changes
+
+AFTER MAKING CHANGES:
+---------------------
+☐ Increment version numbers for changed files
+☐ Update all references to changed files
+☐ Test locally with hard refresh
+☐ Clear localStorage if structure changed
+☐ Update VERSION_TRACKING.md
+
+BEFORE COMMITTING:
+------------------
+☐ Test all navigation paths
+☐ Verify progress saving works
+☐ Check knowledge checks unlock properly
+☐ Test in incognito mode
+☐ Review git diff for unintended changes
+
+AFTER DEPLOYMENT:
+-----------------
+☐ Wait 2-3 minutes for GitHub Pages build
+☐ Test live site with hard refresh
+☐ Test in incognito mode
+☐ Verify version parameters in URLs
+☐ Check browser console for errors
+
+
+==================================================
+HELPFUL RESOURCES
+==================================================
+
+Common Resources:
+- GitHub Pages Docs: https://docs.github.com/en/pages
+- localStorage API: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+- Cache-Control Headers: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+
+Debugging Tools:
+- Browser DevTools (F12)
+- GitHub Actions logs (repository → Actions)
+- HTML Validator: https://validator.w3.org/
+
+
+==================================================
+LICENSE & CONTRIBUTION
+==================================================
+
+This course is maintained by the SourceFuse Learning & Development team.
+For contributions or issues, please contact the internal development team.
+
+Last Updated: March 10, 2026
+Maintained By: J V Ravichandran / SourceFuse L&D Team
+Version: 1.0
