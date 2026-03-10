@@ -517,8 +517,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-1.html" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz1-btn" disabled onclick="window.location.href='kubernetes-module-1.html#knowledge-check'">
+                        <a href="kubernetes-module-1.html?v=1" class="btn btn-primary">Start Learning</a>
+                        <button class="btn btn-success" id="quiz1-btn" disabled onclick="window.location.href='kubernetes-module-1.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -549,8 +549,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-2.html" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz2-btn" disabled onclick="window.location.href='kubernetes-module-2.html#knowledge-check'">
+                        <a href="kubernetes-module-2.html?v=1" class="btn btn-primary">Start Learning</a>
+                        <button class="btn btn-success" id="quiz2-btn" disabled onclick="window.location.href='kubernetes-module-2.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -581,8 +581,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-3.html" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz3-btn" disabled onclick="window.location.href='kubernetes-module-3.html#knowledge-check'">
+                        <a href="kubernetes-module-3.html?v=1" class="btn btn-primary">Start Learning</a>
+                        <button class="btn btn-success" id="quiz3-btn" disabled onclick="window.location.href='kubernetes-module-3.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -613,8 +613,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-4.html" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz4-btn" disabled onclick="window.location.href='kubernetes-module-4.html#knowledge-check'">
+                        <a href="kubernetes-module-4.html?v=1" class="btn btn-primary">Start Learning</a>
+                        <button class="btn btn-success" id="quiz4-btn" disabled onclick="window.location.href='kubernetes-module-4.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -645,8 +645,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-5.html" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz5-btn" disabled onclick="window.location.href='kubernetes-module-5.html#knowledge-check'">
+                        <a href="kubernetes-module-5.html?v=1" class="btn btn-primary">Start Learning</a>
+                        <button class="btn btn-success" id="quiz5-btn" disabled onclick="window.location.href='kubernetes-module-5.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -657,7 +657,7 @@
         <!-- Quick Links -->
         <div class="quick-links">
             <h3>🔗 Quick Links</h3>
-            <a href="kubernetes-basic-test.html" class="quick-link-item">
+            <a href="kubernetes-basic-test.html?v=1" class="quick-link-item">
                 <span>📝 Take the Basic Test</span>
                 <span>→</span>
             </a>
@@ -741,7 +741,7 @@
                 resumeBtn.textContent = '🚀 Start Learning';
             } else if (totalCompleted === totalSections) {
                 resumeBtn.textContent = '🎉 Course Complete - Take Test';
-                resumeBtn.onclick = () => window.location.href = 'kubernetes-basic-test.html';
+                resumeBtn.onclick = () => window.location.href = 'kubernetes-basic-test.html?v=1';
             } else {
                 resumeBtn.textContent = `📖 Resume: Module ${lastModule}, Section ${lastSection}`;
             }
@@ -752,9 +752,9 @@
             const totalCompleted = JSON.parse(localStorage.getItem('k8s_course_progress') || '{}');
             
             if (Object.keys(totalCompleted).length === 40) {
-                window.location.href = 'kubernetes-basic-test.html';
+                window.location.href = 'kubernetes-basic-test.html?v=1';
             } else {
-                window.location.href = `kubernetes-module-${lastModule}.html`;
+                window.location.href = `kubernetes-module-${lastModule}.html?v=1`;
             }
         }
 
