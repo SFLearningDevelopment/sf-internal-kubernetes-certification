@@ -680,17 +680,16 @@
             4: { sections: 4, name: "Storage" },
             5: { sections: 10, name: "Troubleshooting" }
         };
-
         function updateDashboard() {
             const progress = JSON.parse(localStorage.getItem('k8s_course_progress') || '{}');
             let totalCompleted = 0;
             const totalSections = 40;
-
+        
             // Update each module
             Object.keys(moduleStructure).forEach(moduleNum => {
                 const module = moduleStructure[moduleNum];
                 let moduleCompleted = 0;
-
+        
                 for (let i = 1; i <= module.sections; i++) {
                     const key = `check-${moduleNum}.${i}`;
                     if (progress[key]) {
@@ -698,21 +697,22 @@
                         totalCompleted++;
                     }
                 }
-
-                const percentage = Math.round((moduleCompleted / module.sections) * 100);
+        
+                // Use Math.ceil to round up (1/10 = 10%, not 0%)
+                const percentage = moduleCompleted === 0 ? 0 : Math.ceil((moduleCompleted / module.sections) * 100);
                 const progressBar = document.getElementById(`module${moduleNum}-progress`);
                 const progressText = document.getElementById(`module${moduleNum}-progress-text`);
                 const quizBtn = document.getElementById(`quiz${moduleNum}-btn`);
-
+        
                 if (progressBar) {
                     progressBar.style.width = percentage + '%';
                     progressBar.textContent = percentage + '%';
                 }
-
+        
                 if (progressText) {
                     progressText.textContent = `${moduleCompleted} / ${module.sections} sections completed`;
                 }
-
+        
                 // Enable quiz button only if all sections are completed
                 if (quizBtn) {
                     quizBtn.disabled = moduleCompleted < module.sections;
@@ -723,7 +723,7 @@
                     }
                 }
             });
-
+        
             // Update overall progress
             const overallPercentage = Math.round((totalCompleted / totalSections) * 100);
             document.getElementById('overallProgress').style.width = overallPercentage + '%';
@@ -731,7 +731,7 @@
             document.getElementById('progressText').textContent = `${totalCompleted} of ${totalSections} sections completed`;
             document.getElementById('completedStat').textContent = totalCompleted;
             document.getElementById('remainingStat').textContent = totalSections - totalCompleted;
-
+        
             // Update resume button
             const resumeBtn = document.getElementById('resumeBtn');
             const lastModule = localStorage.getItem('k8s_last_module') || '1';
