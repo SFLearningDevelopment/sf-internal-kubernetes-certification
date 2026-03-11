@@ -395,6 +395,50 @@
             .modules-grid { grid-template-columns: 1fr; }
             .module-actions { flex-direction: column; }
         }
+        .disclaimer-section {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            margin-top: 40px;
+        }
+        
+        [data-theme="dark"] .disclaimer-section { background: var(--bg-dark); }
+        
+        .disclaimer-section h3 {
+            margin-bottom: 25px;
+            color: var(--primary);
+            font-size: 1.5em;
+        }
+        
+        .disclaimer-box {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .disclaimer-box h4 {
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            font-size: 1.1em;
+        }
+        
+        .disclaimer-box p {
+            color: var(--text-dark);
+            line-height: 1.7;
+            margin: 0;
+        }
+        
+        .disclaimer-box a {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+        
+        .disclaimer-box a:hover {
+            color: var(--primary-dark);
+        }        
     </style>
 </head>
 <body>
@@ -654,25 +698,48 @@
                 </div>
             </div>
         </div>
-
-        <!-- Quick Links -->
-        <div class="quick-links">
-            <h3>🔗 Quick Links</h3>
-            <a href="kubernetes-basic-test.html?v=1" class="quick-link-item">
-                <span>📝 Take the Basic Test</span>
-                <span>→</span>
-            </a>
-            <a href="#" onclick="alert('Command reference will be available after completing modules'); return false;" class="quick-link-item">
-                <span>📋 Command Reference Sheet</span>
-                <span>→</span>
-            </a>
-            <a href="https://kubernetes.io/docs/" target="_blank" class="quick-link-item">
-                <span>📖 Official Kubernetes Docs</span>
-                <span>↗</span>
-            </a>
+        <!-- Disclaimer -->
+        <div class="disclaimer-section">
+            <h3>⚠️ Important Notice</h3>
+            
+            <div class="disclaimer-box">
+                <h4>🤖 AI-Generated Content</h4>
+                <p>This training content was generated using artificial intelligence (AI) and has been reviewed and tested by human subject matter experts to ensure accuracy and relevance. While we strive for the highest quality, learners should verify critical information against official Kubernetes documentation.</p>
+            </div>
+        
+            <div class="disclaimer-box">
+                <h4>📚 Educational Use Only</h4>
+                <p>This course is intended for internal training and educational purposes only. The content is provided "as-is" without warranties of any kind, either express or implied. Users are responsible for verifying the applicability of this information to their specific use cases.</p>
+            </div>
+        
+            <div class="disclaimer-box">
+                <h4>🔒 Data Privacy & Security</h4>
+                <p>Your progress is stored locally in your browser using localStorage. No personal data is transmitted to external servers. This course complies with SOC 2 Type II requirements for data handling and security controls. For questions about data privacy, contact your security team.</p>
+            </div>
+        
+            <div class="disclaimer-box">
+                <h4>📖 External Resources</h4>
+                <p>Links to external resources (including official Kubernetes documentation) are provided for reference only. We do not control or endorse the content of external sites. Always verify information from multiple authoritative sources.</p>
+            </div>
+        
+            <div class="disclaimer-box">
+                <h4>🔄 Content Updates</h4>
+                <p>Kubernetes evolves rapidly. This course content is current as of March 2026. Always consult the <a href="https://kubernetes.io/docs/" target="_blank" rel="noopener noreferrer">official Kubernetes documentation</a> for the most up-to-date information on specific versions and features.</p>
+            </div>
+        
+            <p style="text-align: center; color: var(--text-light); font-size: 0.9em; margin-top: 30px;">
+                Last Updated: March 2026 | Version 1.0<br>
+                For questions or issues, contact your Learning & Development team.
+            </p>
+        </div>        
+        <div class="disclaimer-box">
+            <h4>⚖️ Legal Disclaimer</h4>
+            <p>This training material is provided for educational purposes only and does not constitute professional advice. The organization makes no representations or warranties regarding the accuracy, completeness, or suitability of this content. Users assume all risk and liability for the use of this training material.</p>
         </div>
-    </div>
-
+        <div class="disclaimer-box">
+            <h4>©️ Attribution</h4>
+            <p>Course content created using Claude AI (Anthropic) and curated by internal subject matter experts. Kubernetes® is a registered trademark of the Linux Foundation. This course is not affiliated with or endorsed by the Kubernetes project or the Linux Foundation.</p>
+        </div>        
     <script>
         const moduleStructure = {
             1: { sections: 10, name: "Cluster Architecture" },
