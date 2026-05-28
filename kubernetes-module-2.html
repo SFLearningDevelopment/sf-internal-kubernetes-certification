@@ -1555,7 +1555,11 @@ kubectl get pod my-app -o wide
                     fsUpdates.lastSection = section;
                 }
                 _k8sDb.collection('k8s_progress').doc(_currentUid).update(fsUpdates).catch(function() {
-                    _k8sDb.collection('k8s_progress').doc(_currentUid).set(fsUpdates, { merge: true }).catch(console.error);
+                    // Document doesn't exist yet — build proper nested structure for set()
+                    var initData = { lastModule: fsUpdates.lastModule, updatedAt: fsUpdates.updatedAt, sections: {} };
+                    if (fsUpdates.lastSection) initData.lastSection = fsUpdates.lastSection;
+                    checkboxes.forEach(function(cb) { initData.sections[cb.id] = cb.checked; });
+                    _k8sDb.collection('k8s_progress').doc(_currentUid).set(initData).catch(console.error);
                 });
             }
 
