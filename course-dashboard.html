@@ -555,7 +555,7 @@
         <!-- Modules Grid -->
         <div class="modules-grid">
             <!-- Module 1 -->
-            <div class="module-card">
+            <div class="module-card" onclick="navigateToModule(1)">
                 <div class="module-header">
                     <h3>Module 1</h3>
                     <p>Cluster Architecture & Installation</p>
@@ -579,8 +579,8 @@
                     </div>
                     <!-- Module 1 card -->
                     <div class="module-actions">
-                        <a href="kubernetes-module-1.html?v=2" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz1-btn" disabled onclick="window.location.href='kubernetes-module-1.html?v=2#knowledge-check'">
+                        <a href="kubernetes-module-1.html?v=2" class="btn btn-primary" id="start1-btn" onclick="event.stopPropagation()">Start Learning</a>
+                        <button class="btn btn-success" id="quiz1-btn" disabled onclick="event.stopPropagation(); window.location.href='kubernetes-module-1.html?v=2#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>                    
@@ -588,7 +588,7 @@
             </div>
 
             <!-- Module 2 -->
-            <div class="module-card">
+            <div class="module-card" onclick="navigateToModule(2)">
                 <div class="module-header">
                     <h3>Module 2</h3>
                     <p>Workloads & Scheduling</p>
@@ -611,8 +611,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-2.html?v=1" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz2-btn" disabled onclick="window.location.href='kubernetes-module-2.html?v=1#knowledge-check'">
+                        <a href="kubernetes-module-2.html?v=1" class="btn btn-primary" id="start2-btn" onclick="event.stopPropagation()">Start Learning</a>
+                        <button class="btn btn-success" id="quiz2-btn" disabled onclick="event.stopPropagation(); window.location.href='kubernetes-module-2.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -620,7 +620,7 @@
             </div>
 
             <!-- Module 3 -->
-            <div class="module-card">
+            <div class="module-card" onclick="navigateToModule(3)">
                 <div class="module-header">
                     <h3>Module 3</h3>
                     <p>Services & Networking</p>
@@ -643,8 +643,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-3.html?v=1" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz3-btn" disabled onclick="window.location.href='kubernetes-module-3.html?v=1#knowledge-check'">
+                        <a href="kubernetes-module-3.html?v=1" class="btn btn-primary" id="start3-btn" onclick="event.stopPropagation()">Start Learning</a>
+                        <button class="btn btn-success" id="quiz3-btn" disabled onclick="event.stopPropagation(); window.location.href='kubernetes-module-3.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -652,7 +652,7 @@
             </div>
 
             <!-- Module 4 -->
-            <div class="module-card">
+            <div class="module-card" onclick="navigateToModule(4)">
                 <div class="module-header">
                     <h3>Module 4</h3>
                     <p>Storage</p>
@@ -675,8 +675,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-4.html?v=1" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz4-btn" disabled onclick="window.location.href='kubernetes-module-4.html?v=1#knowledge-check'">
+                        <a href="kubernetes-module-4.html?v=1" class="btn btn-primary" id="start4-btn" onclick="event.stopPropagation()">Start Learning</a>
+                        <button class="btn btn-success" id="quiz4-btn" disabled onclick="event.stopPropagation(); window.location.href='kubernetes-module-4.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -684,7 +684,7 @@
             </div>
 
             <!-- Module 5 -->
-            <div class="module-card">
+            <div class="module-card" onclick="navigateToModule(5)">
                 <div class="module-header">
                     <h3>Module 5</h3>
                     <p>Troubleshooting</p>
@@ -707,8 +707,8 @@
                         </div>
                     </div>
                     <div class="module-actions">
-                        <a href="kubernetes-module-5.html?v=1" class="btn btn-primary">Start Learning</a>
-                        <button class="btn btn-success" id="quiz5-btn" disabled onclick="window.location.href='kubernetes-module-5.html?v=1#knowledge-check'">
+                        <a href="kubernetes-module-5.html?v=1" class="btn btn-primary" id="start5-btn" onclick="event.stopPropagation()">Start Learning</a>
+                        <button class="btn btn-success" id="quiz5-btn" disabled onclick="event.stopPropagation(); window.location.href='kubernetes-module-5.html?v=1#knowledge-check'">
                             ✅ Quiz
                         </button>
                     </div>
@@ -807,6 +807,12 @@
                         quizBtn.innerHTML = `🔒 Quiz (${moduleCompleted}/${module.sections})`;
                     }
                 }
+
+                // Update Start/Resume button text based on progress
+                const startBtn = document.getElementById(`start${moduleNum}-btn`);
+                if (startBtn) {
+                    startBtn.textContent = moduleCompleted > 0 ? '📖 Resume Learning' : '🚀 Start Learning';
+                }
             });
         
             // Update overall progress
@@ -844,13 +850,19 @@
                 '5': 1
             };
             
-            if (Object.keys(totalCompleted).length === 40) {
+            if (Object.values(totalCompleted).filter(v => v === true).length === 40) {
                 window.location.href = 'kubernetes-basic-test.html?v=1';
             } else {
                 const version = moduleVersions[lastModule] || 1;
                 window.location.href = `kubernetes-module-${lastModule}.html?v=${version}`;
             }
         }
+        const moduleVersions = { '1': 2, '2': 1, '3': 1, '4': 1, '5': 1 };
+        function navigateToModule(num) {
+            const ver = moduleVersions[num.toString()] || 1;
+            window.location.href = `kubernetes-module-${num}.html?v=${ver}`;
+        }
+
         function toggleTheme() {
             const current = document.documentElement.getAttribute('data-theme');
             const newTheme = current === 'dark' ? 'light' : 'dark';
