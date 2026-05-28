@@ -1788,7 +1788,7 @@ kubectl get nodes
         const totalSections = 10;
         const moduleNum = 1;
 
-        function updateProgress() {
+        function updateProgress(skipSave) {
             const checkboxes = document.querySelectorAll('.section-complete input[type="checkbox"]');
             const completed = Array.from(checkboxes).filter(cb => cb.checked).length;
             const percentage = Math.round((completed / totalSections) * 100);
@@ -1798,8 +1798,8 @@ kubectl get nodes
             document.getElementById('progressLabel').textContent = `Progress: ${completed}/${totalSections}`;
             document.getElementById('progressPercent').textContent = percentage + '%';
 
-            // Save progress to Firestore
-            if (_currentUid) {
+            // Save progress to Firestore (skipped on page load)
+            if (!skipSave && _currentUid) {
                 const fsUpdates = { lastModule: moduleNum.toString(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
                 checkboxes.forEach(cb => { fsUpdates['sections.' + cb.id] = cb.checked; });
                 const unchecked = Array.from(checkboxes).find(cb => !cb.checked);
@@ -1938,7 +1938,8 @@ const _k8sDb   = firebase.firestore(window._k8sApp);
 
 async function k8sLoadProgress(uid) {
     try {
-        const snap = await _k8sDb.collection('k8s_progress').doc(uid).get();
+        // Force server read to always get latest progress
+        const snap = await _k8sDb.collection('k8s_progress').doc(uid).get({ source: 'server' });
         if (snap.exists) {
             const sections = snap.data().sections || {};
             Object.entries(sections).forEach(([id, checked]) => {
@@ -1947,7 +1948,8 @@ async function k8sLoadProgress(uid) {
             });
         }
     } catch(e) { console.error('Load progress error:', e); }
-    updateProgress();
+    // Update UI only — do NOT write to Firestore on page load
+    updateProgress(true);
 }
 
 document.getElementById('k8s-google-btn').addEventListener('click', function() {
