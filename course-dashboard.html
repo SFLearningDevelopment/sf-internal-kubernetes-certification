@@ -891,10 +891,24 @@ const _k8sDb   = firebase.firestore(window._k8sApp);
 
 async function k8sLoadProgress(uid) {
     try {
-        const snap = await _k8sDb.collection('k8s_progress').doc(uid).get();
-        _k8sProgress = snap.exists ? snap.data() : { sections: {}, lastModule: '1', lastSection: '1.1' };
+        // Force server read so we always get the latest saved progress
+        const snap = await _k8sDb.collection('k8s_progress').doc(uid).get({ source: 'server' });
+        if (snap.exists) {
+            const data = snap.data();
+            // Ensure sections is always a proper nested object
+            _k8sProgress = { ...data, sections: data.sections || {} };
+        } else {
+            _k8sProgress = { sections: {}, lastModule: '1', lastSection: '1.1' };
+        }
     } catch(e) {
-        _k8sProgress = { sections: {}, lastModule: '1', lastSection: '1.1' };
+        // Server unreachable — fall back to cache
+        try {
+            const snap = await _k8sDb.collection('k8s_progress').doc(uid).get();
+            _k8sProgress = snap.exists ? { ...snap.data(), sections: snap.data().sections || {} }
+                                       : { sections: {}, lastModule: '1', lastSection: '1.1' };
+        } catch(e2) {
+            _k8sProgress = { sections: {}, lastModule: '1', lastSection: '1.1' };
+        }
     }
     updateDashboard();
 }
