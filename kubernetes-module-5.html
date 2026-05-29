@@ -686,7 +686,7 @@ Terminating         → Finalizers, Grace period
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.1" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.1" onchange="handleCheckboxChange(this)">
                         <label for="check-5.1">✅ Mark section 5.1 as completed</label>
                     </div>
                 </div>
@@ -791,7 +791,7 @@ kubectl logs logger --timestamps --tail=5
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.2" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.2" onchange="handleCheckboxChange(this)">
                         <label for="check-5.2">✅ Mark section 5.2 as completed</label>
                     </div>
                 </div>
@@ -893,7 +893,7 @@ kubectl describe pod broken
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.3" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.3" onchange="handleCheckboxChange(this)">
                         <label for="check-5.3">✅ Mark section 5.3 as completed</label>
                     </div>
                 </div>
@@ -1014,7 +1014,7 @@ exit
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.4" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.4" onchange="handleCheckboxChange(this)">
                         <label for="check-5.4">✅ Mark section 5.4 as completed</label>
                     </div>
                 </div>
@@ -1060,7 +1060,7 @@ kubectl get events --all-namespaces
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.5" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.5" onchange="handleCheckboxChange(this)">
                         <label for="check-5.5">✅ Mark section 5.5 as completed</label>
                     </div>
                 </div>
@@ -1128,7 +1128,7 @@ kubectl get pod my-pod -o yaml | grep -A 10 env
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.6" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.6" onchange="handleCheckboxChange(this)">
                         <label for="check-5.6">✅ Mark section 5.6 as completed</label>
                     </div>
                 </div>
@@ -1190,7 +1190,7 @@ docker pull <image-name>
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.7" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.7" onchange="handleCheckboxChange(this)">
                         <label for="check-5.7">✅ Mark section 5.7 as completed</label>
                     </div>
                 </div>
@@ -1244,7 +1244,7 @@ kubectl describe nodes
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.8" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.8" onchange="handleCheckboxChange(this)">
                         <label for="check-5.8">✅ Mark section 5.8 as completed</label>
                     </div>
                 </div>
@@ -1288,7 +1288,7 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.9" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.9" onchange="handleCheckboxChange(this)">
                         <label for="check-5.9">✅ Mark section 5.9 as completed</label>
                     </div>
                 </div>
@@ -1345,7 +1345,7 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-5.10" onchange="updateProgress()">
+                        <input type="checkbox" id="check-5.10" onchange="handleCheckboxChange(this)">
                         <label for="check-5.10">✅ Mark section 5.10 as completed</label>
                     </div>
                 </div>
@@ -1464,9 +1464,11 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
     </div>
 
     <script>
-        let _currentUid = null;
         const totalSections = 10;
         const moduleNum = 5;
+        let _currentUid = null;
+        const MODULE_KEY = 'k8s_m5';
+        let _completed = [];
 
         function updateProgress(skipSave) {
             const checkboxes = document.querySelectorAll('.section-complete input[type="checkbox"]');
@@ -1477,23 +1479,7 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
             document.getElementById('progressLabel').textContent = `Progress: ${completed}/${totalSections}`;
             document.getElementById('progressPercent').textContent = percentage + '%';
 
-            // Save progress to Firestore (skipped on page load)
-            if (!skipSave && _currentUid) {
-                const fsUpdates = { lastModule: moduleNum.toString(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-                checkboxes.forEach(cb => { fsUpdates['sections.' + cb.id] = cb.checked; });
-                const unchecked = Array.from(checkboxes).find(cb => !cb.checked);
-                if (unchecked) {
-                    const section = unchecked.closest('.accordion-item').dataset.section;
-                    fsUpdates.lastSection = section;
-                }
-                _k8sDb.collection('k8s_progress').doc(_currentUid).update(fsUpdates).catch(function() {
-                    // Document doesn't exist yet — build proper nested structure for set()
-                    var initData = { lastModule: fsUpdates.lastModule, updatedAt: fsUpdates.updatedAt, sections: {} };
-                    if (fsUpdates.lastSection) initData.lastSection = fsUpdates.lastSection;
-                    checkboxes.forEach(function(cb) { initData.sections[cb.id] = cb.checked; });
-                    _k8sDb.collection('k8s_progress').doc(_currentUid).set(initData).catch(console.error);
-                });
-            }
+            // Firestore writes handled by handleCheckboxChange() — not here
 
             updateAccordionStyles();
             updateQuizAccess(completed);
@@ -1598,7 +1584,6 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// ── Kubernetes course — Firebase Auth + Firestore ─────────────────────────
 const _K8S_CONFIG = {
     apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
     authDomain: "sfcertification-grafana.firebaseapp.com",
@@ -1613,19 +1598,43 @@ const _k8sDb   = firebase.firestore(window._k8sApp);
 
 async function k8sLoadProgress(uid) {
     try {
-        // Force server read to always get latest progress
-        const snap = await _k8sDb.collection('k8s_progress').doc(uid).get({ source: 'server' });
+        const snap = await _k8sDb.collection('progress').doc(uid).get({ source: 'server' });
         if (snap.exists) {
-            const sections = snap.data().sections || {};
-            Object.entries(sections).forEach(([id, checked]) => {
-                const checkbox = document.getElementById(id);
-                if (checkbox) checkbox.checked = checked;
+            _completed = snap.data()[MODULE_KEY] || [];
+            _completed.forEach(function(cbId) {
+                const cb = document.getElementById(cbId);
+                if (cb) cb.checked = true;
             });
+        } else {
+            _completed = [];
         }
     } catch(e) { console.error('Load progress error:', e); }
-    // Update UI only — do NOT write to Firestore on page load
     updateProgress(true);
 }
+
+async function markSection(cbId, isChecked) {
+    if (!_currentUid) return;
+    const ref = _k8sDb.collection('progress').doc(_currentUid);
+    const fieldValue = isChecked
+        ? firebase.firestore.FieldValue.arrayUnion(cbId)
+        : firebase.firestore.FieldValue.arrayRemove(cbId);
+    try {
+        await ref.update({ [MODULE_KEY]: fieldValue, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch(e) {
+        await ref.set({ [MODULE_KEY]: isChecked ? [cbId] : [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() })
+                 .catch(console.error);
+    }
+}
+
+window.handleCheckboxChange = function(checkbox) {
+    if (checkbox.checked) {
+        if (!_completed.includes(checkbox.id)) _completed.push(checkbox.id);
+    } else {
+        _completed = _completed.filter(function(id) { return id !== checkbox.id; });
+    }
+    updateProgress(true);
+    markSection(checkbox.id, checkbox.checked);
+};
 
 document.getElementById('k8s-google-btn').addEventListener('click', function() {
     _k8sAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e) {
