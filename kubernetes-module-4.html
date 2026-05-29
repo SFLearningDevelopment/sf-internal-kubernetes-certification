@@ -710,7 +710,7 @@ kubectl logs cache-pod -c reader
                     </div>
 
                     <div class="section-complete">
-                        <input type="checkbox" id="check-4.1" onchange="updateProgress()">
+                        <input type="checkbox" id="check-4.1" onchange="handleCheckboxChange(this)">
                         <label for="check-4.1">✅ Mark section 4.1 as completed</label>
                     </div>
                 </div>
@@ -879,7 +879,7 @@ kubectl logs cache-pod -c reader
                     </div>
         
                     <div class="section-complete">
-                        <input type="checkbox" id="check-4.2" onchange="updateProgress()">
+                        <input type="checkbox" id="check-4.2" onchange="handleCheckboxChange(this)">
                         <label for="check-4.2">✅ Mark section 4.2 as completed</label>
                     </div>
                 </div>
@@ -1091,7 +1091,7 @@ kubectl logs cache-pod -c reader
                     </div>
         
                     <div class="section-complete">
-                        <input type="checkbox" id="check-4.3" onchange="updateProgress()">
+                        <input type="checkbox" id="check-4.3" onchange="handleCheckboxChange(this)">
                         <label for="check-4.3">✅ Mark section 4.3 as completed</label>
                     </div>
                 </div>
@@ -1333,7 +1333,7 @@ kubectl logs cache-pod -c reader
                     </div>
         
                     <div class="section-complete">
-                        <input type="checkbox" id="check-4.4" onchange="updateProgress()">
+                        <input type="checkbox" id="check-4.4" onchange="handleCheckboxChange(this)">
                         <label for="check-4.4">✅ Mark section 4.4 as completed</label>
                     </div>
                 </div>
@@ -1415,9 +1415,11 @@ kubectl logs cache-pod -c reader
     </div>
 
     <script>
-        let _currentUid = null;
         const totalSections = 4;
         const moduleNum = 4;
+        let _currentUid = null;
+        const MODULE_KEY = 'k8s_m4';
+        let _completed = [];
 
         function updateProgress(skipSave) {
             const checkboxes = document.querySelectorAll('.section-complete input[type="checkbox"]');
@@ -1428,23 +1430,7 @@ kubectl logs cache-pod -c reader
             document.getElementById('progressLabel').textContent = `Progress: ${completed}/${totalSections}`;
             document.getElementById('progressPercent').textContent = percentage + '%';
 
-            // Save progress to Firestore (skipped on page load)
-            if (!skipSave && _currentUid) {
-                const fsUpdates = { lastModule: moduleNum.toString(), updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-                checkboxes.forEach(cb => { fsUpdates['sections.' + cb.id] = cb.checked; });
-                const unchecked = Array.from(checkboxes).find(cb => !cb.checked);
-                if (unchecked) {
-                    const section = unchecked.closest('.accordion-item').dataset.section;
-                    fsUpdates.lastSection = section;
-                }
-                _k8sDb.collection('k8s_progress').doc(_currentUid).update(fsUpdates).catch(function() {
-                    // Document doesn't exist yet — build proper nested structure for set()
-                    var initData = { lastModule: fsUpdates.lastModule, updatedAt: fsUpdates.updatedAt, sections: {} };
-                    if (fsUpdates.lastSection) initData.lastSection = fsUpdates.lastSection;
-                    checkboxes.forEach(function(cb) { initData.sections[cb.id] = cb.checked; });
-                    _k8sDb.collection('k8s_progress').doc(_currentUid).set(initData).catch(console.error);
-                });
-            }
+            // Firestore writes handled by handleCheckboxChange() — not here
 
             updateAccordionStyles();
             updateQuizAccess(completed);
@@ -1542,7 +1528,6 @@ kubectl logs cache-pod -c reader
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script>
-// ── Kubernetes course — Firebase Auth + Firestore ─────────────────────────
 const _K8S_CONFIG = {
     apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
     authDomain: "sfcertification-grafana.firebaseapp.com",
@@ -1557,19 +1542,43 @@ const _k8sDb   = firebase.firestore(window._k8sApp);
 
 async function k8sLoadProgress(uid) {
     try {
-        // Force server read to always get latest progress
-        const snap = await _k8sDb.collection('k8s_progress').doc(uid).get({ source: 'server' });
+        const snap = await _k8sDb.collection('progress').doc(uid).get({ source: 'server' });
         if (snap.exists) {
-            const sections = snap.data().sections || {};
-            Object.entries(sections).forEach(([id, checked]) => {
-                const checkbox = document.getElementById(id);
-                if (checkbox) checkbox.checked = checked;
+            _completed = snap.data()[MODULE_KEY] || [];
+            _completed.forEach(function(cbId) {
+                const cb = document.getElementById(cbId);
+                if (cb) cb.checked = true;
             });
+        } else {
+            _completed = [];
         }
     } catch(e) { console.error('Load progress error:', e); }
-    // Update UI only — do NOT write to Firestore on page load
     updateProgress(true);
 }
+
+async function markSection(cbId, isChecked) {
+    if (!_currentUid) return;
+    const ref = _k8sDb.collection('progress').doc(_currentUid);
+    const fieldValue = isChecked
+        ? firebase.firestore.FieldValue.arrayUnion(cbId)
+        : firebase.firestore.FieldValue.arrayRemove(cbId);
+    try {
+        await ref.update({ [MODULE_KEY]: fieldValue, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    } catch(e) {
+        await ref.set({ [MODULE_KEY]: isChecked ? [cbId] : [], updatedAt: firebase.firestore.FieldValue.serverTimestamp() })
+                 .catch(console.error);
+    }
+}
+
+window.handleCheckboxChange = function(checkbox) {
+    if (checkbox.checked) {
+        if (!_completed.includes(checkbox.id)) _completed.push(checkbox.id);
+    } else {
+        _completed = _completed.filter(function(id) { return id !== checkbox.id; });
+    }
+    updateProgress(true);
+    markSection(checkbox.id, checkbox.checked);
+};
 
 document.getElementById('k8s-google-btn').addEventListener('click', function() {
     _k8sAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e) {
