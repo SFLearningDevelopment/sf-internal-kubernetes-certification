@@ -766,7 +766,7 @@
             5: { sections: 10, name: "Troubleshooting" }
         };
         function updateDashboard() {
-            const progress = (_k8sProgress && _k8sProgress.sections) ? _k8sProgress.sections : {};
+            // Read progress from array format — same as Grafana (k8s_m1, k8s_m2, ...)
             let totalCompleted = 0;
             const totalSections = 40;
         
@@ -774,10 +774,13 @@
             Object.keys(moduleStructure).forEach(moduleNum => {
                 const module = moduleStructure[moduleNum];
                 let moduleCompleted = 0;
+                const moduleKey = `k8s_m${moduleNum}`;
+                const completedIds = (_k8sProgress && Array.isArray(_k8sProgress[moduleKey]))
+                    ? _k8sProgress[moduleKey] : [];
         
                 for (let i = 1; i <= module.sections; i++) {
                     const key = `check-${moduleNum}.${i}`;
-                    if (progress[key]) {
+                    if (completedIds.includes(key)) {
                         moduleCompleted++;
                         totalCompleted++;
                     }
@@ -825,37 +828,30 @@
         
             // Update resume button
             const resumeBtn = document.getElementById('resumeBtn');
-            const lastModule = (_k8sProgress && _k8sProgress.lastModule) ? _k8sProgress.lastModule : '1';
-            const lastSection = (_k8sProgress && _k8sProgress.lastSection) ? _k8sProgress.lastSection : '1.1';
-            
             if (totalCompleted === 0) {
                 resumeBtn.textContent = '🚀 Start Learning';
             } else if (totalCompleted === totalSections) {
                 resumeBtn.textContent = '🎉 Course Complete - Take Test';
                 resumeBtn.onclick = () => window.location.href = 'kubernetes-basic-test.html?v=1';
             } else {
-                resumeBtn.textContent = `📖 Resume: Module ${lastModule}, Section ${lastSection}`;
+                resumeBtn.textContent = '📖 Resume Learning';
             }
         }
         function resumeLearning() {
-            const lastModule = (_k8sProgress && _k8sProgress.lastModule) ? _k8sProgress.lastModule : '1';
-            const totalCompleted = (_k8sProgress && _k8sProgress.sections) ? _k8sProgress.sections : {};
-            
-            // Version map for each module
-            const moduleVersions = {
-                '1': 2,  // Module 1 updated
-                '2': 1,
-                '3': 1,
-                '4': 1,
-                '5': 1
-            };
-            
-            if (Object.values(totalCompleted).filter(v => v === true).length === 40) {
-                window.location.href = 'kubernetes-basic-test.html?v=1';
-            } else {
-                const version = moduleVersions[lastModule] || 1;
-                window.location.href = `kubernetes-module-${lastModule}.html?v=${version}`;
+            const moduleVersions = { '1': 2, '2': 1, '3': 1, '4': 1, '5': 1 };
+            const moduleTotals  = { '1': 10, '2': 8, '3': 8, '4': 4, '5': 10 };
+            // Find first module that isn't fully complete — same pattern as Grafana
+            for (let m = 1; m <= 5; m++) {
+                const key  = `k8s_m${m}`;
+                const done = (_k8sProgress && Array.isArray(_k8sProgress[key]))
+                    ? _k8sProgress[key].length : 0;
+                if (done < moduleTotals[m.toString()]) {
+                    const ver = moduleVersions[m.toString()] || 1;
+                    window.location.href = `kubernetes-module-${m}.html?v=${ver}`;
+                    return;
+                }
             }
+            window.location.href = 'kubernetes-basic-test.html?v=1';
         }
         const moduleVersions = { '1': 2, '2': 1, '3': 1, '4': 1, '5': 1 };
         function navigateToModule(num) {
@@ -903,23 +899,16 @@ const _k8sDb   = firebase.firestore(window._k8sApp);
 
 async function k8sLoadProgress(uid) {
     try {
-        // Force server read so we always get the latest saved progress
-        const snap = await _k8sDb.collection('k8s_progress').doc(uid).get({ source: 'server' });
-        if (snap.exists) {
-            const data = snap.data();
-            // Ensure sections is always a proper nested object
-            _k8sProgress = { ...data, sections: data.sections || {} };
-        } else {
-            _k8sProgress = { sections: {}, lastModule: '1', lastSection: '1.1' };
-        }
+        // Force server read — same collection as Grafana (progress/{uid})
+        const snap = await _k8sDb.collection('progress').doc(uid).get({ source: 'server' });
+        _k8sProgress = snap.exists ? snap.data() : {};
     } catch(e) {
         // Server unreachable — fall back to cache
         try {
-            const snap = await _k8sDb.collection('k8s_progress').doc(uid).get();
-            _k8sProgress = snap.exists ? { ...snap.data(), sections: snap.data().sections || {} }
-                                       : { sections: {}, lastModule: '1', lastSection: '1.1' };
+            const snap = await _k8sDb.collection('progress').doc(uid).get();
+            _k8sProgress = snap.exists ? snap.data() : {};
         } catch(e2) {
-            _k8sProgress = { sections: {}, lastModule: '1', lastSection: '1.1' };
+            _k8sProgress = {};
         }
     }
     updateDashboard();
