@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
+<meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none">
+<meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
+<title>[Reviewer] Module 4: Storage</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--bg:#eef2f7;--bg2:#ffffff;--bg3:#f0f4f9;--border:#d0dae8;--text:#1a2332;--text-dim:#4a5568;--text-dimmer:#8fa3bc;--blue:#1a6eb5;--blue-light:#e8f1fb;--blue-mid:#b8d0ed;--green:#1a6b3a;--green-light:#e8f5ed;--coral:#c0392b;--coral-light:#fdf0ee;--radius:12px;}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Merriweather Sans',sans-serif;font-size:15px;line-height:1.6;}
+  a{color:var(--blue);text-decoration:none;}
+  .reviewer-topbanner{background:#f5f0ff;border-bottom:2px solid #c4bdf0;padding:9px 40px;font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;display:flex;align-items:center;gap:8px;}
+  .sf-signin-overlay{position:fixed;inset:0;background:rgba(20,30,50,.82);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(3px);}
+  .sf-signin-overlay.hidden{display:none;}
+  .sf-signin-card{background:#fff;border-radius:16px;padding:36px 40px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center;}
+  .sf-signin-logo{font-size:32px;margin-bottom:12px;}
+  .sf-signin-title{font-size:17px;font-weight:700;color:#1a2332;margin-bottom:8px;}
+  .sf-signin-sub{font-size:13px;color:#4a5568;line-height:1.6;margin-bottom:24px;}
+  .sf-google-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #d0dae8;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;color:#1a2332;width:100%;justify-content:center;transition:box-shadow .15s;}
+  .sf-google-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  .sf-google-btn img{width:20px;height:20px;}
+  .sf-signin-divider{font-size:11px;color:#8fa3bc;text-align:center;margin:14px 0 10px;display:flex;align-items:center;gap:8px;font-family:'Source Code Pro',monospace;}
+  .sf-signin-divider::before,.sf-signin-divider::after{content:'';flex:1;height:1px;background:#d0dae8;}
+  .sf-fallback-input{width:100%;padding:10px 12px;border:1.5px solid #d0dae8;border-radius:8px;font-size:14px;font-family:'Merriweather Sans',sans-serif;color:#1a2332;margin-bottom:10px;outline:none;}
+  .sf-fallback-input:focus{border-color:var(--blue);}
+  .sf-fallback-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+  .sf-signin-error{margin-top:14px;font-size:12.5px;color:#c0392b;font-family:'Source Code Pro',monospace;background:#fdf0ee;border:1px solid #f0b8b2;border-radius:6px;padding:10px 12px;display:none;text-align:left;}
+  .sf-signin-error.visible{display:block;}
+  .sf-signed-in-bar{background:#e8f5ed;border-bottom:1px solid #a3d4b8;padding:7px 40px;font-size:11px;font-family:'Source Code Pro',monospace;color:var(--green);display:flex;align-items:center;justify-content:space-between;}
+  .sf-signed-in-bar.hidden{display:none;}
+  .sf-signout-btn{font-size:10px;color:var(--blue);background:none;border:1px solid #b8d0ed;border-radius:4px;padding:2px 8px;cursor:pointer;}
+  .topnav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 40px;height:48px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dimmer);font-family:'Source Code Pro',monospace;position:sticky;top:0;z-index:100;}
+  .topnav a{color:var(--blue);}
+  .sep{margin:0 4px;color:var(--text-dimmer);}
+  .main{max-width:860px;margin:0 auto;padding:36px 40px 80px;}
+  .module-hero{margin-bottom:28px;}
+  .hero-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:8px;font-family:'Source Code Pro',monospace;}
+  .module-hero h1{font-size:clamp(18px,2.5vw,26px);font-weight:700;color:var(--text);line-height:1.25;}
+  .section-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+  .section-header{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .section-header:hover{background:var(--bg3);}
+  .section-num{font-size:10px;font-weight:700;color:var(--text-dimmer);min-width:24px;font-family:'Source Code Pro',monospace;}
+  .section-title{font-weight:600;font-size:14px;flex:1;color:var(--text);}
+  .section-toggle{font-size:11px;color:var(--text-dimmer);transition:transform .2s;}
+  .section-toggle.open{transform:rotate(180deg);}
+  .section-body{display:none;padding:20px 22px 14px;border-top:1px solid var(--border);font-size:14px;color:var(--text-dim);line-height:1.75;}
+  .section-body.open{display:block;}
+  .section-body h3{font-size:15px;font-weight:700;color:var(--text);margin:16px 0 8px;}
+  .section-body p{margin-bottom:10px;}
+  .section-body ul,.section-body ol{margin:8px 0 12px 20px;}
+  .section-body li{margin-bottom:4px;}
+  .section-body code{font-family:'Source Code Pro',monospace;font-size:12.5px;background:var(--bg3);border:1px solid var(--border);padding:1px 5px;border-radius:4px;color:#0f4a7a;}
+  .section-body pre{background:#1e2433;color:#cdd6f4;padding:16px;border-radius:8px;font-size:12.5px;font-family:'Source Code Pro',monospace;overflow-x:auto;margin:12px 0;position:relative;}
+  .copy-btn,.copy-btn-small{position:absolute;top:8px;right:8px;background:#252b3b;border:1px solid #3a4155;color:#7a8ab0;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Source Code Pro',monospace;}
+  .copy-btn:hover,.copy-btn-small:hover{color:#cdd6f4;}
+  .reviewer-bar{background:#fff8e6;border:1px solid #f0d4a0;border-left:3px solid #92600a;border-radius:8px;padding:10px 16px;margin:18px 0 6px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92600a;font-family:'Source Code Pro',monospace;}
+  .reviewer-bar input[type="checkbox"]{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--green);}
+  .reviewer-bar label{cursor:pointer;font-weight:600;user-select:none;}
+  .reviewer-bar.checked{background:var(--green-light);border-color:#a3d4b8;border-left-color:var(--green);color:var(--green);}
+  .reviewer-panel{background:#f5f0ff;border:1px solid #c4bdf0;border-top:3px solid #5b4fcf;border-radius:12px;padding:24px 28px;margin:32px 0;}
+  .reviewer-panel-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.18em;text-transform:uppercase;color:#5b4fcf;font-weight:600;margin-bottom:16px;}
+  .reviewer-q-text{font-size:14px;font-weight:600;color:#1a2332;line-height:1.65;margin-bottom:14px;}
+  .reviewer-options{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .reviewer-option{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid #d0dae8;border-radius:8px;cursor:pointer;font-size:13.5px;color:#4a5568;line-height:1.5;background:#fff;transition:background .12s,border-color .12s;}
+  .reviewer-option:hover{background:#f0f4f9;border-color:#b8d0ed;}
+  .reviewer-option.selected{background:#e8f1fb;border-color:var(--blue);color:#1a2332;}
+  .reviewer-option.correct{background:var(--green-light);border-color:#a3d4b8;color:var(--green);}
+  .reviewer-option.wrong{background:var(--coral-light);border-color:#f0b8b2;color:var(--coral);}
+  .reviewer-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#8fa3bc;flex-shrink:0;margin-top:1px;}
+  .reviewer-reveal{font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;margin-bottom:14px;display:block;}
+  .reviewer-explanation{font-size:13px;color:#4a5568;line-height:1.7;padding:12px 14px;background:#eef2f7;border-radius:8px;margin-bottom:16px;display:none;}
+  .reviewer-explanation.visible{display:block;}
+  .reviewer-exp-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+  .reviewer-exp-label.correct{color:var(--green);}
+  .reviewer-exp-label.wrong{color:var(--coral);}
+  .reviewer-comment-label{font-size:11px;font-family:'Source Code Pro',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8fa3bc;font-weight:600;margin-bottom:6px;}
+  .reviewer-comment{width:100%;min-height:80px;padding:10px 12px;border:1px solid #c4bdf0;border-radius:8px;font-family:'Merriweather Sans',sans-serif;font-size:13.5px;color:#1a2332;background:#fff;resize:vertical;line-height:1.6;}
+  .reviewer-comment:focus{outline:none;border-color:#5b4fcf;}
+  .reviewer-save-note{font-size:11px;font-family:'Source Code Pro',monospace;color:#8fa3bc;margin-top:6px;}
+  .rev-complete-wrap{margin:28px 0 0;}
+  .rev-complete-bar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:8px;font-size:13.5px;font-family:'Source Code Pro',monospace;font-weight:600;border:1.5px solid var(--border);background:var(--bg3);color:var(--text-dimmer);transition:all .2s;}
+  .rev-complete-bar.disabled{opacity:.6;cursor:not-allowed;}
+  .rev-complete-bar.ready{background:#fff8e6;border-color:#f0d4a0;border-left:3px solid #92600a;color:#92600a;cursor:pointer;}
+  .rev-complete-bar.done{background:var(--green-light);border-color:#a3d4b8;border-left:3px solid var(--green);color:var(--green);cursor:default;}
+  .rev-complete-bar input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--green);}
+  .rev-complete-bar.disabled input{cursor:not-allowed;}
+  .rev-complete-hint{font-size:11px;font-family:'Source Code Pro',monospace;color:var(--text-dimmer);margin-top:6px;min-height:16px;}
+  .bottom-nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0 0;border-top:1px solid var(--border);margin-top:40px;}
+  .nav-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-family:'Source Code Pro',monospace;color:var(--blue);text-decoration:none;padding:10px 18px;border:1px solid var(--blue-mid);border-radius:8px;background:var(--blue-light);font-weight:600;}
+  .nav-btn.secondary{background:var(--bg2);color:var(--text-dim);border-color:var(--border);}
+  .nav-btn:hover{background:var(--blue-mid);}
+</style>
+<style>
+.section-questions{margin-top:16px;border-top:2px solid #e2e8f0;padding-top:16px;}
+.section-question-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.section-question-item.answered-correct{border-color:#16a34a;background:#f0fdf4;}
+.section-question-item.answered-wrong{border-color:#dc2626;background:#fef2f2;}
+.sq-text{font-size:14px;font-weight:600;color:#0f172a;margin-bottom:10px;}
+.sq-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.sq-option{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s;}
+.sq-option:hover{border-color:#2563eb;background:#eff6ff;}
+.sq-option.selected{border-color:#2563eb;background:#eff6ff;}
+.sq-option.correct{border-color:#16a34a;background:#f0fdf4;color:#16a34a;font-weight:600;}
+.sq-option.wrong{border-color:#dc2626;background:#fef2f2;color:#dc2626;}
+.sq-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#94a3b8;min-width:18px;}
+.sq-feedback{font-size:12px;font-weight:700;padding:4px 0;}
+.sq-feedback.correct{color:#16a34a;}
+.sq-feedback.wrong{color:#dc2626;}
+.sq-check-btn{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;}
+.sq-check-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.section-complete-btn{display:flex;align-items:center;gap:8px;background:transparent;border:2px solid #e2e8f0;color:#94a3b8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:not-allowed;margin-top:14px;transition:all .2s;}
+.section-complete-btn.unlocked{border-color:#16a34a;color:#16a34a;cursor:pointer;background:#f0fdf4;}
+.section-complete-btn.done{border-color:#16a34a;background:#16a34a;color:#fff;cursor:default;}
+.module-complete-wrap{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:28px;text-align:center;}
+.module-complete-btn{background:#16a34a;color:#fff;border:none;border-radius:10px;padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;opacity:0.4;pointer-events:none;transition:all .2s;}
+.module-complete-btn.unlocked{opacity:1;pointer-events:auto;}
+.module-complete-hint{font-size:13px;color:#64748b;margin-top:8px;}
+.reviewer-comment-wrap{margin-top:20px;}
+.reviewer-comment-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:6px;}
+.reviewer-comment{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;}
+.reviewer-comment:focus{border-color:#2563eb;}
+</style>
+</head>
+<body>
+<div class="sf-signin-overlay" id="sfSigninOverlay">
+  <div class="sf-signin-card">
+    <div class="sf-signin-logo">🔐</div>
+    <div class="sf-signin-title">Sign in to save your progress</div>
+    <div class="sf-signin-sub">Sign in with your SourceFuse Gmail. Review progress, checkboxes and question attempts are saved and restored across devices.</div>
+    <button class="sf-google-btn" id="sfGoogleSignInBtn"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Sign in with Google</button>
+    <div class="sf-signin-divider">or</div>
+    <input type="text" class="sf-fallback-input" id="sfEmailInput" placeholder="your.name@sourcefuse.com" autocomplete="off" inputmode="email">
+    <input type="password" class="sf-fallback-input" id="sfPasswordInput" placeholder="Password (test users only)" autocomplete="off" style="margin-top:6px;">
+    <button class="sf-fallback-btn" id="sfEmailSignInBtn">Continue with email</button>
+    <div class="sf-signin-error" id="sfSigninError"></div>
+  </div>
+</div>
+<div class="sf-signed-in-bar hidden" id="sfSignedInBar"><span id="sfSignedInEmail">Signed in as …</span><button class="sf-signout-btn" id="sfSignoutLink">Sign out</button></div>
+<div class="reviewer-topbanner"><span>👁</span><strong>Reviewer Mode</strong> — Module 4: Storage</div>
+<div class="main">
+  <div class="module-hero">
+    <div class="hero-eyebrow">Module 4 of 5 · Reviewer Mode</div>
+    <h1>Storage</h1>
+    <p style="color:#64748b;font-size:14px;margin-top:8px;">Review each section carefully and answer all questions correctly to mark sections complete. Once all sections are complete, submit your module review.</p>
+  </div>
+  <div id="sections-container"></div>
+  <div class="module-complete-wrap">
+    <div class="module-complete-hint" id="module-complete-hint">Complete all sections to unlock</div>
+    <div class="reviewer-comment-wrap">
+      <div class="reviewer-comment-label">Module Review Notes</div>
+      <textarea class="reviewer-comment" id="module-comment" placeholder="Add your overall notes for this module…"></textarea>
+    </div>
+    <button class="module-complete-btn" id="module-complete-btn" onclick="submitModuleComplete()">✓ Mark Module 4 as Reviewed</button>
+  </div>
+</div>
+<script>
+function sfShowError(msg){const el=document.getElementById('sfSigninError');if(el){el.textContent=msg;el.classList.add('visible');}}
+function sfHideOverlay(user){
+  window.sfReviewerEmail=user.email||user;window.sfReviewerUid=user.uid||'email_'+btoa(window.sfReviewerEmail).replace(/=/g,'');
+  const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');
+  const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');
+  if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+window.sfReviewerEmail;
+  if(typeof sfInitSession==='function')sfInitSession();
+  if(window._sfFirebaseReady&&typeof window.sfDb!=='undefined'&&typeof sfFetchAndMerge==='function')sfFetchAndMerge();
+}
+const SF_TEST_USERS={'ravjv2013@gmail.com':'SF-Test-2026!','noushin.khan7official@gmail.com':'SF-Test-2026!'};
+function sfSignInWithEmail(){const emailEl=document.getElementById('sfEmailInput');if(!emailEl)return;const email=emailEl.value.trim().toLowerCase();const pwdEl=document.getElementById('sfPasswordInput');const pwd=pwdEl?pwdEl.value:'';if(!email||!email.includes('@')){sfShowError('Please enter a valid email address.');return;}if(SF_TEST_USERS[email]){if(SF_TEST_USERS[email]!==pwd){sfShowError('Invalid test credentials.');return;}sfHideOverlay(email);return;}if(!email.endsWith('@sourcefuse.com')){sfShowError('Please use your @sourcefuse.com email address.');return;}sfHideOverlay(email);}
+async function sfSignInWithGoogle(){if(typeof firebase==='undefined'||!window._sfFirebaseReady){sfShowError('Popup blocked. Please enter your SF email below.');return;}const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({hd:'sourcefuse.com',prompt:'select_account'});const t=setTimeout(()=>sfShowError('Popup blocked. Please enter your SF email below.'),30000);try{const r=await firebase.auth().signInWithPopup(provider);clearTimeout(t);sfHideOverlay(r.user);}catch(e){clearTimeout(t);sfShowError('Popup blocked. Please enter your SF email below.');}}
+function sfSignOut(){window.sfReviewerEmail=null;window.sfReviewerUid=null;const bar=document.getElementById('sfSignedInBar');const ov=document.getElementById('sfSigninOverlay');if(bar)bar.classList.add('hidden');if(ov)ov.classList.remove('hidden');if(typeof firebase!=='undefined'&&window._sfFirebaseReady)firebase.auth().signOut();}
+document.addEventListener('DOMContentLoaded',function(){const gb=document.getElementById('sfGoogleSignInBtn');const eb=document.getElementById('sfEmailSignInBtn');const so=document.getElementById('sfSignoutLink');if(gb)gb.addEventListener('click',sfSignInWithGoogle);if(eb)eb.addEventListener('click',sfSignInWithEmail);if(so)so.addEventListener('click',sfSignOut);});
+</script>
+<script>
+const HUB_URL = 'index.html';
+const SECTION_COUNT = 33551;
+const SECTION_QUESTIONS = {"1":[{"q":"What problem do Volumes solve?","o":["They schedule pods to nodes","They provide storage that persists beyond container restarts, since container filesystems are ephemeral","They load-balance network traffic","They authenticate API requests"],"c":1,"exp":"Container filesystems are ephemeral (lost on restart); volumes persist data across restarts and can be shared between containers in a pod."},{"q":"What characterizes an emptyDir volume?","o":["It persists forever, independent of the pod","It is created when the pod is assigned to a node and deleted when the pod is removed — good for scratch space","It mounts cloud object storage","It is read-only"],"c":1,"exp":"emptyDir is temporary storage tied to the pod’s lifetime on a node — ideal for scratch space."}],"2":[{"q":"What is a PersistentVolume (PV)?","o":["A request for storage made by a user","A piece of cluster storage provisioned by an admin or dynamically, existing independently of pods","A temporary scratch directory","A network routing rule"],"c":1,"exp":"A PV is a cluster storage resource (like a node) that exists independently of any pod, with its own lifecycle and reclaim policy."},{"q":"Is a PersistentVolume namespaced or cluster-scoped?","o":["Namespaced","Cluster-scoped","Pod-scoped","Node-scoped"],"c":1,"exp":"A PV is a cluster-scoped resource, unlike a PVC which is namespaced."}],"3":[{"q":"What is a PersistentVolumeClaim (PVC)?","o":["A request for storage by a user that consumes PV resources","A cluster-wide storage device","A scheduling rule","A network policy"],"c":0,"exp":"A PVC is a user’s request for storage; like pods consume node resources, PVCs consume PV resources."},{"q":"How does a pod use persistent storage?","o":["It mounts the PV directly by name","It references a PVC, which Kubernetes binds to a matching PV","It writes straight to etcd","It uses a Service"],"c":1,"exp":"Pods reference PVCs; Kubernetes binds the PVC to a matching PV (or triggers dynamic provisioning)."}],"4":[{"q":"What does a StorageClass enable?","o":["Manual creation of every PV by an admin","Dynamic provisioning — automatically creating PVs when PVCs are created","Network routing between pods","Pod scheduling by labels"],"c":1,"exp":"A StorageClass describes a class of storage and enables dynamic provisioning, auto-creating PVs as PVCs request them."},{"q":"Why are different StorageClasses useful?","o":["They let you offer different performance/cost tiers (e.g. fast-ssd vs standard)","They replace the need for PVCs","They control network ingress","They schedule pods to specific nodes"],"c":0,"exp":"StorageClasses define tiers (e.g. \"fast-ssd\", \"standard\") so users can request the performance/cost level they need."}]};
+
+function submitModuleComplete() {
+  const btn = document.getElementById('module-complete-btn');
+  if (!btn.classList.contains('unlocked')) return;
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const comment = document.getElementById('module-comment')?.value || '';
+  const completedAt = new Date().toISOString();
+  const completedState = { completed: true, comment, completedAt, sectionCount: SECTION_COUNT };
+  revSave(completedState);
+  if (typeof sfWrite === 'function') {
+    sfWrite(completedState);
+  }
+  setTimeout(() => { window.location.href = HUB_URL; }, 1200);
+}
+</script>
+<script>
+const REV_KEY='reviewer_'+window.location.pathname.replace(/[^a-z0-9]/gi,'_');
+const BADGES={foundation:'Foundation',essential:'Essential',important:'Important'};
+const SECTIONS=[
+  {
+    "id": 1,
+    "title": "Volumes — Pod Storage",
+    "badge": "Foundation",
+    "content": "<h3>📘 What are Volumes?</h3>\n                    <p>Volumes provide <strong>storage to containers</strong> in a Pod. Unlike container filesystems (which are ephemeral), volumes persist beyond container restarts.</p>\n\n                    <div class=\"info-box\">\n                        <strong>Why Volumes?</strong><br>\n                        • Container filesystems are ephemeral (lost on restart)<br>\n                        • Volumes persist data across container restarts<br>\n                        • Multiple containers in a pod can share volumes<br>\n                        • Many volume types available (emptyDir, hostPath, cloud storage, etc.)\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">📁 Common Volume Types</h3>\n\n                    <h4 style=\"margin-top: 15px;\">1. emptyDir (Temporary Storage)</h4>\n                    <p>Created when Pod is assigned to a node, deleted when Pod is removed. Perfect for scratch space.</p>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: v1\nkind: Pod\nmetadata:\n  name: test-pod\nspec:\n  containers:\n  - name: app\n    image: nginx\n    volumeMounts:\n    - mountPath: /cache\n      name: cache-volume\n  volumes:\n  - name: cache-volume\n    emptyDir: {}  # Temporary storage\n                    </div>\n\n                    <h4 style=\"margin-top: 15px;\">2. hostPath (Node Storage)</h4>\n                    <p>Mounts a file or directory from the host node's filesystem. Use carefully!</p>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: v1\nkind: Pod\nmetadata:\n  name: hostpath-pod\nspec:\n  containers:\n  - name: app\n    image: nginx\n    volumeMounts:\n    - mountPath: /data\n      name: host-volume\n  volumes:\n  - name: host-volume\n    hostPath:\n      path: /var/log  # Node directory\n      type: Directory\n                    </div>\n\n                    <div class=\"warning-box\">\n                        <strong>⚠️ hostPath Warning:</strong><br>\n                        • Ties pod to specific node<br>\n                        • Security risk (access to host filesystem)<br>\n                        • Data lost if pod moves to another node<br>\n                        • Use only for special cases (logging, monitoring)\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Analogy</h3>\n                    <p>Think of volumes like <strong>storage lockers</strong>:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li><strong>emptyDir:</strong> Temporary locker (cleared when you leave)</li>\n                        <li><strong>hostPath:</strong> Shared office drawer (on that desk only)</li>\n                        <li><strong>PersistentVolume:</strong> Personal storage unit (follows you anywhere)</li>\n                    </ul>\n\n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Create a pod with emptyDir volume:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\nkubectl apply -f - &lt;<eof apiversion:=\"\" v1=\"\" kind:=\"\" pod=\"\" metadata:=\"\" name:=\"\" cache-pod=\"\" spec:=\"\" containers:=\"\" -=\"\" writer=\"\" image:=\"\" busybox=\"\" command:=\"\" [\"sh\",=\"\" \"-c\",=\"\" \"echo=\"\" 'hello=\"\" from=\"\" writer'=\"\"> /cache/data.txt; sleep 3600\"]\n    volumeMounts:\n    - name: cache\n      mountPath: /cache\n  - name: reader\n    image: busybox\n    command: [\"sh\", \"-c\", \"sleep 10; cat /cache/data.txt; sleep 3600\"]\n    volumeMounts:\n    - name: cache\n      mountPath: /cache\n  volumes:\n  - name: cache\n    emptyDir: {}\nEOF\n\n# Check logs - reader should see writer's file\nkubectl logs cache-pod -c reader\n                        </eof></div>\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> emptyDir uses node disk (no additional cost)</p>\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. emptyDir is NOT persistent</strong><br>\n                        Data lost when pod is deleted (but survives container restarts)<br><br>\n                        \n                        <strong>2. hostPath ties pod to a node</strong><br>\n                        Pod can't move to another node and access the same data<br><br>\n                        \n                        <strong>3. Volumes are defined at pod level, not container</strong><br>\n                        Multiple containers in a pod can share the same volume\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q30: What type of volume is temporary and deleted with the pod?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-4.1\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-4.1\">✅ Mark section 4.1 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 2,
+    "title": "PersistentVolumes (PV) — Cluster Storage",
+    "badge": "Essential",
+    "content": "<h3>📘 What is a PersistentVolume?</h3>\n                    <p>A PersistentVolume (PV) is a <strong>piece of storage in the cluster</strong> that has been provisioned by an administrator or dynamically provisioned using Storage Classes. It's a cluster resource, just like a node.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Key Characteristics:</strong><br>\n                        • PV exists independently of pods<br>\n                        • Lifecycle independent of any pod using it<br>\n                        • Can be provisioned statically (admin) or dynamically (StorageClass)<br>\n                        • Has a reclaim policy (what happens when released)<br>\n                        • Different access modes and capacity\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Analogy</h3>\n                    <p>Think of PersistentVolumes like <strong>rental storage units</strong>:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li><strong>PV:</strong> The actual storage unit (exists whether rented or not)</li>\n                        <li><strong>PVC:</strong> Your rental agreement (claims the storage)</li>\n                        <li><strong>Pod:</strong> You (the person using the storage)</li>\n                        <li>When you leave (pod deleted), the storage unit still exists</li>\n                    </ul>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 Creating a PersistentVolume</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: v1\n        kind: PersistentVolume\n        metadata:\n          name: my-pv\n        spec:\n          capacity:\n            storage: 10Gi\n          accessModes:\n            - ReadWriteOnce  # Can be mounted by one node\n          persistentVolumeReclaimPolicy: Retain\n          hostPath:\n            path: /mnt/data  # Example using hostPath (for testing only)\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">📊 Access Modes</h3>\n                    <div class=\"info-box\">\n                        <strong>Three Access Modes:</strong><br><br>\n                        \n                        <strong>ReadWriteOnce (RWO):</strong><br>\n                        • Volume can be mounted as read-write by a single node<br>\n                        • Most common mode<br>\n                        • Example: AWS EBS, Azure Disk<br><br>\n                        \n                        <strong>ReadOnlyMany (ROX):</strong><br>\n                        • Volume can be mounted as read-only by many nodes<br>\n                        • Good for shared configuration<br><br>\n                        \n                        <strong>ReadWriteMany (RWX):</strong><br>\n                        • Volume can be mounted as read-write by many nodes<br>\n                        • Example: AWS EFS, Azure Files, NFS<br>\n                        • Required for stateful apps that scale horizontally\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">♻️ Reclaim Policies</h3>\n                    <div class=\"info-box\">\n                        <strong>What happens when PVC is deleted:</strong><br><br>\n                        \n                        <strong>Retain:</strong> PV kept, data preserved, manual cleanup needed<br>\n                        <strong>Delete:</strong> PV and underlying storage deleted automatically<br>\n                        <strong>Recycle (deprecated):</strong> Data deleted, PV reused\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔍 Checking PersistentVolumes</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # List all PVs in cluster\n        kubectl get pv\n        \n        # Example output:\n        # NAME     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      \n        # my-pv    10Gi       RWO            Retain           Available\n        \n        # Get PV details\n        kubectl describe pv my-pv\n        \n        # Delete PV\n        kubectl delete pv my-pv\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">📈 PV Status</h3>\n                    <p>PersistentVolumes go through different phases:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li><strong>Available:</strong> PV is free, not yet bound to a claim</li>\n                        <li><strong>Bound:</strong> PV is bound to a PVC</li>\n                        <li><strong>Released:</strong> PVC deleted, but PV not yet reclaimed</li>\n                        <li><strong>Failed:</strong> PV has failed automatic reclamation</li>\n                    </ul>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ AWS/EKS - Using EBS as PersistentVolume</h4>\n                        <p><strong>On EKS, you typically use dynamic provisioning, but here's static:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # 1. Create an EBS volume first (via AWS Console or CLI)\n        aws ec2 create-volume \\\n          --size 10 \\\n          --region us-east-1 \\\n          --availability-zone us-east-1a \\\n          --volume-type gp3\n        \n        # Note the volume ID (e.g., vol-0abc123...)\n        \n        # 2. Create PV pointing to that EBS volume\n        kubectl apply -f - &lt;<eof apiversion:=\"\" v1=\"\" kind:=\"\" persistentvolume=\"\" metadata:=\"\" name:=\"\" ebs-pv=\"\" spec:=\"\" capacity:=\"\" storage:=\"\" 10gi=\"\" accessmodes:=\"\" -=\"\" readwriteonce=\"\" persistentvolumereclaimpolicy:=\"\" retain=\"\" awselasticblockstore:=\"\" volumeid:=\"\" vol-0abc123...=\"\" #=\"\" your=\"\" ebs=\"\" volume=\"\" id=\"\" fstype:=\"\" ext4=\"\" eof=\"\" 3.=\"\" check=\"\" pv=\"\" status=\"\" kubectl=\"\" get=\"\" <=\"\" div=\"\">\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> AWS EBS gp3 ~$0.08/GB/month</p>\n                    </eof></div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. PV is cluster-scoped, not namespaced</strong><br>\n                        PVs are visible across all namespaces<br><br>\n                        \n                        <strong>2. Access mode must match storage type</strong><br>\n                        AWS EBS only supports ReadWriteOnce (single node)<br>\n                        AWS EFS supports ReadWriteMany (multi-node)<br><br>\n                        \n                        <strong>3. Reclaim policy matters!</strong><br>\n                        \"Delete\" policy removes data permanently when PVC is deleted\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q27: What is a PersistentVolume in Kubernetes?</li>\n                            <li>Q28: Which access mode allows a volume to be mounted by multiple nodes for reading and writing?</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-4.2\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-4.2\">✅ Mark section 4.2 as completed</label>\n                    </div>\n                </div>"
+  },
+  {
+    "id": 3,
+    "title": "PersistentVolumeClaims (PVC) — Requesting Storage",
+    "badge": "Essential",
+    "content": "<h3>📘 What is a PersistentVolumeClaim?</h3>\n                    <p>A PersistentVolumeClaim (PVC) is a <strong>request for storage by a user</strong>. It's like a pod: pods consume node resources, PVCs consume PV resources.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Key Characteristics:</strong><br>\n                        • PVC is namespaced (unlike PV which is cluster-scoped)<br>\n                        • Pods reference PVCs to use storage<br>\n                        • PVC specifies size and access mode needed<br>\n                        • Kubernetes binds PVC to a matching PV automatically<br>\n                        • PVC can trigger dynamic provisioning if no PV matches\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Analogy</h3>\n                    <p>Continuing the storage unit analogy:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li><strong>PV:</strong> Storage unit available for rent (100 sq ft)</li>\n                        <li><strong>PVC:</strong> Your rental request (\"I need 50 sq ft of storage\")</li>\n                        <li><strong>Binding:</strong> Storage company assigns you a unit that matches</li>\n                        <li><strong>Pod:</strong> You move your stuff into the storage unit</li>\n                    </ul>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 Creating a PersistentVolumeClaim</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: v1\n        kind: PersistentVolumeClaim\n        metadata:\n          name: my-pvc\n        spec:\n          accessModes:\n            - ReadWriteOnce  # Must match available PV\n          resources:\n            requests:\n              storage: 5Gi   # Requesting 5GB\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔗 PVC to PV Binding</h3>\n                    <p>Kubernetes automatically binds PVCs to PVs based on:</p>\n                    <ol style=\"margin-left: 25px; margin-top: 10px; line-height: 2;\">\n                        <li><strong>Access Mode:</strong> PVC and PV access modes must match</li>\n                        <li><strong>Storage Size:</strong> PV must be &gt;= PVC requested size</li>\n                        <li><strong>Storage Class:</strong> If specified, must match</li>\n                        <li><strong>Selector:</strong> Optional label selectors for specific PVs</li>\n                    </ol>\n        \n                    <h3 style=\"margin-top: 25px;\">🔍 Using PVC in a Pod</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: v1\n        kind: Pod\n        metadata:\n          name: pod-using-pvc\n        spec:\n          containers:\n          - name: app\n            image: nginx\n            volumeMounts:\n            - mountPath: /data\n              name: my-storage\n          volumes:\n          - name: my-storage\n            persistentVolumeClaim:\n              claimName: my-pvc  # Reference the PVC\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">📊 Checking PVC Status</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # List PVCs in current namespace\n        kubectl get pvc\n        \n        # Example output:\n        # NAME     STATUS   VOLUME   CAPACITY   ACCESS MODES\n        # my-pvc   Bound    my-pv    10Gi       RWO\n        \n        # Get detailed PVC information\n        kubectl describe pvc my-pvc\n        \n        # Delete PVC (also releases the PV based on reclaim policy)\n        kubectl delete pvc my-pvc\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🎯 PVC Status</h3>\n                    <div class=\"info-box\">\n                        <strong>PVC States:</strong><br>\n                        • <strong>Pending:</strong> No suitable PV found yet<br>\n                        • <strong>Bound:</strong> Successfully bound to a PV<br>\n                        • <strong>Lost:</strong> PV exists but is not available\n                    </div>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Complete workflow: PV → PVC → Pod</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Step 1: Create PVC (dynamic provisioning on EKS)\n        kubectl apply -f - &lt;<eof apiversion:=\"\" v1=\"\" kind:=\"\" persistentvolumeclaim=\"\" metadata:=\"\" name:=\"\" ebs-claim=\"\" spec:=\"\" accessmodes:=\"\" -=\"\" readwriteonce=\"\" resources:=\"\" requests:=\"\" storage:=\"\" 4gi=\"\" eof=\"\" #=\"\" step=\"\" 2:=\"\" check=\"\" pvc=\"\" status=\"\" (should=\"\" auto-provision=\"\" ebs=\"\" volume)=\"\" kubectl=\"\" get=\"\" wait=\"\" for=\"\" status:=\"\" bound=\"\" 3:=\"\" auto-created=\"\" pv=\"\" 4:=\"\" create=\"\" pod=\"\" using=\"\" the=\"\" apply=\"\" -f=\"\" <<eof=\"\" app-with-storage=\"\" containers:=\"\" app=\"\" image:=\"\" nginx=\"\" volumemounts:=\"\" mountpath:=\"\" usr=\"\" share=\"\" html=\"\" storage=\"\" volumes:=\"\" persistentvolumeclaim:=\"\" claimname:=\"\" 5:=\"\" verify=\"\" is=\"\" running=\"\" 6:=\"\" write=\"\" data=\"\" to=\"\" volume=\"\" exec=\"\" --=\"\" sh=\"\" -c=\"\" \"echo=\"\" 'hello=\"\" from=\"\" pvc'=\"\"> /usr/share/nginx/html/index.html\"\n        \n        # Step 7: Delete pod (data persists!)\n        kubectl delete pod app-with-storage\n        \n        # Step 8: Create new pod with same PVC\n        kubectl run app2 --image=nginx --overrides='\n        {\n          \"spec\": {\n            \"containers\": [{\n              \"name\": \"app2\",\n              \"image\": \"nginx\",\n              \"volumeMounts\": [{\n                \"mountPath\": \"/usr/share/nginx/html\",\n                \"name\": \"storage\"\n              }]\n            }],\n            \"volumes\": [{\n              \"name\": \"storage\",\n              \"persistentVolumeClaim\": {\n                \"claimName\": \"ebs-claim\"\n              }\n            }]\n          }\n        }'\n        \n        # Step 9: Data is still there!\n        kubectl exec app2 -- cat /usr/share/nginx/html/index.html\n                        </eof></div>\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> EBS volume continues charging even when pod is deleted (until PVC is deleted)</p>\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. PVC stays Pending if no matching PV</strong><br>\n                        Check: <code class=\"command\">kubectl describe pvc &lt;name&gt;</code> for events<br>\n                        Reasons: No PV with enough capacity, wrong access mode, no StorageClass<br><br>\n                        \n                        <strong>2. PVC is namespaced, PV is not</strong><br>\n                        PVC in namespace \"app\" can only be used by pods in \"app\" namespace<br><br>\n                        \n                        <strong>3. Deleting PVC may delete underlying storage</strong><br>\n                        Check PV's reclaimPolicy before deleting PVC!<br>\n                        • Retain = data safe<br>\n                        • Delete = data gone forever\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q29: How do pods request storage in Kubernetes?</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-4.3\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-4.3\">✅ Mark section 4.3 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 4,
+    "title": "Storage Classes & Dynamic Provisioning",
+    "badge": "Important",
+    "content": "<h3>📘 What is a StorageClass?</h3>\n                    <p>A StorageClass provides a way to describe different <strong>\"classes\" of storage</strong>. It enables <strong>dynamic provisioning</strong> - automatically creating PVs when PVCs are created.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Why StorageClass?</strong><br>\n                        • Eliminates need for admins to pre-create PVs manually<br>\n                        • Automatically provisions storage when PVC is created<br>\n                        • Different classes for different performance/cost tiers<br>\n                        • Example: \"fast-ssd\", \"slow-hdd\", \"standard\"<br>\n                        • Cloud providers offer default StorageClasses\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Analogy</h3>\n                    <p>Think of StorageClass like <strong>car rental tiers</strong>:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li><strong>StorageClass \"economy\":</strong> Basic storage (slow, cheap)</li>\n                        <li><strong>StorageClass \"premium\":</strong> Fast SSD storage (expensive)</li>\n                        <li><strong>PVC:</strong> \"I need a premium car\" (request)</li>\n                        <li><strong>Dynamic Provisioning:</strong> Rental company automatically provides a premium car</li>\n                    </ul>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 StorageClass Example</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: storage.k8s.io/v1\n        kind: StorageClass\n        metadata:\n          name: fast-ssd\n        provisioner: kubernetes.io/aws-ebs  # AWS EBS provisioner\n        parameters:\n          type: gp3           # EBS volume type\n          iopsPerGB: \"10\"\n          encrypted: \"true\"\n        volumeBindingMode: WaitForFirstConsumer\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔄 Static vs Dynamic Provisioning</h3>\n        \n                    <h4 style=\"margin-top: 15px;\">Static Provisioning (Manual)</h4>\n                    <div class=\"info-box\">\n                        1. Admin creates PV manually<br>\n                        2. User creates PVC<br>\n                        3. Kubernetes binds PVC to existing PV<br>\n                        4. Pod uses PVC<br><br>\n                        <strong>Problem:</strong> Admin must pre-create all PVs\n                    </div>\n        \n                    <h4 style=\"margin-top: 15px;\">Dynamic Provisioning (Automatic)</h4>\n                    <div class=\"info-box\">\n                        1. User creates PVC referencing a StorageClass<br>\n                        2. StorageClass automatically provisions a new PV<br>\n                        3. PVC is bound to the new PV<br>\n                        4. Pod uses PVC<br><br>\n                        <strong>Benefit:</strong> No manual admin work!\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🎯 Using Dynamic Provisioning</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Create PVC with StorageClass\n        apiVersion: v1\n        kind: PersistentVolumeClaim\n        metadata:\n          name: dynamic-pvc\n        spec:\n          storageClassName: fast-ssd  # Reference StorageClass\n          accessModes:\n            - ReadWriteOnce\n          resources:\n            requests:\n              storage: 10Gi\n        \n        # Kubernetes automatically:\n        # 1. Finds StorageClass \"fast-ssd\"\n        # 2. Uses the provisioner to create a new PV\n        # 3. Binds the PVC to the new PV\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">📊 Check StorageClasses</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # List all StorageClasses\n        kubectl get storageclass\n        kubectl get sc  # Short form\n        \n        # Example output on EKS:\n        # NAME            PROVISIONER             RECLAIMPOLICY   \n        # gp2 (default)   kubernetes.io/aws-ebs   Delete\n        \n        # Describe StorageClass\n        kubectl describe sc gp2\n        \n        # Set default StorageClass\n        kubectl patch storageclass gp2 -p '{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}'\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔍 Default StorageClass</h3>\n                    <p>If a PVC doesn't specify a StorageClass, Kubernetes uses the <strong>default</strong> StorageClass (if one exists).</p>\n        \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # PVC without storageClassName uses default\n        apiVersion: v1\n        kind: PersistentVolumeClaim\n        metadata:\n          name: auto-pvc\n        spec:\n          accessModes:\n            - ReadWriteOnce\n          resources:\n            requests:\n              storage: 5Gi\n        # Uses default StorageClass automatically\n                    </div>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ AWS/EKS - Dynamic Provisioning with EBS</h4>\n                        <p><strong>EKS comes with a default gp2 StorageClass. Let's use it:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Step 1: Check available StorageClasses\n        kubectl get sc\n        \n        # Step 2: Create PVC (no PV needed!)\n        kubectl apply -f - &lt;<eof apiversion:=\"\" v1=\"\" kind:=\"\" persistentvolumeclaim=\"\" metadata:=\"\" name:=\"\" ebs-dynamic=\"\" spec:=\"\" accessmodes:=\"\" -=\"\" readwriteonce=\"\" storageclassname:=\"\" gp2=\"\" #=\"\" eks=\"\" default=\"\" resources:=\"\" requests:=\"\" storage:=\"\" 8gi=\"\" eof=\"\" step=\"\" 3:=\"\" watch=\"\" pvc=\"\" and=\"\" pv=\"\" get=\"\" created=\"\" automatically=\"\" kubectl=\"\" --watch=\"\" status=\"\" changes:=\"\" pending=\"\" →=\"\" bound=\"\" 4:=\"\" check=\"\" the=\"\" auto-created=\"\" you'll=\"\" see=\"\" a=\"\" new=\"\" automatically!=\"\" 5:=\"\" create=\"\" pod=\"\" using=\"\" run=\"\" app=\"\" --image=\"nginx\" --overrides=\"\n        {\n          &quot;spec&quot;: {\n            &quot;containers&quot;: [{\n              &quot;name&quot;: &quot;app&quot;,\n              &quot;image&quot;: &quot;nginx&quot;,\n              &quot;volumeMounts&quot;: [{\n                &quot;mountPath&quot;: &quot;/data&quot;,\n                &quot;name&quot;: &quot;storage&quot;\n              }]\n            }],\n            &quot;volumes&quot;: [{\n              &quot;name&quot;: &quot;storage&quot;,\n              &quot;persistentVolumeClaim&quot;: {\n                &quot;claimName&quot;: &quot;ebs-dynamic&quot;\n              }\n            }]\n          }\n        }\" 6:=\"\" verify=\"\" exec=\"\" --=\"\" df=\"\" -h=\"\" |=\"\" grep=\"\" data=\"\" <=\"\" div=\"\">\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> EBS gp2 ~$0.10/GB/month (8GB = ~$0.80/month)</p>\n                    </eof></div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚡ Volume Binding Modes</h3>\n                    <div class=\"info-box\">\n                        <strong>Immediate (default):</strong><br>\n                        • PV created immediately when PVC is created<br>\n                        • May not be in the same zone as the pod<br><br>\n                        \n                        <strong>WaitForFirstConsumer (recommended):</strong><br>\n                        • PV created only when a pod uses the PVC<br>\n                        • Ensures PV is in the same zone as the pod<br>\n                        • Prevents cross-zone mounting errors\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. StorageClass provisioner must exist</strong><br>\n                        EKS needs EBS CSI driver for gp3 volumes (gp2 works by default)<br><br>\n                        \n                        <strong>2. Dynamic PVs inherit StorageClass reclaim policy</strong><br>\n                        Default is usually \"Delete\" - PV deleted when PVC is deleted!<br><br>\n                        \n                        <strong>3. Different clouds have different provisioners</strong><br>\n                        • AWS: kubernetes.io/aws-ebs (EBS), efs.csi.aws.com (EFS)<br>\n                        • GCP: kubernetes.io/gce-pd<br>\n                        • Azure: kubernetes.io/azure-disk<br><br>\n                        \n                        <strong>4. PVC without StorageClass needs manual PV</strong><br>\n                        If no default StorageClass, PVC stays Pending forever\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">📋 Static vs Dynamic Comparison</h3>\n                    <div class=\"success-box\">\n                        <strong>When to use Static Provisioning:</strong><br>\n                        • Pre-existing storage you want to use<br>\n                        • Special storage requirements<br>\n                        • Testing/development with hostPath<br><br>\n                        \n                        <strong>When to use Dynamic Provisioning:</strong><br>\n                        • Production workloads (recommended)<br>\n                        • Cloud environments (AWS, GCP, Azure)<br>\n                        • When you want automation<br>\n                        • Most common approach today\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Related to Q27-Q30: General storage concepts</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-4.4\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-4.4\">✅ Mark section 4.4 as completed</label>\n                    </div>\n                </div>"
+  }
+];
+const SQ=typeof SECTION_QUESTIONS!=='undefined'?SECTION_QUESTIONS:{};
+function revLoad(){try{return JSON.parse(localStorage.getItem(REV_KEY))||{};}catch(e){return {};}}
+function revSave(s){localStorage.setItem(REV_KEY,JSON.stringify(s));if(typeof sfWrite==='function')sfWrite(s);}
+
+function allSectionsComplete(){
+  return SECTIONS.every(s=>revLoad()['section_complete_'+s.id]===true);
+}
+
+function updateModuleCompleteBtn(){
+  const btn=document.getElementById('module-complete-btn');
+  const hint=document.getElementById('module-complete-hint');
+  if(!btn)return;
+  const state=revLoad();
+  if(state.completed){
+    btn.textContent='✓ Module Review Submitted';
+    btn.classList.add('unlocked');
+    btn.disabled=true;
+    if(hint)hint.textContent='Review submitted on '+new Date(state.completedAt).toLocaleString();
+    return;
+  }
+  const done=SECTIONS.filter(s=>state['section_complete_'+s.id]===true).length;
+  const total=SECTIONS.length;
+  if(done===total){
+    btn.classList.add('unlocked');
+    if(hint)hint.textContent='All '+total+' sections complete. You may now submit your module review.';
+  } else {
+    btn.classList.remove('unlocked');
+    if(hint)hint.textContent=done+' of '+total+' sections complete. Complete all sections to unlock.';
+  }
+}
+
+function buildQuestionBlock(secId,questions){
+  if(!questions||!questions.length)return '';
+  const keys=['A','B','C','D'];
+  const state=revLoad();
+  const secDone=state['section_complete_'+secId]===true;
+  let html='<div class="section-questions">';
+  questions.forEach((q,qi)=>{
+    const answered=state['sq_'+secId+'_'+qi+'_correct']===true;
+    html+='<div class="section-question-item'+(answered?' answered-correct':'')+'" id="sq-item-'+secId+'-'+qi+'">';
+    html+='<div class="sq-text">'+(qi+1)+'. '+q.q.replace(/</g,'&lt;')+'</div>';
+    html+='<div class="sq-options" id="sq-opts-'+secId+'-'+qi+'">';
+    q.o.forEach((opt,oi)=>{
+      html+='<div class="sq-option" data-sec="'+secId+'" data-q="'+qi+'" data-i="'+oi+'" onclick="sqSelect(this)"><span class="sq-option-key">'+keys[oi]+'</span><span>'+opt.replace(/</g,'&lt;')+'</span></div>';
+    });
+    html+='</div>';
+    html+='<div class="sq-feedback" id="sq-fb-'+secId+'-'+qi+'"></div>';
+    html+='<button class="sq-check-btn" id="sq-btn-'+secId+'-'+qi+'" onclick="sqCheck('+secId+','+qi+','+q.c+')" '+(answered?'disabled':'')+'>Check Answer</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  const allAnswered=questions.every((_,qi)=>revLoad()['sq_'+secId+'_'+qi+'_correct']===true);
+  html+='<button class="section-complete-btn'+(allAnswered||secDone?' unlocked':'')+' '+(secDone?'done':'')+'" id="sec-complete-btn-'+secId+'" onclick="sectionComplete('+secId+')" '+(secDone?'disabled':(allAnswered?'':'disabled'))+'>'+(secDone?'✓ Section Reviewed':'Mark Section as Reviewed')+'</button>';
+  return html;
+}
+
+window.sqSelect=function(el){
+  const secId=el.dataset.sec,qi=el.dataset.q;
+  document.querySelectorAll('[data-sec="'+secId+'"][data-q="'+qi+'"]').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+window.sqCheck=function(secId,qi,correctIdx){
+  const selected=document.querySelector('[data-sec="'+secId+'"][data-q="'+qi+'"].selected');
+  if(!selected){alert('Please select an answer first.');return;}
+  const chosenIdx=parseInt(selected.dataset.i);
+  const isCorrect=(chosenIdx===correctIdx);
+  const fb=document.getElementById('sq-fb-'+secId+'-'+qi);
+  const btn=document.getElementById('sq-btn-'+secId+'-'+qi);
+  const item=document.getElementById('sq-item-'+secId+'-'+qi);
+  // Track attempt count — incremented on every submit, right or wrong
+  const atKey='sq_'+secId+'_'+qi+'_attempts';
+  const st0=revLoad();st0[atKey]=(st0[atKey]||0)+1;revSave(st0);
+  if(isCorrect){
+    selected.classList.add('correct');
+    if(fb){fb.textContent='✓ Correct!';fb.className='sq-feedback correct';}
+    if(btn)btn.disabled=true;
+    if(item)item.classList.add('answered-correct');
+    const st=revLoad();st['sq_'+secId+'_'+qi+'_correct']=true;revSave(st);
+    const secQs=SQ[secId]||[];
+    const allCorrect=secQs.every((_,i)=>revLoad()['sq_'+secId+'_'+i+'_correct']===true);
+    const secBtn=document.getElementById('sec-complete-btn-'+secId);
+    if(allCorrect&&secBtn){secBtn.classList.add('unlocked');secBtn.removeAttribute('disabled');}
+  } else {
+    selected.classList.add('wrong');
+    if(fb){fb.textContent='✗ Incorrect — please try again.';fb.className='sq-feedback wrong';}
+    setTimeout(()=>{
+      selected.classList.remove('wrong','selected');
+      if(fb){fb.textContent='';fb.className='sq-feedback';}
+    },1500);
+  }
+};
+
+window.sectionComplete=function(secId){
+  const btn=document.getElementById('sec-complete-btn-'+secId);
+  if(!btn||!btn.classList.contains('unlocked'))return;
+  btn.classList.add('done');btn.disabled=true;btn.textContent='✓ Section Reviewed';
+  const st=revLoad();st['section_complete_'+secId]=true;st['section_completed_at_'+secId]=new Date().toISOString();revSave(st);
+  updateModuleCompleteBtn();
+};
+
+window.toggleSection=(id)=>{const body=document.getElementById('body-'+id);const toggle=document.getElementById('toggle-'+id);const isOpen=body.classList.contains('open');document.querySelectorAll('.section-body').forEach(b=>b.classList.remove('open'));document.querySelectorAll('.section-toggle').forEach(t=>t.classList.remove('open'));if(!isOpen){body.classList.add('open');toggle.classList.add('open');}};
+window.copyCode=(btn)=>{const text=btn.parentElement.innerText.replace('Copy','').trim();navigator.clipboard.writeText(text).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);});};
+
+function renderAll(){
+  const sec=document.getElementById('sections-container');if(!sec)return;sec.innerHTML='';
+  const s0=revLoad();
+  SECTIONS.forEach(s=>{
+    const secDone=s0['section_complete_'+s.id]===true;
+    const sd=document.createElement('div');sd.className='section-block';
+    const badgeTxt=BADGES[s.badge]||s.badge||'';
+    const questions=SQ[s.id]||[];
+    const qBlock=buildQuestionBlock(s.id,questions);
+    sd.innerHTML='<div class="section-header" onclick="toggleSection('+s.id+')"><span class="section-num">'+s.id+'.</span><span class="section-title">'+s.title+'</span>'+(badgeTxt?'<span style="font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;background:#e8f1fb;color:#1a6eb5;font-family:Source Code Pro,monospace;">'+badgeTxt+'</span>':'')+(secDone?'<span style="font-size:12px;margin-left:4px;">✅</span>':'')+'<span class="section-toggle" id="toggle-'+s.id+'">▼</span></div><div class="section-body" id="body-'+s.id+'">'+s.content+'</div>';
+    sec.appendChild(sd);
+    if(qBlock){const bodyEl=document.getElementById('body-'+s.id);if(bodyEl)bodyEl.insertAdjacentHTML('beforeend',qBlock);}
+  });
+  updateModuleCompleteBtn();
+}
+
+const moduleCommentEl=document.getElementById('module-comment');
+if(moduleCommentEl){
+  const s=revLoad();if(s.moduleComment)moduleCommentEl.value=s.moduleComment;
+  moduleCommentEl.addEventListener('input',()=>{const s=revLoad();s.moduleComment=moduleCommentEl.value;revSave(s);});
+}
+renderAll();
+</script>
+<script>
+(function(){var scripts=['https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js'];function loadNext(i){if(i>=scripts.length){window._sfFirebaseReady=true;initRevFirebase();return;}var s=document.createElement('script');s.src=scripts[i];s.onload=function(){loadNext(i+1);};s.onerror=function(){window._sfFirebaseReady=false;};document.head.appendChild(s);}loadNext(0);})();
+</script>
+<script>
+function initRevFirebase(){
+  const SF_CONFIG={apiKey:"AIzaSyA-8fatW5D7uR69rcuGFPH54IFqrz0PhU0",authDomain:"sfcertification-grafana.firebaseapp.com",projectId:"sfcertification-grafana",storageBucket:"sfcertification-grafana.firebasestorage.app",messagingSenderId:"227322696511",appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"};
+  if(!firebase.apps.length)firebase.initializeApp(SF_CONFIG);
+  window.sfAuth=firebase.auth();window.sfDb=firebase.firestore();
+  const REV_KEY_FB='reviewer_sf-internal-kubernetes-certification_module-4';
+  const COURSE_ID='ymfsFxUvNoJxOY8suZnY';
+  function sfDocRef(){if(!window.sfReviewerUid)return null;return window.sfDb.collection('reviewerSessions').doc(window.sfReviewerUid).collection('sf-internal-kubernetes-certification').doc('module-4');}
+  function sfInitSession(){const local=revLoad();if(!local.startedAt){local.startedAt=new Date().toISOString();localStorage.setItem(REV_KEY,JSON.stringify(local));}if(!window._sfFirebaseReady||!window.sfReviewerUid)return;sfDocRef().set({email:window.sfReviewerEmail,moduleId:'module-4',courseId:COURSE_ID,startedAt:local.startedAt,lastUpdated:firebase.firestore.FieldValue.serverTimestamp(),reviewComplete:local.reviewComplete||false,attemptCount:local.attemptCount||0},{merge:true}).catch(e=>console.warn('SF init:',e.message));}
+  window.sfInitSession=sfInitSession;
+  window.sfWrite=function(extra){if(!window._sfFirebaseReady||!window.sfReviewerUid)return;const ref=sfDocRef();if(!ref)return;const local=revLoad();const payload=Object.assign({},local,extra,{email:window.sfReviewerEmail,moduleId:'module-4',courseId:COURSE_ID,lastUpdated:firebase.firestore.FieldValue.serverTimestamp()});ref.set(payload,{merge:true}).catch(e=>console.warn('SF write:',e.message));};
+  window.sfFetchAndMerge=async function(){const ref=sfDocRef();if(!ref)return;try{const snap=await ref.get();if(!snap.exists)return;const remote=snap.data();const local=revLoad();const merged=Object.assign({},local,remote);delete merged.email;delete merged.lastUpdated;localStorage.setItem(REV_KEY,JSON.stringify(merged));if(typeof renderAll==='function'){renderAll();}if(typeof updateCompleteBar==='function')updateCompleteBar();}catch(e){console.warn('SF fetch:',e.message);}};
+  function sfHideOverlayFB(user){window.sfReviewerEmail=user.email;window.sfReviewerUid=user.uid;const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+user.email;sfInitSession();window.sfFetchAndMerge();}
+  window.sfAuth.onAuthStateChanged(user=>{if(user){sfHideOverlayFB(user);}else{document.getElementById('sfSigninOverlay').classList.remove('hidden');}});
+}
+</script>
+</body>
+</html>
