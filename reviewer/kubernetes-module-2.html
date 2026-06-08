@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
+<meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none">
+<meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
+<title>[Reviewer] Module 2: Workloads & Scheduling</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--bg:#eef2f7;--bg2:#ffffff;--bg3:#f0f4f9;--border:#d0dae8;--text:#1a2332;--text-dim:#4a5568;--text-dimmer:#8fa3bc;--blue:#1a6eb5;--blue-light:#e8f1fb;--blue-mid:#b8d0ed;--green:#1a6b3a;--green-light:#e8f5ed;--coral:#c0392b;--coral-light:#fdf0ee;--radius:12px;}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Merriweather Sans',sans-serif;font-size:15px;line-height:1.6;}
+  a{color:var(--blue);text-decoration:none;}
+  .reviewer-topbanner{background:#f5f0ff;border-bottom:2px solid #c4bdf0;padding:9px 40px;font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;display:flex;align-items:center;gap:8px;}
+  .sf-signin-overlay{position:fixed;inset:0;background:rgba(20,30,50,.82);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(3px);}
+  .sf-signin-overlay.hidden{display:none;}
+  .sf-signin-card{background:#fff;border-radius:16px;padding:36px 40px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center;}
+  .sf-signin-logo{font-size:32px;margin-bottom:12px;}
+  .sf-signin-title{font-size:17px;font-weight:700;color:#1a2332;margin-bottom:8px;}
+  .sf-signin-sub{font-size:13px;color:#4a5568;line-height:1.6;margin-bottom:24px;}
+  .sf-google-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #d0dae8;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;color:#1a2332;width:100%;justify-content:center;transition:box-shadow .15s;}
+  .sf-google-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  .sf-google-btn img{width:20px;height:20px;}
+  .sf-signin-divider{font-size:11px;color:#8fa3bc;text-align:center;margin:14px 0 10px;display:flex;align-items:center;gap:8px;font-family:'Source Code Pro',monospace;}
+  .sf-signin-divider::before,.sf-signin-divider::after{content:'';flex:1;height:1px;background:#d0dae8;}
+  .sf-fallback-input{width:100%;padding:10px 12px;border:1.5px solid #d0dae8;border-radius:8px;font-size:14px;font-family:'Merriweather Sans',sans-serif;color:#1a2332;margin-bottom:10px;outline:none;}
+  .sf-fallback-input:focus{border-color:var(--blue);}
+  .sf-fallback-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+  .sf-signin-error{margin-top:14px;font-size:12.5px;color:#c0392b;font-family:'Source Code Pro',monospace;background:#fdf0ee;border:1px solid #f0b8b2;border-radius:6px;padding:10px 12px;display:none;text-align:left;}
+  .sf-signin-error.visible{display:block;}
+  .sf-signed-in-bar{background:#e8f5ed;border-bottom:1px solid #a3d4b8;padding:7px 40px;font-size:11px;font-family:'Source Code Pro',monospace;color:var(--green);display:flex;align-items:center;justify-content:space-between;}
+  .sf-signed-in-bar.hidden{display:none;}
+  .sf-signout-btn{font-size:10px;color:var(--blue);background:none;border:1px solid #b8d0ed;border-radius:4px;padding:2px 8px;cursor:pointer;}
+  .topnav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 40px;height:48px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dimmer);font-family:'Source Code Pro',monospace;position:sticky;top:0;z-index:100;}
+  .topnav a{color:var(--blue);}
+  .sep{margin:0 4px;color:var(--text-dimmer);}
+  .main{max-width:860px;margin:0 auto;padding:36px 40px 80px;}
+  .module-hero{margin-bottom:28px;}
+  .hero-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:8px;font-family:'Source Code Pro',monospace;}
+  .module-hero h1{font-size:clamp(18px,2.5vw,26px);font-weight:700;color:var(--text);line-height:1.25;}
+  .section-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+  .section-header{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .section-header:hover{background:var(--bg3);}
+  .section-num{font-size:10px;font-weight:700;color:var(--text-dimmer);min-width:24px;font-family:'Source Code Pro',monospace;}
+  .section-title{font-weight:600;font-size:14px;flex:1;color:var(--text);}
+  .section-toggle{font-size:11px;color:var(--text-dimmer);transition:transform .2s;}
+  .section-toggle.open{transform:rotate(180deg);}
+  .section-body{display:none;padding:20px 22px 14px;border-top:1px solid var(--border);font-size:14px;color:var(--text-dim);line-height:1.75;}
+  .section-body.open{display:block;}
+  .section-body h3{font-size:15px;font-weight:700;color:var(--text);margin:16px 0 8px;}
+  .section-body p{margin-bottom:10px;}
+  .section-body ul,.section-body ol{margin:8px 0 12px 20px;}
+  .section-body li{margin-bottom:4px;}
+  .section-body code{font-family:'Source Code Pro',monospace;font-size:12.5px;background:var(--bg3);border:1px solid var(--border);padding:1px 5px;border-radius:4px;color:#0f4a7a;}
+  .section-body pre{background:#1e2433;color:#cdd6f4;padding:16px;border-radius:8px;font-size:12.5px;font-family:'Source Code Pro',monospace;overflow-x:auto;margin:12px 0;position:relative;}
+  .copy-btn,.copy-btn-small{position:absolute;top:8px;right:8px;background:#252b3b;border:1px solid #3a4155;color:#7a8ab0;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Source Code Pro',monospace;}
+  .copy-btn:hover,.copy-btn-small:hover{color:#cdd6f4;}
+  .reviewer-bar{background:#fff8e6;border:1px solid #f0d4a0;border-left:3px solid #92600a;border-radius:8px;padding:10px 16px;margin:18px 0 6px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92600a;font-family:'Source Code Pro',monospace;}
+  .reviewer-bar input[type="checkbox"]{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--green);}
+  .reviewer-bar label{cursor:pointer;font-weight:600;user-select:none;}
+  .reviewer-bar.checked{background:var(--green-light);border-color:#a3d4b8;border-left-color:var(--green);color:var(--green);}
+  .reviewer-panel{background:#f5f0ff;border:1px solid #c4bdf0;border-top:3px solid #5b4fcf;border-radius:12px;padding:24px 28px;margin:32px 0;}
+  .reviewer-panel-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.18em;text-transform:uppercase;color:#5b4fcf;font-weight:600;margin-bottom:16px;}
+  .reviewer-q-text{font-size:14px;font-weight:600;color:#1a2332;line-height:1.65;margin-bottom:14px;}
+  .reviewer-options{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .reviewer-option{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid #d0dae8;border-radius:8px;cursor:pointer;font-size:13.5px;color:#4a5568;line-height:1.5;background:#fff;transition:background .12s,border-color .12s;}
+  .reviewer-option:hover{background:#f0f4f9;border-color:#b8d0ed;}
+  .reviewer-option.selected{background:#e8f1fb;border-color:var(--blue);color:#1a2332;}
+  .reviewer-option.correct{background:var(--green-light);border-color:#a3d4b8;color:var(--green);}
+  .reviewer-option.wrong{background:var(--coral-light);border-color:#f0b8b2;color:var(--coral);}
+  .reviewer-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#8fa3bc;flex-shrink:0;margin-top:1px;}
+  .reviewer-reveal{font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;margin-bottom:14px;display:block;}
+  .reviewer-explanation{font-size:13px;color:#4a5568;line-height:1.7;padding:12px 14px;background:#eef2f7;border-radius:8px;margin-bottom:16px;display:none;}
+  .reviewer-explanation.visible{display:block;}
+  .reviewer-exp-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+  .reviewer-exp-label.correct{color:var(--green);}
+  .reviewer-exp-label.wrong{color:var(--coral);}
+  .reviewer-comment-label{font-size:11px;font-family:'Source Code Pro',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8fa3bc;font-weight:600;margin-bottom:6px;}
+  .reviewer-comment{width:100%;min-height:80px;padding:10px 12px;border:1px solid #c4bdf0;border-radius:8px;font-family:'Merriweather Sans',sans-serif;font-size:13.5px;color:#1a2332;background:#fff;resize:vertical;line-height:1.6;}
+  .reviewer-comment:focus{outline:none;border-color:#5b4fcf;}
+  .reviewer-save-note{font-size:11px;font-family:'Source Code Pro',monospace;color:#8fa3bc;margin-top:6px;}
+  .rev-complete-wrap{margin:28px 0 0;}
+  .rev-complete-bar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:8px;font-size:13.5px;font-family:'Source Code Pro',monospace;font-weight:600;border:1.5px solid var(--border);background:var(--bg3);color:var(--text-dimmer);transition:all .2s;}
+  .rev-complete-bar.disabled{opacity:.6;cursor:not-allowed;}
+  .rev-complete-bar.ready{background:#fff8e6;border-color:#f0d4a0;border-left:3px solid #92600a;color:#92600a;cursor:pointer;}
+  .rev-complete-bar.done{background:var(--green-light);border-color:#a3d4b8;border-left:3px solid var(--green);color:var(--green);cursor:default;}
+  .rev-complete-bar input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--green);}
+  .rev-complete-bar.disabled input{cursor:not-allowed;}
+  .rev-complete-hint{font-size:11px;font-family:'Source Code Pro',monospace;color:var(--text-dimmer);margin-top:6px;min-height:16px;}
+  .bottom-nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0 0;border-top:1px solid var(--border);margin-top:40px;}
+  .nav-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-family:'Source Code Pro',monospace;color:var(--blue);text-decoration:none;padding:10px 18px;border:1px solid var(--blue-mid);border-radius:8px;background:var(--blue-light);font-weight:600;}
+  .nav-btn.secondary{background:var(--bg2);color:var(--text-dim);border-color:var(--border);}
+  .nav-btn:hover{background:var(--blue-mid);}
+</style>
+<style>
+.section-questions{margin-top:16px;border-top:2px solid #e2e8f0;padding-top:16px;}
+.section-question-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.section-question-item.answered-correct{border-color:#16a34a;background:#f0fdf4;}
+.section-question-item.answered-wrong{border-color:#dc2626;background:#fef2f2;}
+.sq-text{font-size:14px;font-weight:600;color:#0f172a;margin-bottom:10px;}
+.sq-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.sq-option{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s;}
+.sq-option:hover{border-color:#2563eb;background:#eff6ff;}
+.sq-option.selected{border-color:#2563eb;background:#eff6ff;}
+.sq-option.correct{border-color:#16a34a;background:#f0fdf4;color:#16a34a;font-weight:600;}
+.sq-option.wrong{border-color:#dc2626;background:#fef2f2;color:#dc2626;}
+.sq-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#94a3b8;min-width:18px;}
+.sq-feedback{font-size:12px;font-weight:700;padding:4px 0;}
+.sq-feedback.correct{color:#16a34a;}
+.sq-feedback.wrong{color:#dc2626;}
+.sq-check-btn{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;}
+.sq-check-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.section-complete-btn{display:flex;align-items:center;gap:8px;background:transparent;border:2px solid #e2e8f0;color:#94a3b8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:not-allowed;margin-top:14px;transition:all .2s;}
+.section-complete-btn.unlocked{border-color:#16a34a;color:#16a34a;cursor:pointer;background:#f0fdf4;}
+.section-complete-btn.done{border-color:#16a34a;background:#16a34a;color:#fff;cursor:default;}
+.module-complete-wrap{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:28px;text-align:center;}
+.module-complete-btn{background:#16a34a;color:#fff;border:none;border-radius:10px;padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;opacity:0.4;pointer-events:none;transition:all .2s;}
+.module-complete-btn.unlocked{opacity:1;pointer-events:auto;}
+.module-complete-hint{font-size:13px;color:#64748b;margin-top:8px;}
+.reviewer-comment-wrap{margin-top:20px;}
+.reviewer-comment-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:6px;}
+.reviewer-comment{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;}
+.reviewer-comment:focus{border-color:#2563eb;}
+</style>
+</head>
+<body>
+<div class="sf-signin-overlay" id="sfSigninOverlay">
+  <div class="sf-signin-card">
+    <div class="sf-signin-logo">🔐</div>
+    <div class="sf-signin-title">Sign in to save your progress</div>
+    <div class="sf-signin-sub">Sign in with your SourceFuse Gmail. Review progress, checkboxes and question attempts are saved and restored across devices.</div>
+    <button class="sf-google-btn" id="sfGoogleSignInBtn"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Sign in with Google</button>
+    <div class="sf-signin-divider">or</div>
+    <input type="text" class="sf-fallback-input" id="sfEmailInput" placeholder="your.name@sourcefuse.com" autocomplete="off" inputmode="email">
+    <input type="password" class="sf-fallback-input" id="sfPasswordInput" placeholder="Password (test users only)" autocomplete="off" style="margin-top:6px;">
+    <button class="sf-fallback-btn" id="sfEmailSignInBtn">Continue with email</button>
+    <div class="sf-signin-error" id="sfSigninError"></div>
+  </div>
+</div>
+<div class="sf-signed-in-bar hidden" id="sfSignedInBar"><span id="sfSignedInEmail">Signed in as …</span><button class="sf-signout-btn" id="sfSignoutLink">Sign out</button></div>
+<div class="reviewer-topbanner"><span>👁</span><strong>Reviewer Mode</strong> — Module 2: Workloads & Scheduling</div>
+<div class="main">
+  <div class="module-hero">
+    <div class="hero-eyebrow">Module 2 of 5 · Reviewer Mode</div>
+    <h1>Workloads & Scheduling</h1>
+    <p style="color:#64748b;font-size:14px;margin-top:8px;">Review each section carefully and answer all questions correctly to mark sections complete. Once all sections are complete, submit your module review.</p>
+  </div>
+  <div id="sections-container"></div>
+  <div class="module-complete-wrap">
+    <div class="module-complete-hint" id="module-complete-hint">Complete all sections to unlock</div>
+    <div class="reviewer-comment-wrap">
+      <div class="reviewer-comment-label">Module Review Notes</div>
+      <textarea class="reviewer-comment" id="module-comment" placeholder="Add your overall notes for this module…"></textarea>
+    </div>
+    <button class="module-complete-btn" id="module-complete-btn" onclick="submitModuleComplete()">✓ Mark Module 2 as Reviewed</button>
+  </div>
+</div>
+<script>
+function sfShowError(msg){const el=document.getElementById('sfSigninError');if(el){el.textContent=msg;el.classList.add('visible');}}
+function sfHideOverlay(user){
+  window.sfReviewerEmail=user.email||user;window.sfReviewerUid=user.uid||'email_'+btoa(window.sfReviewerEmail).replace(/=/g,'');
+  const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');
+  const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');
+  if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+window.sfReviewerEmail;
+  if(typeof sfInitSession==='function')sfInitSession();
+  if(window._sfFirebaseReady&&typeof window.sfDb!=='undefined'&&typeof sfFetchAndMerge==='function')sfFetchAndMerge();
+}
+const SF_TEST_USERS={'ravjv2013@gmail.com':'SF-Test-2026!','noushin.khan7official@gmail.com':'SF-Test-2026!'};
+function sfSignInWithEmail(){const emailEl=document.getElementById('sfEmailInput');if(!emailEl)return;const email=emailEl.value.trim().toLowerCase();const pwdEl=document.getElementById('sfPasswordInput');const pwd=pwdEl?pwdEl.value:'';if(!email||!email.includes('@')){sfShowError('Please enter a valid email address.');return;}if(SF_TEST_USERS[email]){if(SF_TEST_USERS[email]!==pwd){sfShowError('Invalid test credentials.');return;}sfHideOverlay(email);return;}if(!email.endsWith('@sourcefuse.com')){sfShowError('Please use your @sourcefuse.com email address.');return;}sfHideOverlay(email);}
+async function sfSignInWithGoogle(){if(typeof firebase==='undefined'||!window._sfFirebaseReady){sfShowError('Popup blocked. Please enter your SF email below.');return;}const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({hd:'sourcefuse.com',prompt:'select_account'});const t=setTimeout(()=>sfShowError('Popup blocked. Please enter your SF email below.'),30000);try{const r=await firebase.auth().signInWithPopup(provider);clearTimeout(t);sfHideOverlay(r.user);}catch(e){clearTimeout(t);sfShowError('Popup blocked. Please enter your SF email below.');}}
+function sfSignOut(){window.sfReviewerEmail=null;window.sfReviewerUid=null;const bar=document.getElementById('sfSignedInBar');const ov=document.getElementById('sfSigninOverlay');if(bar)bar.classList.add('hidden');if(ov)ov.classList.remove('hidden');if(typeof firebase!=='undefined'&&window._sfFirebaseReady)firebase.auth().signOut();}
+document.addEventListener('DOMContentLoaded',function(){const gb=document.getElementById('sfGoogleSignInBtn');const eb=document.getElementById('sfEmailSignInBtn');const so=document.getElementById('sfSignoutLink');if(gb)gb.addEventListener('click',sfSignInWithGoogle);if(eb)eb.addEventListener('click',sfSignInWithEmail);if(so)so.addEventListener('click',sfSignOut);});
+</script>
+<script>
+const HUB_URL = 'index.html';
+const SECTION_COUNT = 36007;
+const SECTION_QUESTIONS = {"1":[{"q":"What is a Pod in Kubernetes?","o":["A physical server in the cluster","The smallest deployable unit — a single instance of a running process, holding one or more containers","A network load balancer","A persistent storage volume"],"c":1,"exp":"A Pod is the smallest, simplest unit; it usually holds one container (sometimes more) that share network and storage."},{"q":"How do containers within the same pod communicate?","o":["Through a LoadBalancer Service","Via localhost, since they share the pod’s network namespace","Only through etcd","They cannot communicate"],"c":1,"exp":"Containers in a pod share the network namespace (localhost) and can share storage volumes; each pod gets one IP."}],"2":[{"q":"Which list correctly names Kubernetes pod phases?","o":["Start, Stop, Restart, Delete","Pending, Running, Succeeded, Failed, Unknown","Created, Mounted, Bound, Released","Queued, Active, Idle, Done"],"c":1,"exp":"Pod phases are Pending, Running, Succeeded, Failed, and Unknown."},{"q":"What does the Pending phase usually indicate?","o":["The pod has failed permanently","The pod is accepted but not yet running — e.g. image is downloading or it is being scheduled","All containers completed successfully","The node has crashed"],"c":1,"exp":"Pending is normal during image download or node selection; it does not always mean a problem."}],"3":[{"q":"What does a ReplicaSet ensure?","o":["That a specified number of pod replicas are running at any time","That each node runs exactly one pod","That storage is provisioned automatically","That traffic is load balanced externally"],"c":0,"exp":"A ReplicaSet maintains a stable set of replica pods, replacing any that fail or are deleted."},{"q":"What is the relationship between Deployments and ReplicaSets?","o":["They are unrelated","ReplicaSets are the mechanism Deployments use to manage and scale pods","ReplicaSets manage Deployments","Deployments replace the need for pods"],"c":1,"exp":"A Deployment manages ReplicaSets (and rolling updates); the ReplicaSet is the underlying mechanism keeping replica counts correct."}],"4":[{"q":"What does a Deployment provide?","o":["Declarative updates for Pods and ReplicaSets","A persistent storage backend","Cluster-wide DNS","Node health monitoring"],"c":0,"exp":"A Deployment provides declarative updates for Pods and ReplicaSets and is the recommended way to manage stateless apps."},{"q":"Which command creates a deployment imperatively?","o":["kubectl get deployment webapp","kubectl create deployment webapp --image=nginx","kubectl describe deployment webapp","kubectl delete deployment webapp"],"c":1,"exp":"\"kubectl create deployment <name> --image=<image>\" creates a deployment imperatively."}],"5":[{"q":"Which command manually scales a deployment to 5 replicas?","o":["kubectl scale deployment webapp --replicas=5","kubectl resize deployment webapp 5","kubectl set replicas webapp=5","kubectl deploy webapp --count 5"],"c":0,"exp":"\"kubectl scale deployment <name> --replicas=5\" sets the replica count."},{"q":"What does Horizontal Pod Autoscaling (HPA) do?","o":["Increases CPU/RAM of existing pods","Automatically adjusts the number of pod replicas based on metrics like CPU/memory","Adds or removes cluster nodes","Manually sets a fixed replica count"],"c":1,"exp":"HPA automatically scales replica count based on CPU/memory; vertical scaling changes pod resources, cluster autoscaling changes nodes."}],"6":[{"q":"What does a DaemonSet ensure?","o":["A fixed number of total replicas","That all (or some) nodes run a copy of a specific pod","That storage is dynamically provisioned","That a job runs to completion once"],"c":1,"exp":"A DaemonSet ensures every (or selected) node runs a copy of a pod; pods are added/removed as nodes join/leave."},{"q":"Which is a typical use case for a DaemonSet?","o":["A stateless web frontend","A node-level logging or monitoring agent (e.g. Fluentd, node exporter) on every node","A one-off batch job","A relational database with a single replica"],"c":1,"exp":"DaemonSets suit per-node agents: logging, monitoring, storage daemons, and network plugins."}],"7":[{"q":"What does setting \"nodeName\" on a pod do?","o":["Adds a label to the node","Assigns the pod directly to a specific named node, bypassing the scheduler","Tells the scheduler to prefer that node","Renames the node"],"c":1,"exp":"nodeName assigns a pod directly to a named node, bypassing the scheduler; if that node is unavailable the pod fails."},{"q":"How does \"nodeSelector\" differ from \"nodeName\"?","o":["nodeSelector bypasses the scheduler; nodeName uses it","nodeSelector is label-based and lets the scheduler pick a matching node; nodeName names one node directly","They are identical","nodeSelector can only target the control plane"],"c":1,"exp":"nodeSelector is label-based and more flexible — the scheduler picks a node whose labels match; nodeName hard-assigns one node."}],"8":[{"q":"What does restartPolicy control?","o":["How often a node reboots","What Kubernetes does when a container in a pod exits or fails","How many replicas a Deployment keeps","Which node a pod runs on"],"c":1,"exp":"restartPolicy defines the action when a container exits/fails: Always, OnFailure, or Never."},{"q":"What is the default restartPolicy for a pod?","o":["Never","OnFailure","Always","IfNeeded"],"c":2,"exp":"Always is the default — the container restarts even after exiting successfully."}]};
+
+function submitModuleComplete() {
+  const btn = document.getElementById('module-complete-btn');
+  if (!btn.classList.contains('unlocked')) return;
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const comment = document.getElementById('module-comment')?.value || '';
+  const completedAt = new Date().toISOString();
+  const completedState = { completed: true, comment, completedAt, sectionCount: SECTION_COUNT };
+  revSave(completedState);
+  if (typeof sfWrite === 'function') {
+    sfWrite(completedState);
+  }
+  setTimeout(() => { window.location.href = HUB_URL; }, 1200);
+}
+</script>
+<script>
+const REV_KEY='reviewer_'+window.location.pathname.replace(/[^a-z0-9]/gi,'_');
+const BADGES={foundation:'Foundation',essential:'Essential',important:'Important'};
+const SECTIONS=[
+  {
+    "id": 1,
+    "title": "Pods — The Smallest Deployable Unit",
+    "badge": "Essential",
+    "content": "<h3>📘 What is a Pod?</h3>\n                    <p>A Pod is the <strong>smallest and simplest unit</strong> in Kubernetes. It represents a single instance of a running process in your cluster.</p>\n\n                    <div class=\"video-section\">\n                        <button class=\"video-toggle\" onclick=\"toggleVideo(this)\">\n                            📺 Watch: Kubernetes Pods Explained (12:04)\n                            <span class=\"toggle-icon\">▼</span>\n                        </button>\n                        <div class=\"video-content\" style=\"display:none\">\n                            <div class=\"video-container\">\n                                <iframe src=\"https://www.youtube.com/embed/5cNrTU6o3Fw?rel=0\" frameborder=\"0\" allowfullscreen=\"\"></iframe>\n                            </div>\n                            <p class=\"video-credit\">Source: TechWorld with Nana (12:04)</p>\n                        </div>\n                    </div>\n\n                    <div class=\"info-box\">\n                        <strong>Key Characteristics:</strong><br>\n                        • Can contain one or more containers (usually one)<br>\n                        • Containers in a pod share network namespace (localhost)<br>\n                        • Containers in a pod share storage volumes<br>\n                        • Pods are ephemeral — they can be killed and recreated<br>\n                        • Each pod gets a unique IP address\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Example</h3>\n                    <p>Think of a Pod as a <strong>shared apartment</strong>:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li>Containers = Roommates living together</li>\n                        <li>They share the same address (IP)</li>\n                        <li>They can talk to each other via localhost</li>\n                        <li>They share common storage (volumes)</li>\n                    </ul>\n\n                    <h3 style=\"margin-top: 25px;\">💻 Creating Pods</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create a pod imperatively\nkubectl run nginx --image=nginx\n\n# Create from YAML\nkubectl apply -f - &lt;<eof apiversion:=\"\" v1=\"\" kind:=\"\" pod=\"\" metadata:=\"\" name:=\"\" nginx-pod=\"\" spec:=\"\" containers:=\"\" -=\"\" nginx=\"\" image:=\"\" nginx:latest=\"\" ports:=\"\" containerport:=\"\" 80=\"\" eof=\"\" #=\"\" check=\"\" status=\"\" kubectl=\"\" get=\"\" pods=\"\" details=\"\" describe=\"\" <=\"\" div=\"\">\n\n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Step 1:</strong> Create a simple pod</p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create pod\nkubectl run my-app --image=nginx\n\n# Watch pod creation\nkubectl get pods --watch\n\n# Check which node it's running on\nkubectl get pod my-app -o wide\n                        </div>\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> Negligible (uses existing EKS node resources)</p>\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. Don't create pods directly in production</strong><br>\n                        ✅ Use Deployments, StatefulSets, or DaemonSets instead<br>\n                        ❌ Pods created with <code class=\"command\">kubectl run</code> won't be recreated if they die<br><br>\n                        \n                        <strong>2. Multi-container pods are for tightly coupled apps only</strong><br>\n                        Most apps should use 1 container per pod<br><br>\n                        \n                        <strong>3. Pods are ephemeral</strong><br>\n                        Never store data directly in a pod — use volumes!\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul style=\"color: #78350f;\">\n                            <li>Q11: What is the smallest deployable unit in Kubernetes?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.1\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.1\">✅ Mark section 2.1 as completed</label>\n                    </div>\n                </eof></div>"
+  },
+  {
+    "id": 2,
+    "title": "Pod Lifecycle & Status",
+    "badge": "Important",
+    "content": "<h3>📘 Understanding Pod Lifecycle</h3>\n                    <p>Pods go through several phases during their lifecycle. Understanding these phases is critical for troubleshooting.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Pod Phases:</strong><br>\n                        • <strong>Pending:</strong> Pod accepted but not yet running (downloading image, scheduling)<br>\n                        • <strong>Running:</strong> Pod bound to node, at least one container running<br>\n                        • <strong>Succeeded:</strong> All containers terminated successfully<br>\n                        • <strong>Failed:</strong> All containers terminated, at least one failed<br>\n                        • <strong>Unknown:</strong> Pod state cannot be determined\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔄 Pod Lifecycle Stages</h3>\n                    \n                    <h4 style=\"margin-top: 15px;\">1. Creation</h4>\n                    <p>When you create a pod:</p>\n                    <ol style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li>Pod object created in etcd (status: Pending)</li>\n                        <li>Scheduler assigns pod to a node</li>\n                        <li>Kubelet on the node pulls container image</li>\n                        <li>Container runtime starts the container</li>\n                        <li>Pod status changes to Running</li>\n                    </ol>\n        \n                    <h4 style=\"margin-top: 15px;\">2. Running</h4>\n                    <p>Pod is actively running. You can check logs, exec into containers, and monitor health.</p>\n        \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Check pod status\n        kubectl get pods\n        \n        # Get detailed pod information\n        kubectl describe pod my-pod\n        \n        # View pod logs\n        kubectl logs my-pod\n        \n        # Execute command in pod\n        kubectl exec -it my-pod -- /bin/bash\n                    </div>\n        \n                    <h4 style=\"margin-top: 15px;\">3. Termination</h4>\n                    <p>When a pod is deleted:</p>\n                    <ol style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li>Pod status marked as Terminating</li>\n                        <li>SIGTERM sent to containers (graceful shutdown)</li>\n                        <li>Grace period (default 30s) allows cleanup</li>\n                        <li>SIGKILL sent if containers still running after grace period</li>\n                        <li>Pod removed from API server</li>\n                    </ol>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. Pending pods don't always mean problems</strong><br>\n                        Pending is normal during image download or node selection<br><br>\n                        \n                        <strong>2. Failed pods don't auto-restart by default</strong><br>\n                        Use restartPolicy to control restart behavior<br><br>\n                        \n                        <strong>3. Terminating pods can get stuck</strong><br>\n                        Use <code class=\"command\">kubectl delete pod --force --grace-period=0</code> as last resort\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.2\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.2\">✅ Mark section 2.2 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 3,
+    "title": "ReplicaSets — Ensuring Replicas",
+    "badge": "Important",
+    "content": "<h3>📘 What is a ReplicaSet?</h3>\n                    <p>A ReplicaSet ensures that a specified number of pod replicas are running at any given time. It's the mechanism behind Deployments.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Key Functions:</strong><br>\n                        • Maintains a stable set of replica Pods<br>\n                        • Ensures desired number of Pods are always running<br>\n                        • Replaces Pods that fail or are deleted<br>\n                        • Used by Deployments for scaling\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Example</h3>\n                    <p>Think of a ReplicaSet as a <strong>factory supervisor</strong>:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li>Factory needs exactly 5 workers on the floor</li>\n                        <li>If a worker leaves, supervisor hires a replacement immediately</li>\n                        <li>If there are 6 workers, supervisor sends one home</li>\n                        <li>The supervisor constantly maintains exactly 5 workers</li>\n                    </ul>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 ReplicaSet Example</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: apps/v1\n        kind: ReplicaSet\n        metadata:\n          name: nginx-replicaset\n        spec:\n          replicas: 3  # Desired number of pods\n          selector:\n            matchLabels:\n              app: nginx\n          template:\n            metadata:\n              labels:\n                app: nginx\n            spec:\n              containers:\n              - name: nginx\n                image: nginx:latest\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. Don't create ReplicaSets directly in production</strong><br>\n                        ✅ Use Deployments instead (they manage ReplicaSets for you)<br>\n                        ❌ ReplicaSets don't support rolling updates<br><br>\n                        \n                        <strong>2. Selector must match pod labels</strong><br>\n                        If labels don't match, ReplicaSet won't manage the pods<br><br>\n                        \n                        <strong>3. Deleting a ReplicaSet deletes its Pods</strong><br>\n                        Use <code class=\"command\">--cascade=orphan</code> to keep pods\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q12: What ensures a specified number of pod replicas are running?</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.3\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.3\">✅ Mark section 2.3 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 4,
+    "title": "Deployments — Declarative Updates",
+    "badge": "Essential",
+    "content": "<h3>📘 What is a Deployment?</h3>\n                    <p>A Deployment provides declarative updates for Pods and ReplicaSets. It's the recommended way to manage stateless applications.</p>\n\n                    <div class=\"video-section\">\n                        <button class=\"video-toggle\" onclick=\"toggleVideo(this)\">\n                            📺 Watch: Kubernetes Deployments Tutorial (16:33)\n                            <span class=\"toggle-icon\">▼</span>\n                        </button>\n                        <div class=\"video-content\" style=\"display:none\">\n                            <div class=\"video-container\">\n                                <iframe src=\"https://www.youtube.com/embed/EQNO_kM96Mo?rel=0\" frameborder=\"0\" allowfullscreen=\"\"></iframe>\n                            </div>\n                            <p class=\"video-credit\">Source: TechWorld with Nana (16:33)</p>\n                        </div>\n                    </div>\n\n                    <p><em>Detailed content for Deployments following the pattern...</em></p>\n                    \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q13: Which kubectl command creates a deployment?</li>\n                            <li>Q16: What happens when a Deployment is deleted?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.4\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.4\">✅ Mark section 2.4 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 5,
+    "title": "Scaling Workloads",
+    "badge": "Foundation",
+    "content": "<h3>📘 Scaling in Kubernetes</h3>\n                    <p>Scaling is the process of increasing or decreasing the number of pod replicas to handle varying load.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Types of Scaling:</strong><br>\n                        • <strong>Manual Scaling:</strong> You manually set replica count<br>\n                        • <strong>Horizontal Pod Autoscaling (HPA):</strong> Automatic based on CPU/memory<br>\n                        • <strong>Vertical Scaling:</strong> Increase pod resources (CPU/RAM)<br>\n                        • <strong>Cluster Autoscaling:</strong> Add/remove nodes automatically\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 Manual Scaling</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Scale deployment to 5 replicas\n        kubectl scale deployment webapp --replicas=5\n        \n        # Scale using YAML file\n        kubectl scale -f deployment.yaml --replicas=3\n        \n        # Check current replicas\n        kubectl get deployment webapp\n                    </div>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Scale a deployment and watch it happen:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Create deployment\n        kubectl create deployment nginx --image=nginx --replicas=2\n        \n        # Watch pods in real-time\n        kubectl get pods -w\n        \n        # In another terminal, scale up\n        kubectl scale deployment nginx --replicas=5\n        \n        # Scale down\n        kubectl scale deployment nginx --replicas=1\n                        </div>\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> More replicas = more resource usage (minimal on existing nodes)</p>\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. Scaling to 0 is allowed</strong><br>\n                        <code class=\"command\">--replicas=0</code> stops all pods but keeps the deployment<br><br>\n                        \n                        <strong>2. Manual scaling overrides HPA</strong><br>\n                        If HPA is enabled, manual scaling creates conflicts<br><br>\n                        \n                        <strong>3. Nodes must have capacity</strong><br>\n                        Scaling fails if nodes don't have enough CPU/memory\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q14: Which command scales a deployment?</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.5\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.5\">✅ Mark section 2.5 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 6,
+    "title": "DaemonSets — One Pod Per Node",
+    "badge": "Important",
+    "content": "<h3>📘 What is a DaemonSet?</h3>\n                    <p>A DaemonSet ensures that <strong>all (or some) nodes run a copy of a Pod</strong>. As nodes are added to the cluster, Pods are added to them. As nodes are removed, those Pods are garbage collected.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Common Use Cases:</strong><br>\n                        • <strong>Logging agents:</strong> Fluentd, Logstash on every node<br>\n                        • <strong>Monitoring agents:</strong> Prometheus node exporter, Datadog agent<br>\n                        • <strong>Storage daemons:</strong> Ceph, GlusterFS on every node<br>\n                        • <strong>Network plugins:</strong> kube-proxy, CNI plugins\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Analogy</h3>\n                    <p>Think of a DaemonSet as <strong>security cameras in a building</strong>:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li>Every floor (node) needs exactly one camera (pod)</li>\n                        <li>When a new floor is built, install a camera automatically</li>\n                        <li>If a floor is demolished, remove its camera</li>\n                        <li>You don't need multiple cameras per floor</li>\n                    </ul>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 DaemonSet Example</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: apps/v1\n        kind: DaemonSet\n        metadata:\n          name: fluentd-daemonset\n        spec:\n          selector:\n            matchLabels:\n              name: fluentd\n          template:\n            metadata:\n              labels:\n                name: fluentd\n            spec:\n              containers:\n              - name: fluentd\n                image: fluentd:latest\n                volumeMounts:\n                - name: varlog\n                  mountPath: /var/log\n              volumes:\n              - name: varlog\n                hostPath:\n                  path: /var/log\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔍 DaemonSet vs Deployment</h3>\n                    <div class=\"info-box\">\n                        <strong>DaemonSet:</strong><br>\n                        • One pod per node (automatically)<br>\n                        • Used for node-level services<br>\n                        • No replica count needed<br><br>\n                        \n                        <strong>Deployment:</strong><br>\n                        • Multiple pods across nodes<br>\n                        • Used for application workloads<br>\n                        • You specify replica count\n                    </div>\n        \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Create DaemonSet\n        kubectl apply -f daemonset.yaml\n        \n        # Check DaemonSet\n        kubectl get daemonsets\n        \n        # See which nodes have the pod\n        kubectl get pods -o wide\n                    </div>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Deploy a monitoring agent on all nodes:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Create a simple DaemonSet\n        kubectl apply -f - &lt;<eof apiversion:=\"\" apps=\"\" v1=\"\" kind:=\"\" daemonset=\"\" metadata:=\"\" name:=\"\" node-monitor=\"\" spec:=\"\" selector:=\"\" matchlabels:=\"\" app:=\"\" template:=\"\" labels:=\"\" containers:=\"\" -=\"\" monitor=\"\" image:=\"\" busybox=\"\" command:=\"\" [\"sh\",=\"\" \"-c\",=\"\" \"while=\"\" true;=\"\" do=\"\" echo=\"\" 'monitoring...';=\"\" sleep=\"\" 30;=\"\" done\"]=\"\" eof=\"\" #=\"\" check=\"\" that=\"\" one=\"\" pod=\"\" runs=\"\" on=\"\" each=\"\" node=\"\" kubectl=\"\" get=\"\" pods=\"\" -o=\"\" wide=\"\" status=\"\" <=\"\" div=\"\">\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> Minimal (one small pod per node)</p>\n                    </eof></div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. DaemonSets ignore pod scheduling preferences by default</strong><br>\n                        They run on ALL nodes unless you use nodeSelector or taints/tolerations<br><br>\n                        \n                        <strong>2. DaemonSet pods run even on master nodes</strong><br>\n                        Unless master nodes have taints that prevent scheduling<br><br>\n                        \n                        <strong>3. You cannot scale DaemonSets</strong><br>\n                        One pod per node is the rule — scaling doesn't apply\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q15: Which resource ensures one pod runs on every node?</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.6\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.6\">✅ Mark section 2.6 as completed</label>\n                    </div>\n                </div>"
+  },
+  {
+    "id": 7,
+    "title": "Pod Scheduling — nodeName & nodeSelector",
+    "badge": "Foundation",
+    "content": "<h3>📘 Manual Pod Scheduling</h3>\n                    <p>By default, the kube-scheduler assigns pods to nodes. But you can <strong>manually control</strong> where pods run using <code class=\"command\">nodeName</code> or <code class=\"command\">nodeSelector</code>.</p>\n        \n                    <h3 style=\"margin-top: 25px;\">1️⃣ Using nodeName (Direct Assignment)</h3>\n                    <div class=\"info-box\">\n                        <strong>nodeName</strong> — Assign pod to a specific node<br>\n                        • Bypasses the scheduler entirely<br>\n                        • Pod scheduled immediately to the named node<br>\n                        • If node doesn't exist or is unavailable, pod fails<br>\n                        • Use with caution!\n                    </div>\n        \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: v1\n        kind: Pod\n        metadata:\n          name: nginx-manual\n        spec:\n          nodeName: worker-node-1  # Pod MUST run on this node\n          containers:\n          - name: nginx\n            image: nginx\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">2️⃣ Using nodeSelector (Label-Based)</h3>\n                    <div class=\"info-box\">\n                        <strong>nodeSelector</strong> — Assign pod to nodes with specific labels<br>\n                        • More flexible than nodeName<br>\n                        • Scheduler finds a node matching the labels<br>\n                        • Pod won't schedule if no nodes match<br>\n                        • Recommended approach\n                    </div>\n        \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # First, label your nodes\n        kubectl label nodes worker-node-1 disktype=ssd\n        kubectl label nodes worker-node-2 disktype=hdd\n        \n        # Create pod with nodeSelector\n        apiVersion: v1\n        kind: Pod\n        metadata:\n          name: nginx-ssd\n        spec:\n          nodeSelector:\n            disktype: ssd  # Pod runs only on nodes with this label\n          containers:\n          - name: nginx\n            image: nginx\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔍 nodeName vs nodeSelector</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Check node labels\n        kubectl get nodes --show-labels\n        \n        # Add label to node\n        kubectl label nodes <node-name> environment=production\n        \n        # Remove label from node\n        kubectl label nodes <node-name> environment-\n                    </node-name></node-name></div>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Schedule pods to specific node types:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Get your EKS nodes\n        kubectl get nodes\n        \n        # Label a node (use actual node name)\n        kubectl label nodes <your-node-name> workload=frontend\n        \n        # Create pod with nodeSelector\n        kubectl apply -f - &lt;<eof apiversion:=\"\" v1=\"\" kind:=\"\" pod=\"\" metadata:=\"\" name:=\"\" frontend-app=\"\" spec:=\"\" nodeselector:=\"\" workload:=\"\" frontend=\"\" containers:=\"\" -=\"\" nginx=\"\" image:=\"\" eof=\"\" #=\"\" verify=\"\" is=\"\" on=\"\" the=\"\" labeled=\"\" node=\"\" kubectl=\"\" get=\"\" -o=\"\" wide=\"\" <=\"\" div=\"\">\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> No additional cost</p>\n                    </eof></your-node-name></div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. nodeName bypasses scheduler completely</strong><br>\n                        Pod fails if node doesn't exist or has no capacity<br><br>\n                        \n                        <strong>2. Pod stays Pending if nodeSelector doesn't match</strong><br>\n                        Check node labels: <code class=\"command\">kubectl get nodes --show-labels</code><br><br>\n                        \n                        <strong>3. nodeSelector is simple but limited</strong><br>\n                        For complex rules, use Node Affinity (not covered in basic test)\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q17: Fill in the blank - To schedule a pod on a specific node, use the ______ field.</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.7\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.7\">✅ Mark section 2.7 as completed</label>\n                    </div>\n                </div>"
+  },
+  {
+    "id": 8,
+    "title": "Restart Policies",
+    "badge": "Foundation",
+    "content": "<h3>📘 What is restartPolicy?</h3>\n                    <p>The <code class=\"command\">restartPolicy</code> defines what Kubernetes should do when a container in a pod exits or fails.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Three Restart Policies:</strong><br>\n                        • <strong>Always</strong> (default) — Always restart, even on success<br>\n                        • <strong>OnFailure</strong> — Restart only if container exits with error<br>\n                        • <strong>Never</strong> — Never restart, regardless of exit status\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">1️⃣ Always (Default)</h3>\n                    <p>The container will always restart, even if it exits successfully (exit code 0).</p>\n                    \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: v1\n        kind: Pod\n        metadata:\n          name: pod-always\n        spec:\n          restartPolicy: Always  # This is the default\n          containers:\n          - name: app\n            image: busybox\n            command: [\"sh\", \"-c\", \"echo 'Hello'; sleep 10\"]\n        # Container will restart after sleeping for 10 seconds\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">2️⃣ OnFailure</h3>\n                    <p>The container restarts <strong>only if it fails</strong> (non-zero exit code). Success = no restart.</p>\n                    \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: v1\n        kind: Pod\n        metadata:\n          name: pod-onfailure\n        spec:\n          restartPolicy: OnFailure\n          containers:\n          - name: job\n            image: busybox\n            command: [\"sh\", \"-c\", \"exit 1\"]\n        # Container will restart because exit 1 = failure\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">3️⃣ Never</h3>\n                    <p>The container <strong>never restarts</strong>, regardless of exit status. Used for one-time tasks.</p>\n                    \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        apiVersion: v1\n        kind: Pod\n        metadata:\n          name: pod-never\n        spec:\n          restartPolicy: Never\n          containers:\n          - name: task\n            image: busybox\n            command: [\"sh\", \"-c\", \"echo 'Task complete'\"]\n        # Container runs once and stops. Never restarts.\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔍 When to Use Which Policy</h3>\n                    <div class=\"info-box\">\n                        <strong>Always:</strong> Long-running applications (web servers, APIs)<br>\n                        <strong>OnFailure:</strong> Batch jobs that should retry on failure<br>\n                        <strong>Never:</strong> One-time initialization tasks, data migrations\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 Testing Restart Policies</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Create pod that fails\n        kubectl run test-restart --image=busybox --restart=OnFailure \\\n          -- sh -c \"exit 1\"\n        \n        # Watch the restarts (RESTARTS column increases)\n        kubectl get pods test-restart --watch\n        \n        # Check restart count\n        kubectl describe pod test-restart | grep -i restart\n                    </div>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Test different restart policies:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Test OnFailure - container will restart\n        kubectl run test-fail --image=busybox --restart=OnFailure \\\n          -- sh -c \"echo 'Attempt'; exit 1\"\n        \n        # Watch it restart multiple times\n        kubectl get pods test-fail --watch\n        \n        # Test Never - container runs once\n        kubectl run test-never --image=busybox --restart=Never \\\n          -- sh -c \"echo 'Done'; exit 0\"\n        \n        # Check status (should be Completed)\n        kubectl get pod test-never\n                        </div>\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> Minimal resource usage</p>\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. Always restarts even on success</strong><br>\n                        For one-time jobs, use OnFailure or Never<br><br>\n                        \n                        <strong>2. Restart policy applies to ALL containers in pod</strong><br>\n                        You cannot have different policies for different containers<br><br>\n                        \n                        <strong>3. CrashLoopBackOff after multiple failures</strong><br>\n                        Kubernetes adds exponential backoff (10s, 20s, 40s... up to 5min)\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q18: What is the default restartPolicy for a pod?</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-2.8\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-2.8\">✅ Mark section 2.8 as completed</label>\n                    </div>"
+  }
+];
+const SQ=typeof SECTION_QUESTIONS!=='undefined'?SECTION_QUESTIONS:{};
+function revLoad(){try{return JSON.parse(localStorage.getItem(REV_KEY))||{};}catch(e){return {};}}
+function revSave(s){localStorage.setItem(REV_KEY,JSON.stringify(s));if(typeof sfWrite==='function')sfWrite(s);}
+
+function allSectionsComplete(){
+  return SECTIONS.every(s=>revLoad()['section_complete_'+s.id]===true);
+}
+
+function updateModuleCompleteBtn(){
+  const btn=document.getElementById('module-complete-btn');
+  const hint=document.getElementById('module-complete-hint');
+  if(!btn)return;
+  const state=revLoad();
+  if(state.completed){
+    btn.textContent='✓ Module Review Submitted';
+    btn.classList.add('unlocked');
+    btn.disabled=true;
+    if(hint)hint.textContent='Review submitted on '+new Date(state.completedAt).toLocaleString();
+    return;
+  }
+  const done=SECTIONS.filter(s=>state['section_complete_'+s.id]===true).length;
+  const total=SECTIONS.length;
+  if(done===total){
+    btn.classList.add('unlocked');
+    if(hint)hint.textContent='All '+total+' sections complete. You may now submit your module review.';
+  } else {
+    btn.classList.remove('unlocked');
+    if(hint)hint.textContent=done+' of '+total+' sections complete. Complete all sections to unlock.';
+  }
+}
+
+function buildQuestionBlock(secId,questions){
+  if(!questions||!questions.length)return '';
+  const keys=['A','B','C','D'];
+  const state=revLoad();
+  const secDone=state['section_complete_'+secId]===true;
+  let html='<div class="section-questions">';
+  questions.forEach((q,qi)=>{
+    const answered=state['sq_'+secId+'_'+qi+'_correct']===true;
+    html+='<div class="section-question-item'+(answered?' answered-correct':'')+'" id="sq-item-'+secId+'-'+qi+'">';
+    html+='<div class="sq-text">'+(qi+1)+'. '+q.q.replace(/</g,'&lt;')+'</div>';
+    html+='<div class="sq-options" id="sq-opts-'+secId+'-'+qi+'">';
+    q.o.forEach((opt,oi)=>{
+      html+='<div class="sq-option" data-sec="'+secId+'" data-q="'+qi+'" data-i="'+oi+'" onclick="sqSelect(this)"><span class="sq-option-key">'+keys[oi]+'</span><span>'+opt.replace(/</g,'&lt;')+'</span></div>';
+    });
+    html+='</div>';
+    html+='<div class="sq-feedback" id="sq-fb-'+secId+'-'+qi+'"></div>';
+    html+='<button class="sq-check-btn" id="sq-btn-'+secId+'-'+qi+'" onclick="sqCheck('+secId+','+qi+','+q.c+')" '+(answered?'disabled':'')+'>Check Answer</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  const allAnswered=questions.every((_,qi)=>revLoad()['sq_'+secId+'_'+qi+'_correct']===true);
+  html+='<button class="section-complete-btn'+(allAnswered||secDone?' unlocked':'')+' '+(secDone?'done':'')+'" id="sec-complete-btn-'+secId+'" onclick="sectionComplete('+secId+')" '+(secDone?'disabled':(allAnswered?'':'disabled'))+'>'+(secDone?'✓ Section Reviewed':'Mark Section as Reviewed')+'</button>';
+  return html;
+}
+
+window.sqSelect=function(el){
+  const secId=el.dataset.sec,qi=el.dataset.q;
+  document.querySelectorAll('[data-sec="'+secId+'"][data-q="'+qi+'"]').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+window.sqCheck=function(secId,qi,correctIdx){
+  const selected=document.querySelector('[data-sec="'+secId+'"][data-q="'+qi+'"].selected');
+  if(!selected){alert('Please select an answer first.');return;}
+  const chosenIdx=parseInt(selected.dataset.i);
+  const isCorrect=(chosenIdx===correctIdx);
+  const fb=document.getElementById('sq-fb-'+secId+'-'+qi);
+  const btn=document.getElementById('sq-btn-'+secId+'-'+qi);
+  const item=document.getElementById('sq-item-'+secId+'-'+qi);
+  // Track attempt count — incremented on every submit, right or wrong
+  const atKey='sq_'+secId+'_'+qi+'_attempts';
+  const st0=revLoad();st0[atKey]=(st0[atKey]||0)+1;revSave(st0);
+  if(isCorrect){
+    selected.classList.add('correct');
+    if(fb){fb.textContent='✓ Correct!';fb.className='sq-feedback correct';}
+    if(btn)btn.disabled=true;
+    if(item)item.classList.add('answered-correct');
+    const st=revLoad();st['sq_'+secId+'_'+qi+'_correct']=true;revSave(st);
+    const secQs=SQ[secId]||[];
+    const allCorrect=secQs.every((_,i)=>revLoad()['sq_'+secId+'_'+i+'_correct']===true);
+    const secBtn=document.getElementById('sec-complete-btn-'+secId);
+    if(allCorrect&&secBtn){secBtn.classList.add('unlocked');secBtn.removeAttribute('disabled');}
+  } else {
+    selected.classList.add('wrong');
+    if(fb){fb.textContent='✗ Incorrect — please try again.';fb.className='sq-feedback wrong';}
+    setTimeout(()=>{
+      selected.classList.remove('wrong','selected');
+      if(fb){fb.textContent='';fb.className='sq-feedback';}
+    },1500);
+  }
+};
+
+window.sectionComplete=function(secId){
+  const btn=document.getElementById('sec-complete-btn-'+secId);
+  if(!btn||!btn.classList.contains('unlocked'))return;
+  btn.classList.add('done');btn.disabled=true;btn.textContent='✓ Section Reviewed';
+  const st=revLoad();st['section_complete_'+secId]=true;st['section_completed_at_'+secId]=new Date().toISOString();revSave(st);
+  updateModuleCompleteBtn();
+};
+
+window.toggleSection=(id)=>{const body=document.getElementById('body-'+id);const toggle=document.getElementById('toggle-'+id);const isOpen=body.classList.contains('open');document.querySelectorAll('.section-body').forEach(b=>b.classList.remove('open'));document.querySelectorAll('.section-toggle').forEach(t=>t.classList.remove('open'));if(!isOpen){body.classList.add('open');toggle.classList.add('open');}};
+window.copyCode=(btn)=>{const text=btn.parentElement.innerText.replace('Copy','').trim();navigator.clipboard.writeText(text).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);});};
+
+function renderAll(){
+  const sec=document.getElementById('sections-container');if(!sec)return;sec.innerHTML='';
+  const s0=revLoad();
+  SECTIONS.forEach(s=>{
+    const secDone=s0['section_complete_'+s.id]===true;
+    const sd=document.createElement('div');sd.className='section-block';
+    const badgeTxt=BADGES[s.badge]||s.badge||'';
+    const questions=SQ[s.id]||[];
+    const qBlock=buildQuestionBlock(s.id,questions);
+    sd.innerHTML='<div class="section-header" onclick="toggleSection('+s.id+')"><span class="section-num">'+s.id+'.</span><span class="section-title">'+s.title+'</span>'+(badgeTxt?'<span style="font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;background:#e8f1fb;color:#1a6eb5;font-family:Source Code Pro,monospace;">'+badgeTxt+'</span>':'')+(secDone?'<span style="font-size:12px;margin-left:4px;">✅</span>':'')+'<span class="section-toggle" id="toggle-'+s.id+'">▼</span></div><div class="section-body" id="body-'+s.id+'">'+s.content+'</div>';
+    sec.appendChild(sd);
+    if(qBlock){const bodyEl=document.getElementById('body-'+s.id);if(bodyEl)bodyEl.insertAdjacentHTML('beforeend',qBlock);}
+  });
+  updateModuleCompleteBtn();
+}
+
+const moduleCommentEl=document.getElementById('module-comment');
+if(moduleCommentEl){
+  const s=revLoad();if(s.moduleComment)moduleCommentEl.value=s.moduleComment;
+  moduleCommentEl.addEventListener('input',()=>{const s=revLoad();s.moduleComment=moduleCommentEl.value;revSave(s);});
+}
+renderAll();
+</script>
+<script>
+(function(){var scripts=['https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js'];function loadNext(i){if(i>=scripts.length){window._sfFirebaseReady=true;initRevFirebase();return;}var s=document.createElement('script');s.src=scripts[i];s.onload=function(){loadNext(i+1);};s.onerror=function(){window._sfFirebaseReady=false;};document.head.appendChild(s);}loadNext(0);})();
+</script>
+<script>
+function initRevFirebase(){
+  const SF_CONFIG={apiKey:"AIzaSyA-8fatW5D7uR69rcuGFPH54IFqrz0PhU0",authDomain:"sfcertification-grafana.firebaseapp.com",projectId:"sfcertification-grafana",storageBucket:"sfcertification-grafana.firebasestorage.app",messagingSenderId:"227322696511",appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"};
+  if(!firebase.apps.length)firebase.initializeApp(SF_CONFIG);
+  window.sfAuth=firebase.auth();window.sfDb=firebase.firestore();
+  const REV_KEY_FB='reviewer_sf-internal-kubernetes-certification_module-2';
+  const COURSE_ID='ymfsFxUvNoJxOY8suZnY';
+  function sfDocRef(){if(!window.sfReviewerUid)return null;return window.sfDb.collection('reviewerSessions').doc(window.sfReviewerUid).collection('sf-internal-kubernetes-certification').doc('module-2');}
+  function sfInitSession(){const local=revLoad();if(!local.startedAt){local.startedAt=new Date().toISOString();localStorage.setItem(REV_KEY,JSON.stringify(local));}if(!window._sfFirebaseReady||!window.sfReviewerUid)return;sfDocRef().set({email:window.sfReviewerEmail,moduleId:'module-2',courseId:COURSE_ID,startedAt:local.startedAt,lastUpdated:firebase.firestore.FieldValue.serverTimestamp(),reviewComplete:local.reviewComplete||false,attemptCount:local.attemptCount||0},{merge:true}).catch(e=>console.warn('SF init:',e.message));}
+  window.sfInitSession=sfInitSession;
+  window.sfWrite=function(extra){if(!window._sfFirebaseReady||!window.sfReviewerUid)return;const ref=sfDocRef();if(!ref)return;const local=revLoad();const payload=Object.assign({},local,extra,{email:window.sfReviewerEmail,moduleId:'module-2',courseId:COURSE_ID,lastUpdated:firebase.firestore.FieldValue.serverTimestamp()});ref.set(payload,{merge:true}).catch(e=>console.warn('SF write:',e.message));};
+  window.sfFetchAndMerge=async function(){const ref=sfDocRef();if(!ref)return;try{const snap=await ref.get();if(!snap.exists)return;const remote=snap.data();const local=revLoad();const merged=Object.assign({},local,remote);delete merged.email;delete merged.lastUpdated;localStorage.setItem(REV_KEY,JSON.stringify(merged));if(typeof renderAll==='function'){renderAll();}if(typeof updateCompleteBar==='function')updateCompleteBar();}catch(e){console.warn('SF fetch:',e.message);}};
+  function sfHideOverlayFB(user){window.sfReviewerEmail=user.email;window.sfReviewerUid=user.uid;const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+user.email;sfInitSession();window.sfFetchAndMerge();}
+  window.sfAuth.onAuthStateChanged(user=>{if(user){sfHideOverlayFB(user);}else{document.getElementById('sfSigninOverlay').classList.remove('hidden');}});
+}
+</script>
+</body>
+</html>
