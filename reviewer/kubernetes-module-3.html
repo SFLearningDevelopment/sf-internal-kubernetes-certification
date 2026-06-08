@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
+<meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none">
+<meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
+<title>[Reviewer] Module 3: Networking</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--bg:#eef2f7;--bg2:#ffffff;--bg3:#f0f4f9;--border:#d0dae8;--text:#1a2332;--text-dim:#4a5568;--text-dimmer:#8fa3bc;--blue:#1a6eb5;--blue-light:#e8f1fb;--blue-mid:#b8d0ed;--green:#1a6b3a;--green-light:#e8f5ed;--coral:#c0392b;--coral-light:#fdf0ee;--radius:12px;}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Merriweather Sans',sans-serif;font-size:15px;line-height:1.6;}
+  a{color:var(--blue);text-decoration:none;}
+  .reviewer-topbanner{background:#f5f0ff;border-bottom:2px solid #c4bdf0;padding:9px 40px;font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;display:flex;align-items:center;gap:8px;}
+  .sf-signin-overlay{position:fixed;inset:0;background:rgba(20,30,50,.82);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(3px);}
+  .sf-signin-overlay.hidden{display:none;}
+  .sf-signin-card{background:#fff;border-radius:16px;padding:36px 40px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center;}
+  .sf-signin-logo{font-size:32px;margin-bottom:12px;}
+  .sf-signin-title{font-size:17px;font-weight:700;color:#1a2332;margin-bottom:8px;}
+  .sf-signin-sub{font-size:13px;color:#4a5568;line-height:1.6;margin-bottom:24px;}
+  .sf-google-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #d0dae8;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;color:#1a2332;width:100%;justify-content:center;transition:box-shadow .15s;}
+  .sf-google-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  .sf-google-btn img{width:20px;height:20px;}
+  .sf-signin-divider{font-size:11px;color:#8fa3bc;text-align:center;margin:14px 0 10px;display:flex;align-items:center;gap:8px;font-family:'Source Code Pro',monospace;}
+  .sf-signin-divider::before,.sf-signin-divider::after{content:'';flex:1;height:1px;background:#d0dae8;}
+  .sf-fallback-input{width:100%;padding:10px 12px;border:1.5px solid #d0dae8;border-radius:8px;font-size:14px;font-family:'Merriweather Sans',sans-serif;color:#1a2332;margin-bottom:10px;outline:none;}
+  .sf-fallback-input:focus{border-color:var(--blue);}
+  .sf-fallback-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+  .sf-signin-error{margin-top:14px;font-size:12.5px;color:#c0392b;font-family:'Source Code Pro',monospace;background:#fdf0ee;border:1px solid #f0b8b2;border-radius:6px;padding:10px 12px;display:none;text-align:left;}
+  .sf-signin-error.visible{display:block;}
+  .sf-signed-in-bar{background:#e8f5ed;border-bottom:1px solid #a3d4b8;padding:7px 40px;font-size:11px;font-family:'Source Code Pro',monospace;color:var(--green);display:flex;align-items:center;justify-content:space-between;}
+  .sf-signed-in-bar.hidden{display:none;}
+  .sf-signout-btn{font-size:10px;color:var(--blue);background:none;border:1px solid #b8d0ed;border-radius:4px;padding:2px 8px;cursor:pointer;}
+  .topnav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 40px;height:48px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dimmer);font-family:'Source Code Pro',monospace;position:sticky;top:0;z-index:100;}
+  .topnav a{color:var(--blue);}
+  .sep{margin:0 4px;color:var(--text-dimmer);}
+  .main{max-width:860px;margin:0 auto;padding:36px 40px 80px;}
+  .module-hero{margin-bottom:28px;}
+  .hero-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:8px;font-family:'Source Code Pro',monospace;}
+  .module-hero h1{font-size:clamp(18px,2.5vw,26px);font-weight:700;color:var(--text);line-height:1.25;}
+  .section-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+  .section-header{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .section-header:hover{background:var(--bg3);}
+  .section-num{font-size:10px;font-weight:700;color:var(--text-dimmer);min-width:24px;font-family:'Source Code Pro',monospace;}
+  .section-title{font-weight:600;font-size:14px;flex:1;color:var(--text);}
+  .section-toggle{font-size:11px;color:var(--text-dimmer);transition:transform .2s;}
+  .section-toggle.open{transform:rotate(180deg);}
+  .section-body{display:none;padding:20px 22px 14px;border-top:1px solid var(--border);font-size:14px;color:var(--text-dim);line-height:1.75;}
+  .section-body.open{display:block;}
+  .section-body h3{font-size:15px;font-weight:700;color:var(--text);margin:16px 0 8px;}
+  .section-body p{margin-bottom:10px;}
+  .section-body ul,.section-body ol{margin:8px 0 12px 20px;}
+  .section-body li{margin-bottom:4px;}
+  .section-body code{font-family:'Source Code Pro',monospace;font-size:12.5px;background:var(--bg3);border:1px solid var(--border);padding:1px 5px;border-radius:4px;color:#0f4a7a;}
+  .section-body pre{background:#1e2433;color:#cdd6f4;padding:16px;border-radius:8px;font-size:12.5px;font-family:'Source Code Pro',monospace;overflow-x:auto;margin:12px 0;position:relative;}
+  .copy-btn,.copy-btn-small{position:absolute;top:8px;right:8px;background:#252b3b;border:1px solid #3a4155;color:#7a8ab0;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Source Code Pro',monospace;}
+  .copy-btn:hover,.copy-btn-small:hover{color:#cdd6f4;}
+  .reviewer-bar{background:#fff8e6;border:1px solid #f0d4a0;border-left:3px solid #92600a;border-radius:8px;padding:10px 16px;margin:18px 0 6px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92600a;font-family:'Source Code Pro',monospace;}
+  .reviewer-bar input[type="checkbox"]{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--green);}
+  .reviewer-bar label{cursor:pointer;font-weight:600;user-select:none;}
+  .reviewer-bar.checked{background:var(--green-light);border-color:#a3d4b8;border-left-color:var(--green);color:var(--green);}
+  .reviewer-panel{background:#f5f0ff;border:1px solid #c4bdf0;border-top:3px solid #5b4fcf;border-radius:12px;padding:24px 28px;margin:32px 0;}
+  .reviewer-panel-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.18em;text-transform:uppercase;color:#5b4fcf;font-weight:600;margin-bottom:16px;}
+  .reviewer-q-text{font-size:14px;font-weight:600;color:#1a2332;line-height:1.65;margin-bottom:14px;}
+  .reviewer-options{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .reviewer-option{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid #d0dae8;border-radius:8px;cursor:pointer;font-size:13.5px;color:#4a5568;line-height:1.5;background:#fff;transition:background .12s,border-color .12s;}
+  .reviewer-option:hover{background:#f0f4f9;border-color:#b8d0ed;}
+  .reviewer-option.selected{background:#e8f1fb;border-color:var(--blue);color:#1a2332;}
+  .reviewer-option.correct{background:var(--green-light);border-color:#a3d4b8;color:var(--green);}
+  .reviewer-option.wrong{background:var(--coral-light);border-color:#f0b8b2;color:var(--coral);}
+  .reviewer-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#8fa3bc;flex-shrink:0;margin-top:1px;}
+  .reviewer-reveal{font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;margin-bottom:14px;display:block;}
+  .reviewer-explanation{font-size:13px;color:#4a5568;line-height:1.7;padding:12px 14px;background:#eef2f7;border-radius:8px;margin-bottom:16px;display:none;}
+  .reviewer-explanation.visible{display:block;}
+  .reviewer-exp-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+  .reviewer-exp-label.correct{color:var(--green);}
+  .reviewer-exp-label.wrong{color:var(--coral);}
+  .reviewer-comment-label{font-size:11px;font-family:'Source Code Pro',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8fa3bc;font-weight:600;margin-bottom:6px;}
+  .reviewer-comment{width:100%;min-height:80px;padding:10px 12px;border:1px solid #c4bdf0;border-radius:8px;font-family:'Merriweather Sans',sans-serif;font-size:13.5px;color:#1a2332;background:#fff;resize:vertical;line-height:1.6;}
+  .reviewer-comment:focus{outline:none;border-color:#5b4fcf;}
+  .reviewer-save-note{font-size:11px;font-family:'Source Code Pro',monospace;color:#8fa3bc;margin-top:6px;}
+  .rev-complete-wrap{margin:28px 0 0;}
+  .rev-complete-bar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:8px;font-size:13.5px;font-family:'Source Code Pro',monospace;font-weight:600;border:1.5px solid var(--border);background:var(--bg3);color:var(--text-dimmer);transition:all .2s;}
+  .rev-complete-bar.disabled{opacity:.6;cursor:not-allowed;}
+  .rev-complete-bar.ready{background:#fff8e6;border-color:#f0d4a0;border-left:3px solid #92600a;color:#92600a;cursor:pointer;}
+  .rev-complete-bar.done{background:var(--green-light);border-color:#a3d4b8;border-left:3px solid var(--green);color:var(--green);cursor:default;}
+  .rev-complete-bar input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--green);}
+  .rev-complete-bar.disabled input{cursor:not-allowed;}
+  .rev-complete-hint{font-size:11px;font-family:'Source Code Pro',monospace;color:var(--text-dimmer);margin-top:6px;min-height:16px;}
+  .bottom-nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0 0;border-top:1px solid var(--border);margin-top:40px;}
+  .nav-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-family:'Source Code Pro',monospace;color:var(--blue);text-decoration:none;padding:10px 18px;border:1px solid var(--blue-mid);border-radius:8px;background:var(--blue-light);font-weight:600;}
+  .nav-btn.secondary{background:var(--bg2);color:var(--text-dim);border-color:var(--border);}
+  .nav-btn:hover{background:var(--blue-mid);}
+</style>
+<style>
+.section-questions{margin-top:16px;border-top:2px solid #e2e8f0;padding-top:16px;}
+.section-question-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.section-question-item.answered-correct{border-color:#16a34a;background:#f0fdf4;}
+.section-question-item.answered-wrong{border-color:#dc2626;background:#fef2f2;}
+.sq-text{font-size:14px;font-weight:600;color:#0f172a;margin-bottom:10px;}
+.sq-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.sq-option{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s;}
+.sq-option:hover{border-color:#2563eb;background:#eff6ff;}
+.sq-option.selected{border-color:#2563eb;background:#eff6ff;}
+.sq-option.correct{border-color:#16a34a;background:#f0fdf4;color:#16a34a;font-weight:600;}
+.sq-option.wrong{border-color:#dc2626;background:#fef2f2;color:#dc2626;}
+.sq-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#94a3b8;min-width:18px;}
+.sq-feedback{font-size:12px;font-weight:700;padding:4px 0;}
+.sq-feedback.correct{color:#16a34a;}
+.sq-feedback.wrong{color:#dc2626;}
+.sq-check-btn{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;}
+.sq-check-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.section-complete-btn{display:flex;align-items:center;gap:8px;background:transparent;border:2px solid #e2e8f0;color:#94a3b8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:not-allowed;margin-top:14px;transition:all .2s;}
+.section-complete-btn.unlocked{border-color:#16a34a;color:#16a34a;cursor:pointer;background:#f0fdf4;}
+.section-complete-btn.done{border-color:#16a34a;background:#16a34a;color:#fff;cursor:default;}
+.module-complete-wrap{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:28px;text-align:center;}
+.module-complete-btn{background:#16a34a;color:#fff;border:none;border-radius:10px;padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;opacity:0.4;pointer-events:none;transition:all .2s;}
+.module-complete-btn.unlocked{opacity:1;pointer-events:auto;}
+.module-complete-hint{font-size:13px;color:#64748b;margin-top:8px;}
+.reviewer-comment-wrap{margin-top:20px;}
+.reviewer-comment-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:6px;}
+.reviewer-comment{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;}
+.reviewer-comment:focus{border-color:#2563eb;}
+</style>
+</head>
+<body>
+<div class="sf-signin-overlay" id="sfSigninOverlay">
+  <div class="sf-signin-card">
+    <div class="sf-signin-logo">🔐</div>
+    <div class="sf-signin-title">Sign in to save your progress</div>
+    <div class="sf-signin-sub">Sign in with your SourceFuse Gmail. Review progress, checkboxes and question attempts are saved and restored across devices.</div>
+    <button class="sf-google-btn" id="sfGoogleSignInBtn"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Sign in with Google</button>
+    <div class="sf-signin-divider">or</div>
+    <input type="text" class="sf-fallback-input" id="sfEmailInput" placeholder="your.name@sourcefuse.com" autocomplete="off" inputmode="email">
+    <input type="password" class="sf-fallback-input" id="sfPasswordInput" placeholder="Password (test users only)" autocomplete="off" style="margin-top:6px;">
+    <button class="sf-fallback-btn" id="sfEmailSignInBtn">Continue with email</button>
+    <div class="sf-signin-error" id="sfSigninError"></div>
+  </div>
+</div>
+<div class="sf-signed-in-bar hidden" id="sfSignedInBar"><span id="sfSignedInEmail">Signed in as …</span><button class="sf-signout-btn" id="sfSignoutLink">Sign out</button></div>
+<div class="reviewer-topbanner"><span>👁</span><strong>Reviewer Mode</strong> — Module 3: Networking</div>
+<div class="main">
+  <div class="module-hero">
+    <div class="hero-eyebrow">Module 3 of 5 · Reviewer Mode</div>
+    <h1>Networking</h1>
+    <p style="color:#64748b;font-size:14px;margin-top:8px;">Review each section carefully and answer all questions correctly to mark sections complete. Once all sections are complete, submit your module review.</p>
+  </div>
+  <div id="sections-container"></div>
+  <div class="module-complete-wrap">
+    <div class="module-complete-hint" id="module-complete-hint">Complete all sections to unlock</div>
+    <div class="reviewer-comment-wrap">
+      <div class="reviewer-comment-label">Module Review Notes</div>
+      <textarea class="reviewer-comment" id="module-comment" placeholder="Add your overall notes for this module…"></textarea>
+    </div>
+    <button class="module-complete-btn" id="module-complete-btn" onclick="submitModuleComplete()">✓ Mark Module 3 as Reviewed</button>
+  </div>
+</div>
+<script>
+function sfShowError(msg){const el=document.getElementById('sfSigninError');if(el){el.textContent=msg;el.classList.add('visible');}}
+function sfHideOverlay(user){
+  window.sfReviewerEmail=user.email||user;window.sfReviewerUid=user.uid||'email_'+btoa(window.sfReviewerEmail).replace(/=/g,'');
+  const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');
+  const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');
+  if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+window.sfReviewerEmail;
+  if(typeof sfInitSession==='function')sfInitSession();
+  if(window._sfFirebaseReady&&typeof window.sfDb!=='undefined'&&typeof sfFetchAndMerge==='function')sfFetchAndMerge();
+}
+const SF_TEST_USERS={'ravjv2013@gmail.com':'SF-Test-2026!','noushin.khan7official@gmail.com':'SF-Test-2026!'};
+function sfSignInWithEmail(){const emailEl=document.getElementById('sfEmailInput');if(!emailEl)return;const email=emailEl.value.trim().toLowerCase();const pwdEl=document.getElementById('sfPasswordInput');const pwd=pwdEl?pwdEl.value:'';if(!email||!email.includes('@')){sfShowError('Please enter a valid email address.');return;}if(SF_TEST_USERS[email]){if(SF_TEST_USERS[email]!==pwd){sfShowError('Invalid test credentials.');return;}sfHideOverlay(email);return;}if(!email.endsWith('@sourcefuse.com')){sfShowError('Please use your @sourcefuse.com email address.');return;}sfHideOverlay(email);}
+async function sfSignInWithGoogle(){if(typeof firebase==='undefined'||!window._sfFirebaseReady){sfShowError('Popup blocked. Please enter your SF email below.');return;}const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({hd:'sourcefuse.com',prompt:'select_account'});const t=setTimeout(()=>sfShowError('Popup blocked. Please enter your SF email below.'),30000);try{const r=await firebase.auth().signInWithPopup(provider);clearTimeout(t);sfHideOverlay(r.user);}catch(e){clearTimeout(t);sfShowError('Popup blocked. Please enter your SF email below.');}}
+function sfSignOut(){window.sfReviewerEmail=null;window.sfReviewerUid=null;const bar=document.getElementById('sfSignedInBar');const ov=document.getElementById('sfSigninOverlay');if(bar)bar.classList.add('hidden');if(ov)ov.classList.remove('hidden');if(typeof firebase!=='undefined'&&window._sfFirebaseReady)firebase.auth().signOut();}
+document.addEventListener('DOMContentLoaded',function(){const gb=document.getElementById('sfGoogleSignInBtn');const eb=document.getElementById('sfEmailSignInBtn');const so=document.getElementById('sfSignoutLink');if(gb)gb.addEventListener('click',sfSignInWithGoogle);if(eb)eb.addEventListener('click',sfSignInWithEmail);if(so)so.addEventListener('click',sfSignOut);});
+</script>
+<script>
+const HUB_URL = 'index.html';
+const SECTION_COUNT = 43351;
+const SECTION_QUESTIONS = {"1":[{"q":"What is a Kubernetes Service?","o":["A physical load balancer appliance","An abstraction defining a logical set of Pods and a policy to access them","A storage volume shared between pods","A control plane component"],"c":1,"exp":"A Service abstracts a logical set of pods and a stable policy/endpoint to access them, enabling loose coupling."},{"q":"Why are Services needed when pods already have IPs?","o":["Pods cannot have IPs without a Service","Pods are ephemeral and get new IPs when recreated; a Service provides a stable endpoint and load balancing","Services replace the need for pods","Services store pod data persistently"],"c":1,"exp":"Because pods are ephemeral with changing IPs, a Service provides a stable IP/DNS and load-balances across matching pods."}],"2":[{"q":"Which Service type exposes the service only on an internal cluster IP?","o":["NodePort","ClusterIP","LoadBalancer","ExternalName"],"c":1,"exp":"ClusterIP exposes the service on an internal IP reachable only from within the cluster."},{"q":"What does a NodePort Service do?","o":["Exposes the service on each node’s IP at a static port (30000–32767) for external access","Creates a cloud load balancer automatically","Restricts the service to a single node","Disables external access entirely"],"c":0,"exp":"NodePort exposes the service on every node’s IP at a static port in the 30000–32767 range, reachable as <NodeIP>:<NodePort>."}],"3":[{"q":"What does Kubernetes DNS provide?","o":["Persistent storage for pods","Automatic DNS records for Services so pods can reach them by name instead of IP","Container image hosting","Node health checks"],"c":1,"exp":"Kubernetes auto-creates DNS records for Services, letting pods use service names instead of IPs, updating as services change."},{"q":"What is the FQDN format for a Service?","o":["<service>.<node>.local","<service>.<namespace>.svc.cluster.local","<namespace>.<service>.k8s.io","<pod>.<service>.cluster"],"c":1,"exp":"A Service FQDN is <service-name>.<namespace>.svc.cluster.local."}],"4":[{"q":"How does a Service determine which pods receive its traffic?","o":["By pod creation time","By matching pod labels using the Service’s label selector","By the node each pod runs on","By the pod’s restartPolicy"],"c":1,"exp":"Services use label selectors; any pod whose labels match the selector joins the Service and receives load-balanced traffic."},{"q":"A Service has selector \"app: webapp\". Which pod will it route to?","o":["Any pod in the cluster","Only pods carrying the label app=webapp","Pods on a node labeled webapp","Pods with the name webapp"],"c":1,"exp":"The selector matches labels, so only pods with label app=webapp are included."}],"5":[{"q":"What is a NetworkPolicy?","o":["A storage access rule","A resource defining rules that control network traffic between pods, like a firewall","A DNS configuration","A scheduling constraint"],"c":1,"exp":"NetworkPolicy controls ingress/egress traffic between pods using label selectors, acting like a firewall."},{"q":"What is the default traffic behavior when no NetworkPolicy exists?","o":["All traffic is denied","All traffic is allowed","Only egress is allowed","Only same-namespace traffic is allowed"],"c":1,"exp":"By default (no policies) all traffic is allowed; adding policies begins restricting it."}],"6":[{"q":"What is Ingress used for?","o":["Managing external HTTP/HTTPS access to services, with routing and SSL termination","Provisioning persistent storage","Scheduling pods to nodes","Storing secrets"],"c":0,"exp":"Ingress manages external HTTP/HTTPS access, offering load balancing, SSL termination, and name/path-based routing."},{"q":"What is an advantage of Ingress over multiple LoadBalancer Services?","o":["It requires no configuration","A single entry point can route to many services (cost-effective) instead of one external IP per service","It provides persistent storage","It eliminates the need for pods"],"c":1,"exp":"LoadBalancer gives one external IP per service (expensive); Ingress provides a single entry point for many services with path/host routing."}],"7":[{"q":"What are Endpoints in Kubernetes?","o":["External URLs for the cluster","Objects that track the IP addresses of pods matching a Service’s selector","DNS servers","Storage mount points"],"c":1,"exp":"Endpoints track the pod IPs (and ports) matching a Service selector — the bridge between Services and Pods."},{"q":"If \"kubectl get endpoints <service>\" returns no addresses, what is the likely cause?","o":["The cluster DNS is down","No pods match the Service’s selector (or the matching pods are not ready)","The node is out of storage","The Service type is ClusterIP"],"c":1,"exp":"Empty endpoints usually mean no pods match the selector or they are not ready, so traffic has no backends."}],"8":[{"q":"Which command tests Service DNS resolution from inside a test pod?","o":["kubectl get dns","nslookup webapp-service (or nslookup webapp-service.default.svc.cluster.local)","kubectl describe dns webapp-service","kubectl logs dns"],"c":1,"exp":"From a test pod, \"nslookup <service>\" (or the FQDN) verifies DNS resolution."},{"q":"Which is the correct order of a network diagnostic workflow?","o":["Check external access first, then pod-to-pod last","Pod-to-pod connectivity, then service-by-name, then service-to-backends, then external traffic","Only check DNS","Reboot all nodes first"],"c":1,"exp":"Work outward: can pods talk to each other, then reach services by name, then services reach pods, then external traffic reaches the service."}]};
+
+function submitModuleComplete() {
+  const btn = document.getElementById('module-complete-btn');
+  if (!btn.classList.contains('unlocked')) return;
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const comment = document.getElementById('module-comment')?.value || '';
+  const completedAt = new Date().toISOString();
+  const completedState = { completed: true, comment, completedAt, sectionCount: SECTION_COUNT };
+  revSave(completedState);
+  if (typeof sfWrite === 'function') {
+    sfWrite(completedState);
+  }
+  setTimeout(() => { window.location.href = HUB_URL; }, 1200);
+}
+</script>
+<script>
+const REV_KEY='reviewer_'+window.location.pathname.replace(/[^a-z0-9]/gi,'_');
+const BADGES={foundation:'Foundation',essential:'Essential',important:'Important'};
+const SECTIONS=[
+  {
+    "id": 1,
+    "title": "Services Overview",
+    "badge": "Foundation",
+    "content": "<h3>📘 What is a Service?</h3>\n                    <p>A Kubernetes Service is an <strong>abstraction</strong> that defines a logical set of Pods and a policy to access them. Services enable loose coupling between dependent Pods.</p>\n\n                    <div class=\"info-box\">\n                        <strong>Why Services are needed:</strong><br>\n                        • Pods are ephemeral — they can die and be recreated with new IPs<br>\n                        • Services provide a stable endpoint (IP/DNS) to access Pods<br>\n                        • Services enable load balancing across multiple Pods<br>\n                        • Services can expose applications outside the cluster\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🌍 Real-World Analogy</h3>\n                    <p>Think of a Service like a <strong>company phone number</strong>:</p>\n                    <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                        <li>Employees (Pods) come and go, but the phone number stays the same</li>\n                        <li>Calls are routed to available employees automatically</li>\n                        <li>Customers don't need to know which specific employee will answer</li>\n                        <li>The phone system (Service) handles the routing</li>\n                    </ul>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q20: What is the default Service type in Kubernetes?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-3.1\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-3.1\">✅ Mark section 3.1 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 2,
+    "title": "Service Types — ClusterIP, NodePort, LoadBalancer",
+    "badge": "Essential",
+    "content": "<h3>📘 Kubernetes Service Types</h3>\n                    <p>Kubernetes offers different Service types for different use cases:</p>\n\n                    <div class=\"video-section\">\n                        <button class=\"video-toggle\" onclick=\"toggleVideo(this)\">\n                            📺 Watch: Kubernetes Services Explained (18:12)\n                            <span class=\"toggle-icon\">▼</span>\n                        </button>\n                        <div class=\"video-content\" style=\"display:none\">\n                            <div class=\"video-container\">\n                                <iframe src=\"https://www.youtube.com/embed/T4Z7visMM4E?rel=0\" frameborder=\"0\" allowfullscreen=\"\"></iframe>\n                            </div>\n                            <p class=\"video-credit\">Source: TechWorld with Nana (18:12)</p>\n                        </div>\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">1️⃣ ClusterIP (Default)</h3>\n                    <div class=\"info-box\">\n                        <strong>ClusterIP</strong> — Internal access only<br>\n                        • Exposes service on an internal IP in the cluster<br>\n                        • Only reachable from within the cluster<br>\n                        • Default type if not specified<br>\n                        • Use for: Internal microservices, databases\n                    </div>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: v1\nkind: Service\nmetadata:\n  name: my-service\nspec:\n  type: ClusterIP  # This is the default\n  selector:\n    app: my-app\n  ports:\n  - port: 80\n    targetPort: 8080\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">2️⃣ NodePort</h3>\n                    <div class=\"info-box\">\n                        <strong>NodePort</strong> — External access via node IP<br>\n                        • Exposes service on each Node's IP at a static port (30000-32767)<br>\n                        • Accessible from outside the cluster using &lt;NodeIP&gt;:&lt;NodePort&gt;<br>\n                        • Use for: Development, testing, simple external access\n                    </div>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: v1\nkind: Service\nmetadata:\n  name: my-nodeport-service\nspec:\n  type: NodePort\n  selector:\n    app: my-app\n  ports:\n  - port: 80\n    targetPort: 8080\n    nodePort: 30007  # Optional, auto-assigned if omitted\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">3️⃣ LoadBalancer</h3>\n                    <div class=\"info-box\">\n                        <strong>LoadBalancer</strong> — Cloud load balancer<br>\n                        • Creates an external load balancer (AWS ELB, GCP LB, Azure LB)<br>\n                        • Automatically provisions cloud infrastructure<br>\n                        • Use for: Production external-facing applications\n                    </div>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: v1\nkind: Service\nmetadata:\n  name: my-loadbalancer-service\nspec:\n  type: LoadBalancer\n  selector:\n    app: my-app\n  ports:\n  - port: 80\n    targetPort: 8080\n                    </div>\n\n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Create a LoadBalancer Service on EKS:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create a deployment first\nkubectl create deployment webapp --image=nginx\n\n# Expose it as LoadBalancer\nkubectl expose deployment webapp --type=LoadBalancer --port=80\n\n# Check the service (AWS will provision an ELB)\nkubectl get svc webapp\n\n# Get the external URL (takes 2-3 minutes)\nkubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'\n                        </div>\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> AWS ELB ~$0.025/hour + data transfer costs</p>\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. NodePort valid range: 30000-32767</strong><br>\n                        Trying to use ports outside this range will fail<br><br>\n                        \n                        <strong>2. LoadBalancer only works on cloud providers</strong><br>\n                        On local clusters (minikube), LoadBalancer will remain \"Pending\"<br><br>\n                        \n                        <strong>3. ClusterIP is internal only</strong><br>\n                        You cannot access ClusterIP services from outside the cluster\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q19: Which Service type uses a cloud provider's load balancer?</li>\n                            <li>Q20: What is the default Service type?</li>\n                            <li>Q22: What is the valid port range for NodePort?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-3.2\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-3.2\">✅ Mark section 3.2 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 3,
+    "title": "Service Discovery & DNS",
+    "badge": "Important",
+    "content": "<h3>📘 Kubernetes DNS</h3>\n                    <p>Kubernetes automatically creates <strong>DNS records</strong> for Services, allowing pods to discover and communicate with services by name instead of IP addresses.</p>\n        \n                    <div class=\"info-box\">\n                        <strong>Key Benefits:</strong><br>\n                        • Services get automatic DNS names<br>\n                        • Pods can use service names instead of IPs<br>\n                        • DNS updates automatically when services change<br>\n                        • Works across namespaces\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🌐 DNS Naming Format (FQDN)</h3>\n                    <p>Every Kubernetes Service gets a Fully Qualified Domain Name (FQDN) in this format:</p>\n        \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        <service-name>.<namespace>.svc.cluster.local\n        \n        Examples:\n        webapp.default.svc.cluster.local\n        database.production.svc.cluster.local\n        api.backend.svc.cluster.local\n                    </namespace></service-name></div>\n        \n                    <div class=\"info-box\">\n                        <strong>FQDN Breakdown:</strong><br>\n                        • <code class=\"command\">service-name</code> — Name of the Service<br>\n                        • <code class=\"command\">namespace</code> — Kubernetes namespace<br>\n                        • <code class=\"command\">svc</code> — Indicates it's a Service<br>\n                        • <code class=\"command\">cluster.local</code> — Default cluster domain\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">🔍 Short Names vs Full Names</h3>\n                    <p>Pods can use shortened DNS names depending on the namespace:</p>\n        \n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Same namespace - use short name\n        curl http://webapp\n        \n        # Same namespace - use namespace\n        curl http://webapp.default\n        \n        # Different namespace - use full FQDN\n        curl http://webapp.production.svc.cluster.local\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">💻 Testing DNS Resolution</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Create a test service\n        kubectl create service clusterip test-svc --tcp=80:80\n        \n        # Run a debug pod to test DNS\n        kubectl run debug --image=busybox -it --rm -- sh\n        \n        # Inside the pod, test DNS:\n        nslookup test-svc\n        nslookup test-svc.default\n        nslookup test-svc.default.svc.cluster.local\n        \n        # Test connectivity\n        wget -O- http://test-svc\n                    </div>\n        \n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <p><strong>Test service discovery with DNS:</strong></p>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n        # Create deployment and service\n        kubectl create deployment nginx --image=nginx\n        kubectl expose deployment nginx --port=80\n        \n        # Create test pod in same namespace\n        kubectl run test --image=busybox -it --rm -- sh\n        \n        # Inside the test pod:\n        wget -O- http://nginx          # Short name works!\n        nslookup nginx                 # See DNS resolution\n        \n        # Exit the pod\n        exit\n                        </div>\n                        <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> DNS is built-in, no additional cost</p>\n                    </div>\n        \n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. DNS only works for Services, not Pods</strong><br>\n                        Individual pod IPs don't get DNS names (use Services)<br><br>\n                        \n                        <strong>2. Cross-namespace requires full name</strong><br>\n                        <code class=\"command\">webapp</code> won't work across namespaces — use <code class=\"command\">webapp.other-ns</code><br><br>\n                        \n                        <strong>3. DNS propagation isn't instant</strong><br>\n                        New services may take a few seconds to be resolvable\n                    </div>\n        \n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul style=\"color: inherit;\">\n                            <li>Q21: Kubernetes DNS FQDN format (Fill in blank)</li>\n                        </ul>\n                    </div>\n        \n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-3.3\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-3.3\">✅ Mark section 3.3 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 4,
+    "title": "Service Selectors & Labels",
+    "badge": "Essential",
+    "content": "<h3>📘 How Services Find Pods</h3>\n                        <p>Services use <strong>label selectors</strong> to identify which Pods should receive traffic. This is the core mechanism of Kubernetes networking.</p>\n            \n                        <div class=\"info-box\">\n                            <strong>Label Selector Workflow:</strong><br>\n                            1. Pods have labels (key-value pairs)<br>\n                            2. Services define selectors (which labels to match)<br>\n                            3. Any Pod with matching labels joins the Service<br>\n                            4. Service load-balances traffic across matching Pods\n                        </div>\n            \n                        <h3 style=\"margin-top: 25px;\">🏷️ Labels on Pods</h3>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n            apiVersion: v1\n            kind: Pod\n            metadata:\n              name: webapp-pod\n              labels:\n                app: webapp      # Label: app=webapp\n                tier: frontend   # Label: tier=frontend\n                version: v1      # Label: version=v1\n            spec:\n              containers:\n              - name: nginx\n                image: nginx\n                        </div>\n            \n                        <h3 style=\"margin-top: 25px;\">🎯 Selectors in Services</h3>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n            apiVersion: v1\n            kind: Service\n            metadata:\n              name: webapp-service\n            spec:\n              selector:\n                app: webapp      # Matches pods with label app=webapp\n              ports:\n              - port: 80\n                targetPort: 80\n                        </div>\n            \n                        <p style=\"margin-top: 15px;\">This Service will send traffic to <strong>any Pod</strong> that has the label <code class=\"command\">app: webapp</code>, regardless of other labels.</p>\n            \n                        <h3 style=\"margin-top: 25px;\">💻 Working with Labels</h3>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n            # View pod labels\n            kubectl get pods --show-labels\n            \n            # Filter pods by label\n            kubectl get pods -l app=webapp\n            \n            # Add label to existing pod\n            kubectl label pod my-pod environment=production\n            \n            # Remove label from pod\n            kubectl label pod my-pod environment-\n            \n            # View service endpoints (shows which pods are selected)\n            kubectl get endpoints webapp-service\n                        </div>\n            \n                        <h3 style=\"margin-top: 25px;\">🔄 Dynamic Pod Selection</h3>\n                        <p>The beauty of selectors: they're <strong>dynamic</strong>!</p>\n                        <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                            <li>Add a pod with matching labels → automatically joins the service</li>\n                            <li>Remove the label → pod removed from service immediately</li>\n                            <li>No need to update the service configuration</li>\n                        </ul>\n            \n                        <div class=\"aws-practice\">\n                            <h4>🛠️ Try It on AWS/EKS</h4>\n                            <p><strong>See label selectors in action:</strong></p>\n                            <div class=\"code-block\">\n                                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n            # Create deployment with labels\n            kubectl create deployment webapp --image=nginx\n            kubectl label deployment webapp app=frontend\n            \n            # Create service with selector\n            kubectl expose deployment webapp --port=80 --selector=app=frontend\n            \n            # Check which pods are selected\n            kubectl get endpoints webapp\n            \n            # Scale deployment - new pods automatically join service\n            kubectl scale deployment webapp --replicas=3\n            \n            # Check endpoints again - 3 pods now!\n            kubectl get endpoints webapp\n                            </div>\n                            <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> No additional cost</p>\n                        </div>\n            \n                        <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                        <div class=\"danger-box\">\n                            <strong>1. Labels must match exactly</strong><br>\n                            <code class=\"command\">app: webapp</code> ≠ <code class=\"command\">app: Webapp</code> (case-sensitive)<br><br>\n                            \n                            <strong>2. Service with no matching pods = no endpoints</strong><br>\n                            Check: <code class=\"command\">kubectl get endpoints &lt;service-name&gt;</code><br><br>\n                            \n                            <strong>3. Multiple selectors = AND logic</strong><br>\n                            Pods must match ALL selectors, not just one\n                        </div>\n            \n                        <div class=\"test-questions\">\n                            <h4>🎯 This Section Covers Test Questions:</h4>\n                            <ul style=\"color: inherit;\">\n                                <li>Q25: Service selector field (Fill in blank)</li>\n                                <li>Q26: kubectl expose command</li>\n                            </ul>\n                        </div>\n            \n                        <div class=\"section-complete\">\n                            <input type=\"checkbox\" id=\"check-3.4\" onchange=\"handleCheckboxChange(this)\">\n                            <label for=\"check-3.4\">✅ Mark section 3.4 as completed</label>\n                        </div>"
+  },
+  {
+    "id": 5,
+    "title": "NetworkPolicy — Traffic Control",
+    "badge": "Important",
+    "content": "<h3>📘 What is NetworkPolicy?</h3>\n                        <p>NetworkPolicy is a Kubernetes resource that defines <strong>rules for controlling network traffic</strong> between Pods, similar to a firewall.</p>\n            \n                        <div class=\"info-box\">\n                            <strong>Key Concepts:</strong><br>\n                            • Controls ingress (incoming) and egress (outgoing) traffic<br>\n                            • Applied to Pods using label selectors<br>\n                            • Default behavior: all traffic allowed (if no policies exist)<br>\n                            • Requires a CNI plugin that supports NetworkPolicy (Calico, Cilium, etc.)\n                        </div>\n            \n                        <h3 style=\"margin-top: 25px;\">🌍 Real-World Analogy</h3>\n                        <p>Think of NetworkPolicy as <strong>building security</strong>:</p>\n                        <ul style=\"margin-left: 25px; margin-top: 10px;\">\n                            <li>By default, anyone can enter any room (no NetworkPolicy)</li>\n                            <li>You add badge readers (NetworkPolicy)</li>\n                            <li>Only employees with matching badges (labels) can enter</li>\n                            <li>You control which rooms they can access (ingress/egress rules)</li>\n                        </ul>\n            \n                        <h3 style=\"margin-top: 25px;\">💻 Basic NetworkPolicy Example</h3>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n            apiVersion: networking.k8s.io/v1\n            kind: NetworkPolicy\n            metadata:\n              name: allow-frontend\n            spec:\n              podSelector:\n                matchLabels:\n                  app: database    # Apply to pods with label app=database\n              policyTypes:\n              - Ingress\n              ingress:\n              - from:\n                - podSelector:\n                    matchLabels:\n                      app: frontend  # Only allow traffic from frontend pods\n                ports:\n                - protocol: TCP\n                  port: 5432\n                        </div>\n            \n                        <p style=\"margin-top: 15px;\">This policy allows <strong>only</strong> pods with label <code class=\"command\">app: frontend</code> to connect to database pods on port 5432.</p>\n            \n                        <h3 style=\"margin-top: 25px;\">🚫 Deny All Traffic (Default Deny)</h3>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n            apiVersion: networking.k8s.io/v1\n            kind: NetworkPolicy\n            metadata:\n              name: default-deny-all\n            spec:\n              podSelector: {}  # Empty selector = applies to all pods\n              policyTypes:\n              - Ingress\n              - Egress\n            # No ingress/egress rules = deny all traffic\n                        </div>\n            \n                        <div class=\"warning-box\">\n                            <strong>⚠️ Important:</strong> NetworkPolicy requires a compatible CNI plugin!<br>\n                            • AWS EKS default (VPC CNI) does NOT support NetworkPolicy<br>\n                            • You need to install Calico or Cilium on EKS<br>\n                            • Minikube supports NetworkPolicy by default\n                        </div>\n            \n                        <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                        <div class=\"danger-box\">\n                            <strong>1. NetworkPolicy is not global</strong><br>\n                            Policies only affect pods in the same namespace<br><br>\n                            \n                            <strong>2. Policies are additive</strong><br>\n                            Multiple policies = union of all rules (not intersection)<br><br>\n                            \n                            <strong>3. No policy = all traffic allowed</strong><br>\n                            You must explicitly create deny rules\n                        </div>\n            \n                        <div class=\"test-questions\">\n                            <h4>🎯 This Section Covers Test Questions:</h4>\n                            <ul style=\"color: inherit;\">\n                                <li>Q23: Which object defines rules for traffic control?</li>\n                            </ul>\n                        </div>\n            \n                        <div class=\"section-complete\">\n                            <input type=\"checkbox\" id=\"check-3.5\" onchange=\"handleCheckboxChange(this)\">\n                            <label for=\"check-3.5\">✅ Mark section 3.5 as completed</label>\n                        </div>"
+  },
+  {
+    "id": 6,
+    "title": "Ingress — HTTP/HTTPS Routing",
+    "badge": "Important",
+    "content": "<h3>📘 What is Ingress?</h3>\n            <p>Ingress is an API object that manages <strong>external access to services</strong> in a cluster, typically HTTP/HTTPS. It provides load balancing, SSL termination, and name-based virtual hosting.</p>\n\n            <div class=\"info-box\">\n                <strong>Ingress vs Service (LoadBalancer):</strong><br>\n                • <strong>Service LoadBalancer:</strong> One external IP per service (expensive!)<br>\n                • <strong>Ingress:</strong> Single entry point for multiple services (cost-effective)<br>\n                • <strong>Ingress:</strong> Supports path-based and host-based routing<br>\n                • <strong>Ingress:</strong> Can handle SSL/TLS termination\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">🏗️ Ingress Architecture</h3>\n            <p>Ingress requires two components:</p>\n            <ol style=\"margin-left: 25px; margin-top: 10px;\">\n                <li><strong>Ingress Resource:</strong> Defines the routing rules (YAML)</li>\n                <li><strong>Ingress Controller:</strong> Implements the rules (nginx, traefik, AWS ALB, etc.)</li>\n            </ol>\n\n            <div class=\"warning-box\">\n                <strong>⚠️ Important:</strong> Ingress resources do nothing without an Ingress Controller!<br>\n                You must install a controller first (nginx, traefik, AWS Load Balancer Controller, etc.)\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">💻 Simple Ingress Example</h3>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: simple-ingress\nspec:\n  rules:\n  - host: myapp.example.com\n    http:\n      paths:\n      - path: /\n        pathType: Prefix\n        backend:\n          service:\n            name: webapp-service\n            port:\n              number: 80\n            </div>\n\n            <p style=\"margin-top: 15px;\">This routes <code class=\"command\">myapp.example.com</code> traffic to <code class=\"command\">webapp-service</code> on port 80.</p>\n\n            <h3 style=\"margin-top: 25px;\">🔀 Path-Based Routing</h3>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: path-based-ingress\nspec:\n  rules:\n  - host: myapp.example.com\n    http:\n      paths:\n      - path: /api\n        pathType: Prefix\n        backend:\n          service:\n            name: api-service\n            port:\n              number: 8080\n      - path: /web\n        pathType: Prefix\n        backend:\n          service:\n            name: web-service\n            port:\n              number: 80\n            </div>\n\n            <p style=\"margin-top: 15px;\">Routes:</p>\n            <ul style=\"margin-left: 25px;\">\n                <li><code class=\"command\">myapp.example.com/api</code> → api-service</li>\n                <li><code class=\"command\">myapp.example.com/web</code> → web-service</li>\n            </ul>\n\n            <h3 style=\"margin-top: 25px;\">🌐 Host-Based Routing</h3>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\napiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: host-based-ingress\nspec:\n  rules:\n  - host: api.example.com\n    http:\n      paths:\n      - path: /\n        pathType: Prefix\n        backend:\n          service:\n            name: api-service\n            port:\n              number: 80\n  - host: web.example.com\n    http:\n      paths:\n      - path: /\n        pathType: Prefix\n        backend:\n          service:\n            name: web-service\n            port:\n              number: 80\n            </div>\n\n            <p style=\"margin-top: 15px;\">Routes:</p>\n            <ul style=\"margin-left: 25px;\">\n                <li><code class=\"command\">api.example.com</code> → api-service</li>\n                <li><code class=\"command\">web.example.com</code> → web-service</li>\n            </ul>\n\n            <div class=\"aws-practice\">\n                <h4>🛠️ AWS/EKS - Using AWS Load Balancer Controller</h4>\n                <p><strong>Install AWS Load Balancer Controller first:</strong></p>\n                <div class=\"code-block\">\n                    <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Install AWS Load Balancer Controller (one-time setup)\n# Follow: https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html\n\n# Create Ingress (creates AWS ALB automatically)\nkubectl apply -f - &lt;<eof apiversion:=\"\" networking.k8s.io=\"\" v1=\"\" kind:=\"\" ingress=\"\" metadata:=\"\" name:=\"\" webapp-ingress=\"\" annotations:=\"\" alb.ingress.kubernetes.io=\"\" scheme:=\"\" internet-facing=\"\" spec:=\"\" ingressclassname:=\"\" alb=\"\" rules:=\"\" -=\"\" http:=\"\" paths:=\"\" path:=\"\" pathtype:=\"\" prefix=\"\" backend:=\"\" service:=\"\" webapp=\"\" port:=\"\" number:=\"\" 80=\"\" eof=\"\" #=\"\" check=\"\" status=\"\" (get=\"\" url)=\"\" kubectl=\"\" get=\"\" <=\"\" div=\"\">\n                <p style=\"margin-top: 10px;\"><strong>💰 Cost:</strong> AWS ALB ~$0.0225/hour + LCU charges</p>\n            </eof></div>\n\n            <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n            <div class=\"danger-box\">\n                <strong>1. No Ingress Controller = Ingress does nothing</strong><br>\n                Install nginx-ingress or AWS Load Balancer Controller first<br><br>\n                \n                <strong>2. DNS must point to Ingress</strong><br>\n                Create DNS records pointing to the Ingress Controller's external IP/hostname<br><br>\n                \n                <strong>3. pathType matters!</strong><br>\n                • <code class=\"command\">Prefix</code> matches /path and /path/*<br>\n                • <code class=\"command\">Exact</code> only matches /path exactly\n            </div>\n\n            <div class=\"test-questions\">\n                <h4>🎯 This Section Covers Test Questions:</h4>\n                <ul style=\"color: inherit;\">\n                    <li>Q24: What does an Ingress resource do?</li>\n                </ul>\n            </div>\n\n            <div class=\"section-complete\">\n                <input type=\"checkbox\" id=\"check-3.6\" onchange=\"handleCheckboxChange(this)\">\n                <label for=\"check-3.6\">✅ Mark section 3.6 as completed</label>\n            </div>\n        </div>"
+  },
+  {
+    "id": 7,
+    "title": "Endpoints & EndpointSlices",
+    "badge": "Foundation",
+    "content": "<h3>📘 What are Endpoints?</h3>\n            <p>Endpoints are Kubernetes objects that track the <strong>IP addresses of Pods</strong> that match a Service's selector. They're the bridge between Services and Pods.</p>\n\n            <div class=\"info-box\">\n                <strong>How it works:</strong><br>\n                1. Service has a selector (e.g., <code class=\"command\">app: webapp</code>)<br>\n                2. Kubernetes finds all matching Pods<br>\n                3. Creates an Endpoint object with Pod IPs and ports<br>\n                4. Service uses Endpoints to route traffic\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">🔍 Viewing Endpoints</h3>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# List all endpoints\nkubectl get endpoints\n\n# Describe a specific endpoint\nkubectl describe endpoint webapp-service\n\n# Get endpoint details in YAML\nkubectl get endpoint webapp-service -o yaml\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">💻 Example Output</h3>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n$ kubectl get endpoints webapp-service\n\nNAME             ENDPOINTS                           AGE\nwebapp-service   10.244.1.5:80,10.244.2.3:80        5m\n\n# Two pods (IPs: 10.244.1.5 and 10.244.2.3) are serving this service\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">🆕 EndpointSlices (Newer)</h3>\n            <p>EndpointSlices are a <strong>scalable replacement</strong> for Endpoints, introduced in Kubernetes 1.17+.</p>\n\n            <div class=\"info-box\">\n                <strong>Why EndpointSlices?</strong><br>\n                • <strong>Scalability:</strong> Better for services with 100+ endpoints<br>\n                • <strong>Efficiency:</strong> Reduces API server load<br>\n                • <strong>Network topology:</strong> Supports zone-aware routing<br>\n                • <strong>Dual-stack:</strong> Supports IPv4 and IPv6\n            </div>\n\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# View EndpointSlices\nkubectl get endpointslices\n\n# Describe EndpointSlice\nkubectl describe endpointslice webapp-service-abc123\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">🐛 Troubleshooting with Endpoints</h3>\n            <p>Endpoints are crucial for debugging Service issues:</p>\n\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Problem: Service not working\n# Step 1: Check if endpoints exist\nkubectl get endpoints my-service\n\n# If ENDPOINTS column is empty or shows <none>:\n# → Service selector doesn't match any pods\n# → Check pod labels vs service selector\n\n# Step 2: Verify pod labels\nkubectl get pods --show-labels\n\n# Step 3: Check service selector\nkubectl describe service my-service | grep Selector\n            </none></div>\n\n            <div class=\"warning-box\">\n                <strong>Common Issue:</strong> Service with no endpoints<br>\n                <strong>Cause:</strong> Service selector doesn't match any pod labels<br>\n                <strong>Fix:</strong> Update labels or selector to match\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n            <div class=\"danger-box\">\n                <strong>1. Empty endpoints = service broken</strong><br>\n                Always check: <code class=\"command\">kubectl get endpoints</code><br><br>\n                \n                <strong>2. Endpoints update automatically</strong><br>\n                When pods restart, endpoint IPs change automatically<br><br>\n                \n                <strong>3. You rarely create Endpoints manually</strong><br>\n                Kubernetes manages them — manual creation is advanced use case\n            </div>\n\n            <div class=\"section-complete\">\n                <input type=\"checkbox\" id=\"check-3.7\" onchange=\"handleCheckboxChange(this)\">\n                <label for=\"check-3.7\">✅ Mark section 3.7 as completed</label>\n            </div>"
+  },
+  {
+    "id": 8,
+    "title": "Network Troubleshooting",
+    "badge": "Foundation",
+    "content": "<h3>📘 Common Network Issues</h3>\n            <p>Networking problems are among the most common in Kubernetes. Here's how to diagnose and fix them.</p>\n\n            <h3 style=\"margin-top: 25px;\">🔍 Diagnostic Workflow</h3>\n            <ol style=\"margin-left: 25px; margin-top: 10px; line-height: 2;\">\n                <li><strong>Can pods communicate with each other?</strong></li>\n                <li><strong>Can pods reach services by name?</strong></li>\n                <li><strong>Can services reach their backend pods?</strong></li>\n                <li><strong>Can external traffic reach the service?</strong></li>\n            </ol>\n\n            <h3 style=\"margin-top: 25px;\">🛠️ Essential Troubleshooting Commands</h3>\n            \n            <h4 style=\"margin-top: 15px;\">1. Test Pod-to-Pod Connectivity</h4>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create a test pod\nkubectl run test --image=busybox -it --rm -- sh\n\n# Inside the pod, ping another pod's IP\nping <pod-ip>\n\n# Test HTTP connectivity\nwget -O- http://<pod-ip>:80\n            </pod-ip></pod-ip></div>\n\n            <h4 style=\"margin-top: 15px;\">2. Test Service DNS Resolution</h4>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# From a test pod:\nnslookup webapp-service\nnslookup webapp-service.default.svc.cluster.local\n\n# Test service connectivity\nwget -O- http://webapp-service\ncurl http://webapp-service\n            </div>\n\n            <h4 style=\"margin-top: 15px;\">3. Check Service Endpoints</h4>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# View service endpoints\nkubectl get endpoints webapp-service\n\n# If empty, service has no backend pods\n# Check selector and pod labels\nkubectl describe service webapp-service\nkubectl get pods --show-labels\n            </div>\n\n            <h4 style=\"margin-top: 15px;\">4. Verify Network Policies</h4>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# List network policies\nkubectl get networkpolicies\n\n# Check if policies are blocking traffic\nkubectl describe networkpolicy <policy-name>\n            </policy-name></div>\n\n            <h3 style=\"margin-top: 25px;\">🐛 Common Issues &amp; Solutions</h3>\n\n            <div class=\"danger-box\">\n                <strong>Issue 1: \"Service not reachable\"</strong><br>\n                ✅ Check: <code class=\"command\">kubectl get endpoints &lt;service&gt;</code><br>\n                ✅ Verify: Service selector matches pod labels<br>\n                ✅ Ensure: Pods are in Running state\n            </div>\n\n            <div class=\"danger-box\" style=\"margin-top: 15px;\">\n                <strong>Issue 2: \"DNS resolution fails\"</strong><br>\n                ✅ Check: CoreDNS pods are running: <code class=\"command\">kubectl get pods -n kube-system | grep dns</code><br>\n                ✅ Verify: Service exists: <code class=\"command\">kubectl get svc</code><br>\n                ✅ Test: From another pod, not from host\n            </div>\n\n            <div class=\"danger-box\" style=\"margin-top: 15px;\">\n                <strong>Issue 3: \"Connection timeout\"</strong><br>\n                ✅ Check: Pod is Running: <code class=\"command\">kubectl get pods</code><br>\n                ✅ Check: Container port matches service targetPort<br>\n                ✅ Check: NetworkPolicy isn't blocking traffic\n            </div>\n\n            <div class=\"danger-box\" style=\"margin-top: 15px;\">\n                <strong>Issue 4: \"External traffic not reaching service\"</strong><br>\n                ✅ For NodePort: Ensure security group allows NodePort range (30000-32767)<br>\n                ✅ For LoadBalancer: Check external IP is assigned: <code class=\"command\">kubectl get svc</code><br>\n                ✅ For Ingress: Verify Ingress Controller is running\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">💻 Debug Pod Template</h3>\n            <div class=\"code-block\">\n                <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create a debug pod with networking tools\nkubectl run netdebug --image=nicolaka/netshoot -it --rm -- bash\n\n# Inside the pod, you have access to:\n# - curl, wget\n# - ping, traceroute\n# - nslookup, dig\n# - netstat, ss\n# - tcpdump\n\n# Example tests:\ncurl http://webapp-service\nnslookup webapp-service\nping 10.244.1.5\n            </div>\n\n            <div class=\"aws-practice\">\n                <h4>🛠️ Try It on AWS/EKS</h4>\n                <p><strong>Complete network troubleshooting workflow:</strong></p>\n                <div class=\"code-block\">\n                    <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# 1. Create test deployment and service\nkubectl create deployment nginx --image=nginx\nkubectl expose deployment nginx --port=80\n\n# 2. Create debug pod\nkubectl run debug --image=busybox -it --rm -- sh\n\n# Inside debug pod:\n# 3. Test DNS\nnslookup nginx\n\n# 4. Test connectivity\nwget -O- http://nginx\n\n# 5. Exit and check endpoints\nexit\nkubectl get endpoints nginx\n\n# 6. Check service details\nkubectl describe service nginx\n                </div>\n            </div>\n\n            <h3 style=\"margin-top: 25px;\">📋 Troubleshooting Checklist</h3>\n            <div class=\"success-box\">\n                <strong>✅ Network Troubleshooting Checklist:</strong><br>\n                □ Are pods Running? (<code class=\"command\">kubectl get pods</code>)<br>\n                □ Do endpoints exist? (<code class=\"command\">kubectl get endpoints</code>)<br>\n                □ Does DNS work? (<code class=\"command\">nslookup service-name</code>)<br>\n                □ Do labels match selector? (<code class=\"command\">kubectl get pods --show-labels</code>)<br>\n                □ Are NetworkPolicies blocking? (<code class=\"command\">kubectl get netpol</code>)<br>\n                □ Is the application listening? (<code class=\"command\">kubectl logs pod-name</code>)<br>\n                □ Are ports correct? (Check service YAML)\n            </div>\n\n            <div class=\"section-complete\">\n                <input type=\"checkbox\" id=\"check-3.8\" onchange=\"handleCheckboxChange(this)\">\n                <label for=\"check-3.8\">✅ Mark section 3.8 as completed</label>\n            </div>"
+  }
+];
+const SQ=typeof SECTION_QUESTIONS!=='undefined'?SECTION_QUESTIONS:{};
+function revLoad(){try{return JSON.parse(localStorage.getItem(REV_KEY))||{};}catch(e){return {};}}
+function revSave(s){localStorage.setItem(REV_KEY,JSON.stringify(s));if(typeof sfWrite==='function')sfWrite(s);}
+
+function allSectionsComplete(){
+  return SECTIONS.every(s=>revLoad()['section_complete_'+s.id]===true);
+}
+
+function updateModuleCompleteBtn(){
+  const btn=document.getElementById('module-complete-btn');
+  const hint=document.getElementById('module-complete-hint');
+  if(!btn)return;
+  const state=revLoad();
+  if(state.completed){
+    btn.textContent='✓ Module Review Submitted';
+    btn.classList.add('unlocked');
+    btn.disabled=true;
+    if(hint)hint.textContent='Review submitted on '+new Date(state.completedAt).toLocaleString();
+    return;
+  }
+  const done=SECTIONS.filter(s=>state['section_complete_'+s.id]===true).length;
+  const total=SECTIONS.length;
+  if(done===total){
+    btn.classList.add('unlocked');
+    if(hint)hint.textContent='All '+total+' sections complete. You may now submit your module review.';
+  } else {
+    btn.classList.remove('unlocked');
+    if(hint)hint.textContent=done+' of '+total+' sections complete. Complete all sections to unlock.';
+  }
+}
+
+function buildQuestionBlock(secId,questions){
+  if(!questions||!questions.length)return '';
+  const keys=['A','B','C','D'];
+  const state=revLoad();
+  const secDone=state['section_complete_'+secId]===true;
+  let html='<div class="section-questions">';
+  questions.forEach((q,qi)=>{
+    const answered=state['sq_'+secId+'_'+qi+'_correct']===true;
+    html+='<div class="section-question-item'+(answered?' answered-correct':'')+'" id="sq-item-'+secId+'-'+qi+'">';
+    html+='<div class="sq-text">'+(qi+1)+'. '+q.q.replace(/</g,'&lt;')+'</div>';
+    html+='<div class="sq-options" id="sq-opts-'+secId+'-'+qi+'">';
+    q.o.forEach((opt,oi)=>{
+      html+='<div class="sq-option" data-sec="'+secId+'" data-q="'+qi+'" data-i="'+oi+'" onclick="sqSelect(this)"><span class="sq-option-key">'+keys[oi]+'</span><span>'+opt.replace(/</g,'&lt;')+'</span></div>';
+    });
+    html+='</div>';
+    html+='<div class="sq-feedback" id="sq-fb-'+secId+'-'+qi+'"></div>';
+    html+='<button class="sq-check-btn" id="sq-btn-'+secId+'-'+qi+'" onclick="sqCheck('+secId+','+qi+','+q.c+')" '+(answered?'disabled':'')+'>Check Answer</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  const allAnswered=questions.every((_,qi)=>revLoad()['sq_'+secId+'_'+qi+'_correct']===true);
+  html+='<button class="section-complete-btn'+(allAnswered||secDone?' unlocked':'')+' '+(secDone?'done':'')+'" id="sec-complete-btn-'+secId+'" onclick="sectionComplete('+secId+')" '+(secDone?'disabled':(allAnswered?'':'disabled'))+'>'+(secDone?'✓ Section Reviewed':'Mark Section as Reviewed')+'</button>';
+  return html;
+}
+
+window.sqSelect=function(el){
+  const secId=el.dataset.sec,qi=el.dataset.q;
+  document.querySelectorAll('[data-sec="'+secId+'"][data-q="'+qi+'"]').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+window.sqCheck=function(secId,qi,correctIdx){
+  const selected=document.querySelector('[data-sec="'+secId+'"][data-q="'+qi+'"].selected');
+  if(!selected){alert('Please select an answer first.');return;}
+  const chosenIdx=parseInt(selected.dataset.i);
+  const isCorrect=(chosenIdx===correctIdx);
+  const fb=document.getElementById('sq-fb-'+secId+'-'+qi);
+  const btn=document.getElementById('sq-btn-'+secId+'-'+qi);
+  const item=document.getElementById('sq-item-'+secId+'-'+qi);
+  // Track attempt count — incremented on every submit, right or wrong
+  const atKey='sq_'+secId+'_'+qi+'_attempts';
+  const st0=revLoad();st0[atKey]=(st0[atKey]||0)+1;revSave(st0);
+  if(isCorrect){
+    selected.classList.add('correct');
+    if(fb){fb.textContent='✓ Correct!';fb.className='sq-feedback correct';}
+    if(btn)btn.disabled=true;
+    if(item)item.classList.add('answered-correct');
+    const st=revLoad();st['sq_'+secId+'_'+qi+'_correct']=true;revSave(st);
+    const secQs=SQ[secId]||[];
+    const allCorrect=secQs.every((_,i)=>revLoad()['sq_'+secId+'_'+i+'_correct']===true);
+    const secBtn=document.getElementById('sec-complete-btn-'+secId);
+    if(allCorrect&&secBtn){secBtn.classList.add('unlocked');secBtn.removeAttribute('disabled');}
+  } else {
+    selected.classList.add('wrong');
+    if(fb){fb.textContent='✗ Incorrect — please try again.';fb.className='sq-feedback wrong';}
+    setTimeout(()=>{
+      selected.classList.remove('wrong','selected');
+      if(fb){fb.textContent='';fb.className='sq-feedback';}
+    },1500);
+  }
+};
+
+window.sectionComplete=function(secId){
+  const btn=document.getElementById('sec-complete-btn-'+secId);
+  if(!btn||!btn.classList.contains('unlocked'))return;
+  btn.classList.add('done');btn.disabled=true;btn.textContent='✓ Section Reviewed';
+  const st=revLoad();st['section_complete_'+secId]=true;st['section_completed_at_'+secId]=new Date().toISOString();revSave(st);
+  updateModuleCompleteBtn();
+};
+
+window.toggleSection=(id)=>{const body=document.getElementById('body-'+id);const toggle=document.getElementById('toggle-'+id);const isOpen=body.classList.contains('open');document.querySelectorAll('.section-body').forEach(b=>b.classList.remove('open'));document.querySelectorAll('.section-toggle').forEach(t=>t.classList.remove('open'));if(!isOpen){body.classList.add('open');toggle.classList.add('open');}};
+window.copyCode=(btn)=>{const text=btn.parentElement.innerText.replace('Copy','').trim();navigator.clipboard.writeText(text).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);});};
+
+function renderAll(){
+  const sec=document.getElementById('sections-container');if(!sec)return;sec.innerHTML='';
+  const s0=revLoad();
+  SECTIONS.forEach(s=>{
+    const secDone=s0['section_complete_'+s.id]===true;
+    const sd=document.createElement('div');sd.className='section-block';
+    const badgeTxt=BADGES[s.badge]||s.badge||'';
+    const questions=SQ[s.id]||[];
+    const qBlock=buildQuestionBlock(s.id,questions);
+    sd.innerHTML='<div class="section-header" onclick="toggleSection('+s.id+')"><span class="section-num">'+s.id+'.</span><span class="section-title">'+s.title+'</span>'+(badgeTxt?'<span style="font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;background:#e8f1fb;color:#1a6eb5;font-family:Source Code Pro,monospace;">'+badgeTxt+'</span>':'')+(secDone?'<span style="font-size:12px;margin-left:4px;">✅</span>':'')+'<span class="section-toggle" id="toggle-'+s.id+'">▼</span></div><div class="section-body" id="body-'+s.id+'">'+s.content+'</div>';
+    sec.appendChild(sd);
+    if(qBlock){const bodyEl=document.getElementById('body-'+s.id);if(bodyEl)bodyEl.insertAdjacentHTML('beforeend',qBlock);}
+  });
+  updateModuleCompleteBtn();
+}
+
+const moduleCommentEl=document.getElementById('module-comment');
+if(moduleCommentEl){
+  const s=revLoad();if(s.moduleComment)moduleCommentEl.value=s.moduleComment;
+  moduleCommentEl.addEventListener('input',()=>{const s=revLoad();s.moduleComment=moduleCommentEl.value;revSave(s);});
+}
+renderAll();
+</script>
+<script>
+(function(){var scripts=['https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js'];function loadNext(i){if(i>=scripts.length){window._sfFirebaseReady=true;initRevFirebase();return;}var s=document.createElement('script');s.src=scripts[i];s.onload=function(){loadNext(i+1);};s.onerror=function(){window._sfFirebaseReady=false;};document.head.appendChild(s);}loadNext(0);})();
+</script>
+<script>
+function initRevFirebase(){
+  const SF_CONFIG={apiKey:"AIzaSyA-8fatW5D7uR69rcuGFPH54IFqrz0PhU0",authDomain:"sfcertification-grafana.firebaseapp.com",projectId:"sfcertification-grafana",storageBucket:"sfcertification-grafana.firebasestorage.app",messagingSenderId:"227322696511",appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"};
+  if(!firebase.apps.length)firebase.initializeApp(SF_CONFIG);
+  window.sfAuth=firebase.auth();window.sfDb=firebase.firestore();
+  const REV_KEY_FB='reviewer_sf-internal-kubernetes-certification_module-3';
+  const COURSE_ID='ymfsFxUvNoJxOY8suZnY';
+  function sfDocRef(){if(!window.sfReviewerUid)return null;return window.sfDb.collection('reviewerSessions').doc(window.sfReviewerUid).collection('sf-internal-kubernetes-certification').doc('module-3');}
+  function sfInitSession(){const local=revLoad();if(!local.startedAt){local.startedAt=new Date().toISOString();localStorage.setItem(REV_KEY,JSON.stringify(local));}if(!window._sfFirebaseReady||!window.sfReviewerUid)return;sfDocRef().set({email:window.sfReviewerEmail,moduleId:'module-3',courseId:COURSE_ID,startedAt:local.startedAt,lastUpdated:firebase.firestore.FieldValue.serverTimestamp(),reviewComplete:local.reviewComplete||false,attemptCount:local.attemptCount||0},{merge:true}).catch(e=>console.warn('SF init:',e.message));}
+  window.sfInitSession=sfInitSession;
+  window.sfWrite=function(extra){if(!window._sfFirebaseReady||!window.sfReviewerUid)return;const ref=sfDocRef();if(!ref)return;const local=revLoad();const payload=Object.assign({},local,extra,{email:window.sfReviewerEmail,moduleId:'module-3',courseId:COURSE_ID,lastUpdated:firebase.firestore.FieldValue.serverTimestamp()});ref.set(payload,{merge:true}).catch(e=>console.warn('SF write:',e.message));};
+  window.sfFetchAndMerge=async function(){const ref=sfDocRef();if(!ref)return;try{const snap=await ref.get();if(!snap.exists)return;const remote=snap.data();const local=revLoad();const merged=Object.assign({},local,remote);delete merged.email;delete merged.lastUpdated;localStorage.setItem(REV_KEY,JSON.stringify(merged));if(typeof renderAll==='function'){renderAll();}if(typeof updateCompleteBar==='function')updateCompleteBar();}catch(e){console.warn('SF fetch:',e.message);}};
+  function sfHideOverlayFB(user){window.sfReviewerEmail=user.email;window.sfReviewerUid=user.uid;const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+user.email;sfInitSession();window.sfFetchAndMerge();}
+  window.sfAuth.onAuthStateChanged(user=>{if(user){sfHideOverlayFB(user);}else{document.getElementById('sfSigninOverlay').classList.remove('hidden');}});
+}
+</script>
+</body>
+</html>
