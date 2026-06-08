@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate"/>
+<meta http-equiv="Cross-Origin-Opener-Policy" content="unsafe-none">
+<meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
+<title>[Reviewer] Module 5: Troubleshooting</title>
+<link href="https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{--bg:#eef2f7;--bg2:#ffffff;--bg3:#f0f4f9;--border:#d0dae8;--text:#1a2332;--text-dim:#4a5568;--text-dimmer:#8fa3bc;--blue:#1a6eb5;--blue-light:#e8f1fb;--blue-mid:#b8d0ed;--green:#1a6b3a;--green-light:#e8f5ed;--coral:#c0392b;--coral-light:#fdf0ee;--radius:12px;}
+  html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Merriweather Sans',sans-serif;font-size:15px;line-height:1.6;}
+  a{color:var(--blue);text-decoration:none;}
+  .reviewer-topbanner{background:#f5f0ff;border-bottom:2px solid #c4bdf0;padding:9px 40px;font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;display:flex;align-items:center;gap:8px;}
+  .sf-signin-overlay{position:fixed;inset:0;background:rgba(20,30,50,.82);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(3px);}
+  .sf-signin-overlay.hidden{display:none;}
+  .sf-signin-card{background:#fff;border-radius:16px;padding:36px 40px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center;}
+  .sf-signin-logo{font-size:32px;margin-bottom:12px;}
+  .sf-signin-title{font-size:17px;font-weight:700;color:#1a2332;margin-bottom:8px;}
+  .sf-signin-sub{font-size:13px;color:#4a5568;line-height:1.6;margin-bottom:24px;}
+  .sf-google-btn{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1.5px solid #d0dae8;border-radius:8px;padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;color:#1a2332;width:100%;justify-content:center;transition:box-shadow .15s;}
+  .sf-google-btn:hover{box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  .sf-google-btn img{width:20px;height:20px;}
+  .sf-signin-divider{font-size:11px;color:#8fa3bc;text-align:center;margin:14px 0 10px;display:flex;align-items:center;gap:8px;font-family:'Source Code Pro',monospace;}
+  .sf-signin-divider::before,.sf-signin-divider::after{content:'';flex:1;height:1px;background:#d0dae8;}
+  .sf-fallback-input{width:100%;padding:10px 12px;border:1.5px solid #d0dae8;border-radius:8px;font-size:14px;font-family:'Merriweather Sans',sans-serif;color:#1a2332;margin-bottom:10px;outline:none;}
+  .sf-fallback-input:focus{border-color:var(--blue);}
+  .sf-fallback-btn{width:100%;padding:10px;background:var(--blue);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;}
+  .sf-signin-error{margin-top:14px;font-size:12.5px;color:#c0392b;font-family:'Source Code Pro',monospace;background:#fdf0ee;border:1px solid #f0b8b2;border-radius:6px;padding:10px 12px;display:none;text-align:left;}
+  .sf-signin-error.visible{display:block;}
+  .sf-signed-in-bar{background:#e8f5ed;border-bottom:1px solid #a3d4b8;padding:7px 40px;font-size:11px;font-family:'Source Code Pro',monospace;color:var(--green);display:flex;align-items:center;justify-content:space-between;}
+  .sf-signed-in-bar.hidden{display:none;}
+  .sf-signout-btn{font-size:10px;color:var(--blue);background:none;border:1px solid #b8d0ed;border-radius:4px;padding:2px 8px;cursor:pointer;}
+  .topnav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 40px;height:48px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-dimmer);font-family:'Source Code Pro',monospace;position:sticky;top:0;z-index:100;}
+  .topnav a{color:var(--blue);}
+  .sep{margin:0 4px;color:var(--text-dimmer);}
+  .main{max-width:860px;margin:0 auto;padding:36px 40px 80px;}
+  .module-hero{margin-bottom:28px;}
+  .hero-eyebrow{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--blue);font-weight:600;margin-bottom:8px;font-family:'Source Code Pro',monospace;}
+  .module-hero h1{font-size:clamp(18px,2.5vw,26px);font-weight:700;color:var(--text);line-height:1.25;}
+  .section-block{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+  .section-header{padding:14px 18px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+  .section-header:hover{background:var(--bg3);}
+  .section-num{font-size:10px;font-weight:700;color:var(--text-dimmer);min-width:24px;font-family:'Source Code Pro',monospace;}
+  .section-title{font-weight:600;font-size:14px;flex:1;color:var(--text);}
+  .section-toggle{font-size:11px;color:var(--text-dimmer);transition:transform .2s;}
+  .section-toggle.open{transform:rotate(180deg);}
+  .section-body{display:none;padding:20px 22px 14px;border-top:1px solid var(--border);font-size:14px;color:var(--text-dim);line-height:1.75;}
+  .section-body.open{display:block;}
+  .section-body h3{font-size:15px;font-weight:700;color:var(--text);margin:16px 0 8px;}
+  .section-body p{margin-bottom:10px;}
+  .section-body ul,.section-body ol{margin:8px 0 12px 20px;}
+  .section-body li{margin-bottom:4px;}
+  .section-body code{font-family:'Source Code Pro',monospace;font-size:12.5px;background:var(--bg3);border:1px solid var(--border);padding:1px 5px;border-radius:4px;color:#0f4a7a;}
+  .section-body pre{background:#1e2433;color:#cdd6f4;padding:16px;border-radius:8px;font-size:12.5px;font-family:'Source Code Pro',monospace;overflow-x:auto;margin:12px 0;position:relative;}
+  .copy-btn,.copy-btn-small{position:absolute;top:8px;right:8px;background:#252b3b;border:1px solid #3a4155;color:#7a8ab0;border-radius:4px;padding:2px 8px;font-size:10px;cursor:pointer;font-family:'Source Code Pro',monospace;}
+  .copy-btn:hover,.copy-btn-small:hover{color:#cdd6f4;}
+  .reviewer-bar{background:#fff8e6;border:1px solid #f0d4a0;border-left:3px solid #92600a;border-radius:8px;padding:10px 16px;margin:18px 0 6px;display:flex;align-items:center;gap:10px;font-size:13px;color:#92600a;font-family:'Source Code Pro',monospace;}
+  .reviewer-bar input[type="checkbox"]{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--green);}
+  .reviewer-bar label{cursor:pointer;font-weight:600;user-select:none;}
+  .reviewer-bar.checked{background:var(--green-light);border-color:#a3d4b8;border-left-color:var(--green);color:var(--green);}
+  .reviewer-panel{background:#f5f0ff;border:1px solid #c4bdf0;border-top:3px solid #5b4fcf;border-radius:12px;padding:24px 28px;margin:32px 0;}
+  .reviewer-panel-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.18em;text-transform:uppercase;color:#5b4fcf;font-weight:600;margin-bottom:16px;}
+  .reviewer-q-text{font-size:14px;font-weight:600;color:#1a2332;line-height:1.65;margin-bottom:14px;}
+  .reviewer-options{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+  .reviewer-option{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border:1px solid #d0dae8;border-radius:8px;cursor:pointer;font-size:13.5px;color:#4a5568;line-height:1.5;background:#fff;transition:background .12s,border-color .12s;}
+  .reviewer-option:hover{background:#f0f4f9;border-color:#b8d0ed;}
+  .reviewer-option.selected{background:#e8f1fb;border-color:var(--blue);color:#1a2332;}
+  .reviewer-option.correct{background:var(--green-light);border-color:#a3d4b8;color:var(--green);}
+  .reviewer-option.wrong{background:var(--coral-light);border-color:#f0b8b2;color:var(--coral);}
+  .reviewer-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#8fa3bc;flex-shrink:0;margin-top:1px;}
+  .reviewer-reveal{font-size:12px;font-family:'Source Code Pro',monospace;color:#5b4fcf;cursor:pointer;text-decoration:underline;background:none;border:none;padding:0;margin-bottom:14px;display:block;}
+  .reviewer-explanation{font-size:13px;color:#4a5568;line-height:1.7;padding:12px 14px;background:#eef2f7;border-radius:8px;margin-bottom:16px;display:none;}
+  .reviewer-explanation.visible{display:block;}
+  .reviewer-exp-label{font-size:9px;font-family:'Source Code Pro',monospace;letter-spacing:.15em;text-transform:uppercase;font-weight:700;margin-bottom:4px;}
+  .reviewer-exp-label.correct{color:var(--green);}
+  .reviewer-exp-label.wrong{color:var(--coral);}
+  .reviewer-comment-label{font-size:11px;font-family:'Source Code Pro',monospace;letter-spacing:.12em;text-transform:uppercase;color:#8fa3bc;font-weight:600;margin-bottom:6px;}
+  .reviewer-comment{width:100%;min-height:80px;padding:10px 12px;border:1px solid #c4bdf0;border-radius:8px;font-family:'Merriweather Sans',sans-serif;font-size:13.5px;color:#1a2332;background:#fff;resize:vertical;line-height:1.6;}
+  .reviewer-comment:focus{outline:none;border-color:#5b4fcf;}
+  .reviewer-save-note{font-size:11px;font-family:'Source Code Pro',monospace;color:#8fa3bc;margin-top:6px;}
+  .rev-complete-wrap{margin:28px 0 0;}
+  .rev-complete-bar{display:flex;align-items:center;gap:10px;padding:14px 18px;border-radius:8px;font-size:13.5px;font-family:'Source Code Pro',monospace;font-weight:600;border:1.5px solid var(--border);background:var(--bg3);color:var(--text-dimmer);transition:all .2s;}
+  .rev-complete-bar.disabled{opacity:.6;cursor:not-allowed;}
+  .rev-complete-bar.ready{background:#fff8e6;border-color:#f0d4a0;border-left:3px solid #92600a;color:#92600a;cursor:pointer;}
+  .rev-complete-bar.done{background:var(--green-light);border-color:#a3d4b8;border-left:3px solid var(--green);color:var(--green);cursor:default;}
+  .rev-complete-bar input[type="checkbox"]{width:18px;height:18px;flex-shrink:0;accent-color:var(--green);}
+  .rev-complete-bar.disabled input{cursor:not-allowed;}
+  .rev-complete-hint{font-size:11px;font-family:'Source Code Pro',monospace;color:var(--text-dimmer);margin-top:6px;min-height:16px;}
+  .bottom-nav{display:flex;justify-content:space-between;align-items:center;padding:20px 0 0;border-top:1px solid var(--border);margin-top:40px;}
+  .nav-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-family:'Source Code Pro',monospace;color:var(--blue);text-decoration:none;padding:10px 18px;border:1px solid var(--blue-mid);border-radius:8px;background:var(--blue-light);font-weight:600;}
+  .nav-btn.secondary{background:var(--bg2);color:var(--text-dim);border-color:var(--border);}
+  .nav-btn:hover{background:var(--blue-mid);}
+</style>
+<style>
+.section-questions{margin-top:16px;border-top:2px solid #e2e8f0;padding-top:16px;}
+.section-question-item{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+.section-question-item.answered-correct{border-color:#16a34a;background:#f0fdf4;}
+.section-question-item.answered-wrong{border-color:#dc2626;background:#fef2f2;}
+.sq-text{font-size:14px;font-weight:600;color:#0f172a;margin-bottom:10px;}
+.sq-options{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;}
+.sq-option{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:13px;background:#fff;transition:all .15s;}
+.sq-option:hover{border-color:#2563eb;background:#eff6ff;}
+.sq-option.selected{border-color:#2563eb;background:#eff6ff;}
+.sq-option.correct{border-color:#16a34a;background:#f0fdf4;color:#16a34a;font-weight:600;}
+.sq-option.wrong{border-color:#dc2626;background:#fef2f2;color:#dc2626;}
+.sq-option-key{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:700;color:#94a3b8;min-width:18px;}
+.sq-feedback{font-size:12px;font-weight:700;padding:4px 0;}
+.sq-feedback.correct{color:#16a34a;}
+.sq-feedback.wrong{color:#dc2626;}
+.sq-check-btn{background:#2563eb;color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;}
+.sq-check-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.section-complete-btn{display:flex;align-items:center;gap:8px;background:transparent;border:2px solid #e2e8f0;color:#94a3b8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:not-allowed;margin-top:14px;transition:all .2s;}
+.section-complete-btn.unlocked{border-color:#16a34a;color:#16a34a;cursor:pointer;background:#f0fdf4;}
+.section-complete-btn.done{border-color:#16a34a;background:#16a34a;color:#fff;cursor:default;}
+.module-complete-wrap{background:#f8fafc;border:2px solid #e2e8f0;border-radius:12px;padding:20px;margin-top:28px;text-align:center;}
+.module-complete-btn{background:#16a34a;color:#fff;border:none;border-radius:10px;padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;opacity:0.4;pointer-events:none;transition:all .2s;}
+.module-complete-btn.unlocked{opacity:1;pointer-events:auto;}
+.module-complete-hint{font-size:13px;color:#64748b;margin-top:8px;}
+.reviewer-comment-wrap{margin-top:20px;}
+.reviewer-comment-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;margin-bottom:6px;}
+.reviewer-comment{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;resize:vertical;min-height:80px;outline:none;}
+.reviewer-comment:focus{border-color:#2563eb;}
+</style>
+</head>
+<body>
+<div class="sf-signin-overlay" id="sfSigninOverlay">
+  <div class="sf-signin-card">
+    <div class="sf-signin-logo">🔐</div>
+    <div class="sf-signin-title">Sign in to save your progress</div>
+    <div class="sf-signin-sub">Sign in with your SourceFuse Gmail. Review progress, checkboxes and question attempts are saved and restored across devices.</div>
+    <button class="sf-google-btn" id="sfGoogleSignInBtn"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"> Sign in with Google</button>
+    <div class="sf-signin-divider">or</div>
+    <input type="text" class="sf-fallback-input" id="sfEmailInput" placeholder="your.name@sourcefuse.com" autocomplete="off" inputmode="email">
+    <input type="password" class="sf-fallback-input" id="sfPasswordInput" placeholder="Password (test users only)" autocomplete="off" style="margin-top:6px;">
+    <button class="sf-fallback-btn" id="sfEmailSignInBtn">Continue with email</button>
+    <div class="sf-signin-error" id="sfSigninError"></div>
+  </div>
+</div>
+<div class="sf-signed-in-bar hidden" id="sfSignedInBar"><span id="sfSignedInEmail">Signed in as …</span><button class="sf-signout-btn" id="sfSignoutLink">Sign out</button></div>
+<div class="reviewer-topbanner"><span>👁</span><strong>Reviewer Mode</strong> — Module 5: Troubleshooting</div>
+<div class="main">
+  <div class="module-hero">
+    <div class="hero-eyebrow">Module 5 of 5 · Reviewer Mode</div>
+    <h1>Troubleshooting</h1>
+    <p style="color:#64748b;font-size:14px;margin-top:8px;">Review each section carefully and answer all questions correctly to mark sections complete. Once all sections are complete, submit your module review.</p>
+  </div>
+  <div id="sections-container"></div>
+  <div class="module-complete-wrap">
+    <div class="module-complete-hint" id="module-complete-hint">Complete all sections to unlock</div>
+    <div class="reviewer-comment-wrap">
+      <div class="reviewer-comment-label">Module Review Notes</div>
+      <textarea class="reviewer-comment" id="module-comment" placeholder="Add your overall notes for this module…"></textarea>
+    </div>
+    <button class="module-complete-btn" id="module-complete-btn" onclick="submitModuleComplete()">✓ Mark Module 5 as Reviewed</button>
+  </div>
+</div>
+<script>
+function sfShowError(msg){const el=document.getElementById('sfSigninError');if(el){el.textContent=msg;el.classList.add('visible');}}
+function sfHideOverlay(user){
+  window.sfReviewerEmail=user.email||user;window.sfReviewerUid=user.uid||'email_'+btoa(window.sfReviewerEmail).replace(/=/g,'');
+  const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');
+  const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');
+  if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+window.sfReviewerEmail;
+  if(typeof sfInitSession==='function')sfInitSession();
+  if(window._sfFirebaseReady&&typeof window.sfDb!=='undefined'&&typeof sfFetchAndMerge==='function')sfFetchAndMerge();
+}
+const SF_TEST_USERS={'ravjv2013@gmail.com':'SF-Test-2026!','noushin.khan7official@gmail.com':'SF-Test-2026!'};
+function sfSignInWithEmail(){const emailEl=document.getElementById('sfEmailInput');if(!emailEl)return;const email=emailEl.value.trim().toLowerCase();const pwdEl=document.getElementById('sfPasswordInput');const pwd=pwdEl?pwdEl.value:'';if(!email||!email.includes('@')){sfShowError('Please enter a valid email address.');return;}if(SF_TEST_USERS[email]){if(SF_TEST_USERS[email]!==pwd){sfShowError('Invalid test credentials.');return;}sfHideOverlay(email);return;}if(!email.endsWith('@sourcefuse.com')){sfShowError('Please use your @sourcefuse.com email address.');return;}sfHideOverlay(email);}
+async function sfSignInWithGoogle(){if(typeof firebase==='undefined'||!window._sfFirebaseReady){sfShowError('Popup blocked. Please enter your SF email below.');return;}const provider=new firebase.auth.GoogleAuthProvider();provider.setCustomParameters({hd:'sourcefuse.com',prompt:'select_account'});const t=setTimeout(()=>sfShowError('Popup blocked. Please enter your SF email below.'),30000);try{const r=await firebase.auth().signInWithPopup(provider);clearTimeout(t);sfHideOverlay(r.user);}catch(e){clearTimeout(t);sfShowError('Popup blocked. Please enter your SF email below.');}}
+function sfSignOut(){window.sfReviewerEmail=null;window.sfReviewerUid=null;const bar=document.getElementById('sfSignedInBar');const ov=document.getElementById('sfSigninOverlay');if(bar)bar.classList.add('hidden');if(ov)ov.classList.remove('hidden');if(typeof firebase!=='undefined'&&window._sfFirebaseReady)firebase.auth().signOut();}
+document.addEventListener('DOMContentLoaded',function(){const gb=document.getElementById('sfGoogleSignInBtn');const eb=document.getElementById('sfEmailSignInBtn');const so=document.getElementById('sfSignoutLink');if(gb)gb.addEventListener('click',sfSignInWithGoogle);if(eb)eb.addEventListener('click',sfSignInWithEmail);if(so)so.addEventListener('click',sfSignOut);});
+</script>
+<script>
+const HUB_URL = 'index.html';
+const SECTION_COUNT = 27470;
+const SECTION_QUESTIONS = {"1":[{"q":"What is the recommended first step in the systematic troubleshooting workflow?","o":["Reboot all nodes","Identify the problem — determine what is not working","Delete the pod","Reinstall Kubernetes"],"c":1,"exp":"The 5-step process starts with identifying the problem, then checking pod status, logs, describe/events, and connectivity."},{"q":"For a pod stuck in Pending, what does the quick diagnostic chart say to check?","o":["Application logs only","Events, node resources, and scheduling issues","The Service selector","The container image tag"],"c":1,"exp":"For Pending pods, check events, node resources, and scheduling issues."}],"2":[{"q":"What does \"kubectl logs\" show?","o":["The cluster event history","The stdout/stderr output from containers","The node’s system journal","The etcd contents"],"c":1,"exp":"kubectl logs shows container stdout/stderr — errors, warnings, stack traces, and custom logging."},{"q":"Which flag shows logs from the previous container instance after a crash?","o":["--follow","--previous","--tail=100","--since=1h"],"c":1,"exp":"kubectl logs <pod> --previous shows logs from the prior (crashed) container instance."}],"3":[{"q":"What is the most useful part of \"kubectl describe pod\" output for troubleshooting?","o":["The image pull secrets","The Events section at the bottom, showing what Kubernetes tried to do","The resource limits","The pod IP"],"c":1,"exp":"describe shows metadata, status, and crucially the Events at the bottom, which reveal what Kubernetes attempted and why it failed."},{"q":"Besides pods, what else can \"kubectl describe\" inspect?","o":["Only pods","Nodes, services, deployments, and other resources","Only the control plane","Only namespaces"],"c":1,"exp":"describe works on many resources: pods, nodes, services, deployments, etc."}],"4":[{"q":"What does \"kubectl exec\" do?","o":["Deletes a container","Executes commands inside a running container for debugging from within","Exports pod logs","Schedules a new pod"],"c":1,"exp":"kubectl exec runs commands inside a running container — useful to debug from inside the container."},{"q":"Which command opens an interactive shell inside a pod?","o":["kubectl exec -it my-pod -- /bin/bash","kubectl shell my-pod","kubectl logs -it my-pod","kubectl run my-pod -- bash"],"c":0,"exp":"kubectl exec -it <pod> -- /bin/bash (or sh) opens an interactive shell."}],"5":[{"q":"What are cluster Events?","o":["Scheduled cron jobs","Time-ordered records of what happened in the cluster","Container log files","Network packets"],"c":1,"exp":"Events are time-ordered records of cluster actions, invaluable for understanding the sequence of what happened."},{"q":"How long are Events retained by default?","o":["Forever","About 1 hour","24 hours","7 days"],"c":1,"exp":"Events are automatically deleted after about 1 hour by default; use a logging solution for long-term tracking."}],"6":[{"q":"What does CrashLoopBackOff mean?","o":["The image cannot be pulled","The container keeps crashing and Kubernetes keeps restarting it with exponential backoff","The pod cannot be scheduled","The node is unhealthy"],"c":1,"exp":"CrashLoopBackOff means the container repeatedly crashes and is restarted with increasing backoff delays."},{"q":"Which is a common cause of CrashLoopBackOff?","o":["The Service selector is wrong","The application crashes on startup due to missing env vars/config, a wrong command, or unready dependencies","The node is out of disk","The image tag does not exist"],"c":1,"exp":"Common causes include immediate startup crashes, missing config/env vars, wrong entrypoint/command, or dependencies not ready."}],"7":[{"q":"What does ImagePullBackOff indicate?","o":["The container crashed after starting","Kubernetes cannot pull the container image from the registry","The pod cannot be scheduled to a node","The node lost network connectivity to etcd"],"c":1,"exp":"ImagePullBackOff means the image could not be pulled from the registry."},{"q":"Which is a common cause of ImagePullBackOff?","o":["Too many replicas","A wrong image name/tag, a missing image, or a private registry needing credentials","A NetworkPolicy blocking egress","An unbound PVC"],"c":1,"exp":"Causes include incorrect image name/tag, nonexistent image, missing registry credentials, or network issues reaching the registry."}],"8":[{"q":"What does a pod in the Pending state mean?","o":["The container crashed","The scheduler cannot find a suitable node to run it","The image cannot be pulled","The pod completed successfully"],"c":1,"exp":"Pending means the scheduler cannot place the pod on a suitable node."},{"q":"Which is a common reason a pod stays Pending?","o":["The application logs an error","Insufficient CPU/memory, a nodeSelector that matches no node, taints, or an unbound PVC","The container exits with code 0","The Service has no DNS record"],"c":1,"exp":"Pending causes include insufficient resources, unmatched node selectors, taints, unbound PVCs, or no available nodes."}],"9":[{"q":"Which command checks node health?","o":["kubectl get nodes (STATUS should be Ready)","kubectl logs nodes","kubectl exec nodes","kubectl top events"],"c":0,"exp":"kubectl get nodes shows status; Ready is healthy, while NotReady or Unknown indicates a problem."},{"q":"A node showing \"NotReady\" most likely means what?","o":["The node is healthy and idle","There is a problem with the node (e.g. kubelet, network, or resources) needing investigation","The node has no pods scheduled","The node is the control plane"],"c":1,"exp":"NotReady (or Unknown) signals a node problem; describe the node and check conditions to investigate."}],"10":[{"q":"According to the troubleshooting checklist, what is the first command to run when debugging?","o":["kubectl delete pod","kubectl get pods (check status)","kubectl drain node","kubectl apply -f"],"c":1,"exp":"Step 1 of the checklist is to check pod status with kubectl get pods."},{"q":"Which sequence reflects the checklist’s debugging order?","o":["Status → Logs → Events → Resources → Networking → Configuration","Configuration → Networking → Logs → Status","Networking → Status → Resources","Logs → Status → Delete"],"c":0,"exp":"The checklist proceeds: check pod status, logs, events, node resources, networking/endpoints, then configuration."}]};
+
+function submitModuleComplete() {
+  const btn = document.getElementById('module-complete-btn');
+  if (!btn.classList.contains('unlocked')) return;
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  const comment = document.getElementById('module-comment')?.value || '';
+  const completedAt = new Date().toISOString();
+  const completedState = { completed: true, comment, completedAt, sectionCount: SECTION_COUNT };
+  revSave(completedState);
+  if (typeof sfWrite === 'function') {
+    sfWrite(completedState);
+  }
+  setTimeout(() => { window.location.href = HUB_URL; }, 1200);
+}
+</script>
+<script>
+const REV_KEY='reviewer_'+window.location.pathname.replace(/[^a-z0-9]/gi,'_');
+const BADGES={foundation:'Foundation',essential:'Essential',important:'Important'};
+const SECTIONS=[
+  {
+    "id": 1,
+    "title": "Troubleshooting Workflow",
+    "badge": "Essential",
+    "content": "<h3>📘 Systematic Troubleshooting Approach</h3>\n                    <p>When things go wrong in Kubernetes, follow a <strong>systematic workflow</strong> to identify and fix issues quickly.</p>\n\n                    <div class=\"video-section\">\n                        <button class=\"video-toggle\" onclick=\"toggleVideo(this)\">\n                            📺 Watch: Kubernetes Debugging &amp; Troubleshooting (14:28)\n                            <span class=\"toggle-icon\">▼</span>\n                        </button>\n                        <div class=\"video-content\" style=\"display:none\">\n                            <div class=\"video-container\">\n                                <iframe src=\"https://www.youtube.com/embed/aBVMqxeV_qE?rel=0\" frameborder=\"0\" allowfullscreen=\"\"></iframe>\n                            </div>\n                            <p class=\"video-credit\">Source: TechWorld with Nana (14:28)</p>\n                        </div>\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🔍 The 5-Step Debugging Process</h3>\n                    <ol style=\"margin-left: 25px; margin-top: 10px; line-height: 2;\">\n                        <li><strong>Identify the problem:</strong> What's not working?</li>\n                        <li><strong>Check pod status:</strong> Is it Running, Pending, or CrashLoopBackOff?</li>\n                        <li><strong>Examine logs:</strong> What do the application logs say?</li>\n                        <li><strong>Describe resources:</strong> What do events tell you?</li>\n                        <li><strong>Test connectivity:</strong> Can pods communicate?</li>\n                    </ol>\n\n                    <div class=\"info-box\">\n                        <strong>Essential Commands for Every Issue:</strong><br>\n                        • <code class=\"command\">kubectl get pods</code> - Check status<br>\n                        • <code class=\"command\">kubectl logs &lt;pod&gt;</code> - Read logs<br>\n                        • <code class=\"command\">kubectl describe pod &lt;pod&gt;</code> - See events<br>\n                        • <code class=\"command\">kubectl exec -it &lt;pod&gt; -- sh</code> - Interactive debugging\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🎯 Quick Diagnostic Chart</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\nPod Status          → What to Check\n-------------       → ---------------\nPending             → Events, Node resources, Scheduling issues\nRunning             → Logs, Readiness probes\nCrashLoopBackOff    → Logs, Container exit codes\nImagePullBackOff    → Image name, Registry credentials\nError               → Logs, Resource limits\nTerminating         → Finalizers, Grace period\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.1\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.1\">✅ Mark section 5.1 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 2,
+    "title": "kubectl logs — Reading Application Logs",
+    "badge": "Essential",
+    "content": "<h3>📘 Understanding kubectl logs</h3>\n                    <p>The <code class=\"command\">kubectl logs</code> command shows the <strong>stdout/stderr output</strong> from containers. It's your first stop for debugging application issues.</p>\n\n                    <div class=\"info-box\">\n                        <strong>What logs show:</strong><br>\n                        • Application stdout/stderr output<br>\n                        • Errors, warnings, info messages<br>\n                        • Stack traces and exceptions<br>\n                        • Custom application logging\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">💻 Essential Log Commands</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# View logs from a pod\nkubectl logs my-pod\n\n# View logs from specific container in multi-container pod\nkubectl logs my-pod -c container-name\n\n# Follow logs in real-time (like tail -f)\nkubectl logs -f my-pod\n\n# Get last 100 lines\nkubectl logs my-pod --tail=100\n\n# Logs from previous container instance (after crash)\nkubectl logs my-pod --previous\n\n# Logs with timestamps\nkubectl logs my-pod --timestamps\n\n# Logs from last hour\nkubectl logs my-pod --since=1h\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🔍 Common Log Patterns</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Search logs for errors\nkubectl logs my-pod | grep -i error\n\n# Count error occurrences\nkubectl logs my-pod | grep -c \"ERROR\"\n\n# View logs from all pods with label\nkubectl logs -l app=webapp --all-containers=true\n                    </div>\n\n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create a pod that logs continuously\nkubectl run logger --image=busybox -- sh -c \"while true; do echo $(date) - Hello from logger; sleep 2; done\"\n\n# Watch logs in real-time\nkubectl logs -f logger\n\n# In another terminal, check last 10 lines\nkubectl logs logger --tail=10\n\n# Check logs with timestamps\nkubectl logs logger --timestamps --tail=5\n                        </div>\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. Logs are lost when containers are deleted</strong><br>\n                        Use centralized logging (CloudWatch, ELK, etc.) for production<br><br>\n                        \n                        <strong>2. --previous only works if pod restarted</strong><br>\n                        If pod was deleted and recreated, previous logs are gone<br><br>\n                        \n                        <strong>3. Multi-container pods require -c flag</strong><br>\n                        Without it, you'll get an error\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q31: Which command shows pod logs?</li>\n                            <li>Q32: kubectl logs --previous (True/False)</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.2\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.2\">✅ Mark section 5.2 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 3,
+    "title": "kubectl describe — Detailed Resource Info",
+    "badge": "Essential",
+    "content": "<h3>📘 Understanding kubectl describe</h3>\n                    <p><code class=\"command\">kubectl describe</code> shows <strong>detailed information</strong> about Kubernetes resources, including events, which are crucial for troubleshooting.</p>\n\n                    <div class=\"info-box\">\n                        <strong>What describe shows:</strong><br>\n                        • Resource metadata and spec<br>\n                        • Current status and conditions<br>\n                        • <strong>Events (most important for debugging!)</strong><br>\n                        • Relationships to other resources\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">💻 Using kubectl describe</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Describe a pod (shows events at bottom)\nkubectl describe pod my-pod\n\n# Describe a node\nkubectl describe node worker-node-1\n\n# Describe a service\nkubectl describe service my-service\n\n# Describe deployment\nkubectl describe deployment my-app\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🔍 Reading Events</h3>\n                    <p>Events are at the bottom of describe output - they show what Kubernetes tried to do:</p>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\nEvents:\n  Type     Reason     Age   From               Message\n  ----     ------     ----  ----               -------\n  Normal   Scheduled  2m    default-scheduler  Successfully assigned pod\n  Normal   Pulling    2m    kubelet            Pulling image \"nginx:latest\"\n  Normal   Pulled     1m    kubelet            Successfully pulled image\n  Normal   Created    1m    kubelet            Created container\n  Normal   Started    1m    kubelet            Started container\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🚨 Common Error Events</h3>\n                    <div class=\"danger-box\">\n                        <strong>Failed to pull image:</strong><br>\n                        • Image name is wrong<br>\n                        • Image doesn't exist<br>\n                        • No credentials for private registry<br><br>\n                        \n                        <strong>Failed scheduling:</strong><br>\n                        • No nodes have enough CPU/memory<br>\n                        • Node selector doesn't match<br>\n                        • Taints prevent scheduling<br><br>\n                        \n                        <strong>Container failed:</strong><br>\n                        • Application crashed<br>\n                        • Health checks failing<br>\n                        • Missing environment variables\n                    </div>\n\n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create a pod with a bad image\nkubectl run broken --image=nginx:nonexistent-tag\n\n# Describe it to see the error\nkubectl describe pod broken\n\n# Look for events showing ImagePullBackOff\n# Events section will show:\n# \"Failed to pull image ... not found\"\n                        </div>\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q33: Which command shows detailed pod information including events?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.3\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.3\">✅ Mark section 5.3 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 4,
+    "title": "kubectl exec — Interactive Debugging",
+    "badge": "Important",
+    "content": "<h3>📘 Understanding kubectl exec</h3>\n                    <p><code class=\"command\">kubectl exec</code> executes commands inside a running container. Use it to <strong>debug from inside the container</strong>.</p>\n\n                    <div class=\"info-box\">\n                        <strong>Common uses:</strong><br>\n                        • Run diagnostic commands inside container<br>\n                        • Test network connectivity<br>\n                        • Check file systems and permissions<br>\n                        • Inspect running processes<br>\n                        • Verify environment variables\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">💻 Using kubectl exec</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Run a single command\nkubectl exec my-pod -- ls /app\n\n# Interactive shell (most common)\nkubectl exec -it my-pod -- /bin/bash\nkubectl exec -it my-pod -- sh  # If bash not available\n\n# For multi-container pods\nkubectl exec -it my-pod -c container-name -- /bin/bash\n\n# Run command and see output\nkubectl exec my-pod -- env\nkubectl exec my-pod -- ps aux\nkubectl exec my-pod -- cat /etc/resolv.conf\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🔧 Common Debugging Commands</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Inside the pod shell:\n\n# Check network connectivity\nping google.com\ncurl http://service-name\nnslookup service-name\n\n# Check processes\nps aux\ntop\n\n# Check disk space\ndf -h\n\n# Check environment variables\nenv | grep DATABASE\n\n# Test application endpoint\ncurl http://localhost:8080/health\n\n# Check listening ports\nnetstat -tulpn\n                    </div>\n\n                    <div class=\"aws-practice\">\n                        <h4>🛠️ Try It on AWS/EKS</h4>\n                        <div class=\"code-block\">\n                            <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Create a pod\nkubectl run debug-pod --image=nginx\n\n# Get a shell inside the pod\nkubectl exec -it debug-pod -- /bin/bash\n\n# Inside the pod, test things:\n# Check what's running\nps aux\n\n# Test DNS\nnslookup kubernetes.default\n\n# Check environment\nenv\n\n# Exit\nexit\n                        </div>\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">⚠️ Common Pitfalls</h3>\n                    <div class=\"danger-box\">\n                        <strong>1. Container must be running</strong><br>\n                        Can't exec into CrashLoopBackOff containers<br><br>\n                        \n                        <strong>2. Not all images have /bin/bash</strong><br>\n                        Try /bin/sh or install tools using package managers<br><br>\n                        \n                        <strong>3. Commands run as container's user</strong><br>\n                        May not have root permissions\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q34: Which command executes commands inside a container?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.4\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.4\">✅ Mark section 5.4 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 5,
+    "title": "kubectl get events — Cluster-Wide Events",
+    "badge": "Foundation",
+    "content": "<h3>📘 Cluster Events</h3>\n                    <p>Events are time-ordered records of what happened in the cluster. They're invaluable for understanding the sequence of actions.</p>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# View all events in current namespace\nkubectl get events\n\n# Sort by timestamp\nkubectl get events --sort-by='.lastTimestamp'\n\n# Watch events in real-time\nkubectl get events --watch\n\n# Events for specific resource\nkubectl get events --field-selector involvedObject.name=my-pod\n\n# All events across all namespaces\nkubectl get events --all-namespaces\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">⚠️ Event Retention</h3>\n                    <div class=\"warning-box\">\n                        <strong>Important:</strong> Events are automatically deleted after 1 hour by default!<br>\n                        For long-term tracking, use a logging solution.\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.5\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.5\">✅ Mark section 5.5 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 6,
+    "title": "CrashLoopBackOff — Container Restart Issues",
+    "badge": "Essential",
+    "content": "<h3>📘 What is CrashLoopBackOff?</h3>\n                    <p>CrashLoopBackOff means the container keeps <strong>crashing and Kubernetes keeps trying to restart it</strong> with exponential backoff.</p>\n\n                    <div class=\"info-box\">\n                        <strong>Common Causes:</strong><br>\n                        • Application crashes immediately on startup<br>\n                        • Missing environment variables or config files<br>\n                        • Wrong command or entrypoint<br>\n                        • Port already in use<br>\n                        • Application needs dependencies that aren't ready\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🔍 Debugging CrashLoopBackOff</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Step 1: Check pod status\nkubectl get pod my-pod\n# STATUS: CrashLoopBackOff\n\n# Step 2: Check logs from crashed container\nkubectl logs my-pod --previous\n\n# Step 3: Describe pod for events\nkubectl describe pod my-pod\n\n# Step 4: Check if it's a config issue\nkubectl get pod my-pod -o yaml | grep -A 10 env\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🛠️ Common Fixes</h3>\n                    <div class=\"success-box\">\n                        <strong>Fix 1: Missing environment variables</strong><br>\n                        Add required env vars to pod spec<br><br>\n                        \n                        <strong>Fix 2: Wrong command</strong><br>\n                        Verify command and args in container spec<br><br>\n                        \n                        <strong>Fix 3: Application not ready</strong><br>\n                        Add init containers or readiness probes\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q35: What does CrashLoopBackOff indicate?</li>\n                            <li>Q37: What's the first step when debugging CrashLoopBackOff?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.6\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.6\">✅ Mark section 5.6 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 7,
+    "title": "ImagePullBackOff — Image Issues",
+    "badge": "Essential",
+    "content": "<h3>📘 What is ImagePullBackOff?</h3>\n                    <p>ImagePullBackOff means Kubernetes <strong>cannot pull the container image</strong> from the registry.</p>\n\n                    <div class=\"info-box\">\n                        <strong>Common Causes:</strong><br>\n                        • Image name is incorrect (typo)<br>\n                        • Image doesn't exist in registry<br>\n                        • Private registry requires credentials<br>\n                        • Network issues reaching registry<br>\n                        • Image tag doesn't exist\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🔍 Debugging ImagePullBackOff</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Check events for error message\nkubectl describe pod my-pod\n\n# Look for:\n# \"Failed to pull image... manifest unknown\"\n# \"Failed to pull image... authentication required\"\n\n# Verify image name\nkubectl get pod my-pod -o yaml | grep image:\n\n# Test image pull manually\ndocker pull <image-name>\n                    </image-name></div>\n\n                    <h3 style=\"margin-top: 25px;\">🛠️ Solutions</h3>\n                    <div class=\"success-box\">\n                        <strong>Wrong image name:</strong> Fix the image name in deployment<br>\n                        <strong>Private registry:</strong> Add imagePullSecrets<br>\n                        <strong>Missing tag:</strong> Specify correct tag or use 'latest'\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q36: What causes ImagePullBackOff?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.7\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.7\">✅ Mark section 5.7 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 8,
+    "title": "Pending Pods — Scheduling Issues",
+    "badge": "Important",
+    "content": "<h3>📘 Why Pods Stay Pending</h3>\n                    <p>A pod in Pending state means the <strong>scheduler cannot find a suitable node</strong> to run it.</p>\n\n                    <div class=\"info-box\">\n                        <strong>Common Reasons:</strong><br>\n                        • Insufficient CPU or memory on nodes<br>\n                        • Node selector doesn't match any node<br>\n                        • Taints prevent scheduling<br>\n                        • PVC cannot be bound<br>\n                        • No nodes available\n                    </div>\n\n                    <h3 style=\"margin-top: 25px;\">🔍 Debugging Pending Pods</h3>\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Check events\nkubectl describe pod pending-pod\n\n# Common event messages:\n# \"0/3 nodes are available: insufficient cpu\"\n# \"0/3 nodes match node selector\"\n# \"pod has unbound PersistentVolumeClaims\"\n\n# Check node resources\nkubectl top nodes\nkubectl describe nodes\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q38: What should you check when a pod is Pending?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.8\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.8\">✅ Mark section 5.8 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 9,
+    "title": "Node Troubleshooting",
+    "badge": "Important",
+    "content": "<h3>📘 Checking Node Health</h3>\n                    <p>Unhealthy nodes can cause widespread pod failures.</p>\n\n                    <div class=\"code-block\">\n                        <button class=\"copy-btn\" onclick=\"copyCode(this)\">Copy</button>\n# Check node status\nkubectl get nodes\n\n# STATUS should be \"Ready\"\n# If \"NotReady\" or \"Unknown\", there's a problem\n\n# Describe node for details\nkubectl describe node <node-name>\n\n# Check node conditions\nkubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.conditions[?(@.type==\"Ready\")].status\n                    </node-name></div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q39: How do you check if a node is healthy?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.9\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.9\">✅ Mark section 5.9 as completed</label>\n                    </div>"
+  },
+  {
+    "id": 10,
+    "title": "Troubleshooting Checklist",
+    "badge": "Reference",
+    "content": "<h3>📋 Complete Troubleshooting Checklist</h3>\n\n                    <div class=\"success-box\">\n                        <strong>✅ Step-by-Step Debugging Process:</strong><br><br>\n                        \n                        <strong>1. Check Pod Status</strong><br>\n                        □ <code class=\"command\">kubectl get pods</code><br>\n                        □ Is it Running, Pending, CrashLoopBackOff, or ImagePullBackOff?<br><br>\n                        \n                        <strong>2. Check Logs</strong><br>\n                        □ <code class=\"command\">kubectl logs &lt;pod&gt;</code><br>\n                        □ <code class=\"command\">kubectl logs &lt;pod&gt; --previous</code> (if crashed)<br><br>\n                        \n                        <strong>3. Check Events</strong><br>\n                        □ <code class=\"command\">kubectl describe pod &lt;pod&gt;</code><br>\n                        □ Read events at the bottom<br><br>\n                        \n                        <strong>4. Check Resources</strong><br>\n                        □ <code class=\"command\">kubectl describe node</code><br>\n                        □ Are there enough CPU/memory?<br><br>\n                        \n                        <strong>5. Check Networking</strong><br>\n                        □ <code class=\"command\">kubectl get endpoints</code><br>\n                        □ Can pods communicate?<br><br>\n                        \n                        <strong>6. Check Configuration</strong><br>\n                        □ Environment variables set correctly?<br>\n                        □ ConfigMaps/Secrets mounted?<br>\n                        □ Volume mounts working?\n                    </div>\n\n                    <div class=\"test-questions\">\n                        <h4>🎯 This Section Covers Test Questions:</h4>\n                        <ul>\n                            <li>Q40: What is the first command to run when debugging?</li>\n                        </ul>\n                    </div>\n\n                    <div class=\"section-complete\">\n                        <input type=\"checkbox\" id=\"check-5.10\" onchange=\"handleCheckboxChange(this)\">\n                        <label for=\"check-5.10\">✅ Mark section 5.10 as completed</label>\n                    </div>"
+  }
+];
+const SQ=typeof SECTION_QUESTIONS!=='undefined'?SECTION_QUESTIONS:{};
+function revLoad(){try{return JSON.parse(localStorage.getItem(REV_KEY))||{};}catch(e){return {};}}
+function revSave(s){localStorage.setItem(REV_KEY,JSON.stringify(s));if(typeof sfWrite==='function')sfWrite(s);}
+
+function allSectionsComplete(){
+  return SECTIONS.every(s=>revLoad()['section_complete_'+s.id]===true);
+}
+
+function updateModuleCompleteBtn(){
+  const btn=document.getElementById('module-complete-btn');
+  const hint=document.getElementById('module-complete-hint');
+  if(!btn)return;
+  const state=revLoad();
+  if(state.completed){
+    btn.textContent='✓ Module Review Submitted';
+    btn.classList.add('unlocked');
+    btn.disabled=true;
+    if(hint)hint.textContent='Review submitted on '+new Date(state.completedAt).toLocaleString();
+    return;
+  }
+  const done=SECTIONS.filter(s=>state['section_complete_'+s.id]===true).length;
+  const total=SECTIONS.length;
+  if(done===total){
+    btn.classList.add('unlocked');
+    if(hint)hint.textContent='All '+total+' sections complete. You may now submit your module review.';
+  } else {
+    btn.classList.remove('unlocked');
+    if(hint)hint.textContent=done+' of '+total+' sections complete. Complete all sections to unlock.';
+  }
+}
+
+function buildQuestionBlock(secId,questions){
+  if(!questions||!questions.length)return '';
+  const keys=['A','B','C','D'];
+  const state=revLoad();
+  const secDone=state['section_complete_'+secId]===true;
+  let html='<div class="section-questions">';
+  questions.forEach((q,qi)=>{
+    const answered=state['sq_'+secId+'_'+qi+'_correct']===true;
+    html+='<div class="section-question-item'+(answered?' answered-correct':'')+'" id="sq-item-'+secId+'-'+qi+'">';
+    html+='<div class="sq-text">'+(qi+1)+'. '+q.q.replace(/</g,'&lt;')+'</div>';
+    html+='<div class="sq-options" id="sq-opts-'+secId+'-'+qi+'">';
+    q.o.forEach((opt,oi)=>{
+      html+='<div class="sq-option" data-sec="'+secId+'" data-q="'+qi+'" data-i="'+oi+'" onclick="sqSelect(this)"><span class="sq-option-key">'+keys[oi]+'</span><span>'+opt.replace(/</g,'&lt;')+'</span></div>';
+    });
+    html+='</div>';
+    html+='<div class="sq-feedback" id="sq-fb-'+secId+'-'+qi+'"></div>';
+    html+='<button class="sq-check-btn" id="sq-btn-'+secId+'-'+qi+'" onclick="sqCheck('+secId+','+qi+','+q.c+')" '+(answered?'disabled':'')+'>Check Answer</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  const allAnswered=questions.every((_,qi)=>revLoad()['sq_'+secId+'_'+qi+'_correct']===true);
+  html+='<button class="section-complete-btn'+(allAnswered||secDone?' unlocked':'')+' '+(secDone?'done':'')+'" id="sec-complete-btn-'+secId+'" onclick="sectionComplete('+secId+')" '+(secDone?'disabled':(allAnswered?'':'disabled'))+'>'+(secDone?'✓ Section Reviewed':'Mark Section as Reviewed')+'</button>';
+  return html;
+}
+
+window.sqSelect=function(el){
+  const secId=el.dataset.sec,qi=el.dataset.q;
+  document.querySelectorAll('[data-sec="'+secId+'"][data-q="'+qi+'"]').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+window.sqCheck=function(secId,qi,correctIdx){
+  const selected=document.querySelector('[data-sec="'+secId+'"][data-q="'+qi+'"].selected');
+  if(!selected){alert('Please select an answer first.');return;}
+  const chosenIdx=parseInt(selected.dataset.i);
+  const isCorrect=(chosenIdx===correctIdx);
+  const fb=document.getElementById('sq-fb-'+secId+'-'+qi);
+  const btn=document.getElementById('sq-btn-'+secId+'-'+qi);
+  const item=document.getElementById('sq-item-'+secId+'-'+qi);
+  // Track attempt count — incremented on every submit, right or wrong
+  const atKey='sq_'+secId+'_'+qi+'_attempts';
+  const st0=revLoad();st0[atKey]=(st0[atKey]||0)+1;revSave(st0);
+  if(isCorrect){
+    selected.classList.add('correct');
+    if(fb){fb.textContent='✓ Correct!';fb.className='sq-feedback correct';}
+    if(btn)btn.disabled=true;
+    if(item)item.classList.add('answered-correct');
+    const st=revLoad();st['sq_'+secId+'_'+qi+'_correct']=true;revSave(st);
+    const secQs=SQ[secId]||[];
+    const allCorrect=secQs.every((_,i)=>revLoad()['sq_'+secId+'_'+i+'_correct']===true);
+    const secBtn=document.getElementById('sec-complete-btn-'+secId);
+    if(allCorrect&&secBtn){secBtn.classList.add('unlocked');secBtn.removeAttribute('disabled');}
+  } else {
+    selected.classList.add('wrong');
+    if(fb){fb.textContent='✗ Incorrect — please try again.';fb.className='sq-feedback wrong';}
+    setTimeout(()=>{
+      selected.classList.remove('wrong','selected');
+      if(fb){fb.textContent='';fb.className='sq-feedback';}
+    },1500);
+  }
+};
+
+window.sectionComplete=function(secId){
+  const btn=document.getElementById('sec-complete-btn-'+secId);
+  if(!btn||!btn.classList.contains('unlocked'))return;
+  btn.classList.add('done');btn.disabled=true;btn.textContent='✓ Section Reviewed';
+  const st=revLoad();st['section_complete_'+secId]=true;st['section_completed_at_'+secId]=new Date().toISOString();revSave(st);
+  updateModuleCompleteBtn();
+};
+
+window.toggleSection=(id)=>{const body=document.getElementById('body-'+id);const toggle=document.getElementById('toggle-'+id);const isOpen=body.classList.contains('open');document.querySelectorAll('.section-body').forEach(b=>b.classList.remove('open'));document.querySelectorAll('.section-toggle').forEach(t=>t.classList.remove('open'));if(!isOpen){body.classList.add('open');toggle.classList.add('open');}};
+window.copyCode=(btn)=>{const text=btn.parentElement.innerText.replace('Copy','').trim();navigator.clipboard.writeText(text).then(()=>{btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500);});};
+
+function renderAll(){
+  const sec=document.getElementById('sections-container');if(!sec)return;sec.innerHTML='';
+  const s0=revLoad();
+  SECTIONS.forEach(s=>{
+    const secDone=s0['section_complete_'+s.id]===true;
+    const sd=document.createElement('div');sd.className='section-block';
+    const badgeTxt=BADGES[s.badge]||s.badge||'';
+    const questions=SQ[s.id]||[];
+    const qBlock=buildQuestionBlock(s.id,questions);
+    sd.innerHTML='<div class="section-header" onclick="toggleSection('+s.id+')"><span class="section-num">'+s.id+'.</span><span class="section-title">'+s.title+'</span>'+(badgeTxt?'<span style="font-size:10px;padding:2px 7px;border-radius:4px;font-weight:700;background:#e8f1fb;color:#1a6eb5;font-family:Source Code Pro,monospace;">'+badgeTxt+'</span>':'')+(secDone?'<span style="font-size:12px;margin-left:4px;">✅</span>':'')+'<span class="section-toggle" id="toggle-'+s.id+'">▼</span></div><div class="section-body" id="body-'+s.id+'">'+s.content+'</div>';
+    sec.appendChild(sd);
+    if(qBlock){const bodyEl=document.getElementById('body-'+s.id);if(bodyEl)bodyEl.insertAdjacentHTML('beforeend',qBlock);}
+  });
+  updateModuleCompleteBtn();
+}
+
+const moduleCommentEl=document.getElementById('module-comment');
+if(moduleCommentEl){
+  const s=revLoad();if(s.moduleComment)moduleCommentEl.value=s.moduleComment;
+  moduleCommentEl.addEventListener('input',()=>{const s=revLoad();s.moduleComment=moduleCommentEl.value;revSave(s);});
+}
+renderAll();
+</script>
+<script>
+(function(){var scripts=['https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js'];function loadNext(i){if(i>=scripts.length){window._sfFirebaseReady=true;initRevFirebase();return;}var s=document.createElement('script');s.src=scripts[i];s.onload=function(){loadNext(i+1);};s.onerror=function(){window._sfFirebaseReady=false;};document.head.appendChild(s);}loadNext(0);})();
+</script>
+<script>
+function initRevFirebase(){
+  const SF_CONFIG={apiKey:"AIzaSyA-8fatW5D7uR69rcuGFPH54IFqrz0PhU0",authDomain:"sfcertification-grafana.firebaseapp.com",projectId:"sfcertification-grafana",storageBucket:"sfcertification-grafana.firebasestorage.app",messagingSenderId:"227322696511",appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"};
+  if(!firebase.apps.length)firebase.initializeApp(SF_CONFIG);
+  window.sfAuth=firebase.auth();window.sfDb=firebase.firestore();
+  const REV_KEY_FB='reviewer_sf-internal-kubernetes-certification_module-5';
+  const COURSE_ID='ymfsFxUvNoJxOY8suZnY';
+  function sfDocRef(){if(!window.sfReviewerUid)return null;return window.sfDb.collection('reviewerSessions').doc(window.sfReviewerUid).collection('sf-internal-kubernetes-certification').doc('module-5');}
+  function sfInitSession(){const local=revLoad();if(!local.startedAt){local.startedAt=new Date().toISOString();localStorage.setItem(REV_KEY,JSON.stringify(local));}if(!window._sfFirebaseReady||!window.sfReviewerUid)return;sfDocRef().set({email:window.sfReviewerEmail,moduleId:'module-5',courseId:COURSE_ID,startedAt:local.startedAt,lastUpdated:firebase.firestore.FieldValue.serverTimestamp(),reviewComplete:local.reviewComplete||false,attemptCount:local.attemptCount||0},{merge:true}).catch(e=>console.warn('SF init:',e.message));}
+  window.sfInitSession=sfInitSession;
+  window.sfWrite=function(extra){if(!window._sfFirebaseReady||!window.sfReviewerUid)return;const ref=sfDocRef();if(!ref)return;const local=revLoad();const payload=Object.assign({},local,extra,{email:window.sfReviewerEmail,moduleId:'module-5',courseId:COURSE_ID,lastUpdated:firebase.firestore.FieldValue.serverTimestamp()});ref.set(payload,{merge:true}).catch(e=>console.warn('SF write:',e.message));};
+  window.sfFetchAndMerge=async function(){const ref=sfDocRef();if(!ref)return;try{const snap=await ref.get();if(!snap.exists)return;const remote=snap.data();const local=revLoad();const merged=Object.assign({},local,remote);delete merged.email;delete merged.lastUpdated;localStorage.setItem(REV_KEY,JSON.stringify(merged));if(typeof renderAll==='function'){renderAll();}if(typeof updateCompleteBar==='function')updateCompleteBar();}catch(e){console.warn('SF fetch:',e.message);}};
+  function sfHideOverlayFB(user){window.sfReviewerEmail=user.email;window.sfReviewerUid=user.uid;const ov=document.getElementById('sfSigninOverlay');if(ov)ov.classList.add('hidden');const bar=document.getElementById('sfSignedInBar');const lbl=document.getElementById('sfSignedInEmail');if(bar)bar.classList.remove('hidden');if(lbl)lbl.textContent='Signed in as '+user.email;sfInitSession();window.sfFetchAndMerge();}
+  window.sfAuth.onAuthStateChanged(user=>{if(user){sfHideOverlayFB(user);}else{document.getElementById('sfSigninOverlay').classList.remove('hidden');}});
+}
+</script>
+</body>
+</html>
