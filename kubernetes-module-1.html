@@ -571,6 +571,32 @@
             .module-header h1 { font-size: 1.8em; }
             .nav-buttons { flex-direction: column; }
         }
+    
+        /* Inline section quiz (gates Mark-as-complete) */
+        .section-quiz { background: #fef3c7; border: 2px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin-top: 25px; }
+        [data-theme="dark"] .section-quiz { background: #3a2f12; border-color: #b45309; }
+        .section-quiz > h4 { margin-bottom: 14px; color: #92400e; }
+        [data-theme="dark"] .section-quiz > h4 { color: #fef3c7; }
+        .sq-item { margin-bottom: 18px; }
+        .sq-item:last-child { margin-bottom: 4px; }
+        .sq-q { font-weight: 600; margin-bottom: 10px; color: #0f172a; }
+        [data-theme="dark"] .sq-q { color: #e2e8f0; }
+        .sq-opt { padding: 10px 14px; margin: 8px 0; background: white; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .25s; }
+        [data-theme="dark"] .sq-opt { background: var(--bg-dark); }
+        .sq-opt:hover { border-color: var(--primary); }
+        .sq-opt.correct { border-color: var(--success); background: #dcfce7; pointer-events: none; }
+        [data-theme="dark"] .sq-opt.correct { background: #14331f; }
+        .sq-opt.incorrect { border-color: var(--danger); background: #fee2e2; }
+        [data-theme="dark"] .sq-opt.incorrect { background: #3a1414; }
+        .sq-opt.locked { pointer-events: none; opacity: .85; }
+        .sq-feedback { margin-top: 8px; font-size: .92em; display: none; }
+        .sq-feedback.show { display: block; }
+        .sq-feedback.ok { color: var(--success); }
+        .sq-feedback.no { color: var(--danger); }
+        .section-complete input[type="checkbox"]:disabled + label { opacity: .5; cursor: not-allowed; }
+        .sq-gate-note { margin-top: 6px; font-size: .85em; color: #92400e; }
+        [data-theme="dark"] .sq-gate-note { color: #fcd34d; }
+
     </style>
 </head>
 <body>
@@ -732,15 +758,34 @@
                         • A <strong>node</strong> = A single machine (VM or physical) in the cluster
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q1: What is the primary role of the Kubernetes API Server?</li>
-                            <li>Q8: Which of the following best describes a Kubernetes Node?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="1.1">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. In Kubernetes architecture, which group of components is responsible for making cluster-wide decisions such as scheduling?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',0,false)">The worker nodes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',0,true)">The control plane</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',0,false)">The container runtime</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',0,false)">kube-proxy</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What is the correct distinction between a cluster and a node?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',1,false)">A cluster is a single machine; a node is a group of machines</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',1,false)">A cluster and a node are the same thing</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',1,true)">A cluster is the control plane plus all worker nodes; a node is a single machine in the cluster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',1,false)">A node is the control plane; a cluster is one worker</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. Which components run on worker nodes rather than the control plane?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',2,false)">API Server and etcd</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',2,false)">Scheduler and Controller Manager</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',2,true)">kubelet, kube-proxy, and the container runtime</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.1',2,false)">etcd and kube-scheduler</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-1.1" onchange="handleCheckboxChange(this)">
                         <label for="check-1.1">✅ Mark section 1.1 as completed</label>
                     </div>
@@ -796,14 +841,26 @@ kubectl logs -n kube-system kube-apiserver-master-node
                         In production, run multiple API Server replicas for high availability
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q1: What is the primary role of the Kubernetes API Server?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="1.2">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Which statement about the API Server is correct?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',0,false)">Every component writes directly to etcd</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',0,true)">It is the only component that directly communicates with (writes to) etcd</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',0,false)">It only handles authentication, not authorization</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',0,false)">It runs on every worker node</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. When you run kubectl get pods, what does the API Server do before returning results?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',1,false)">Writes the request directly into the container runtime</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',1,true)">Authenticates and authorizes the request, then queries etcd</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',1,false)">Bypasses RBAC and reads etcd immediately</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.2',1,false)">Sends the request to kube-proxy for routing</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-1.2" onchange="handleCheckboxChange(this)">
                         <label for="check-1.2">✅ Mark section 1.2 as completed</label>
                     </div>
@@ -873,14 +930,34 @@ kubectl cluster-info dump
                         <p style="margin-top: 10px;"><strong>💰 Cost:</strong> etcd management included in EKS control plane cost ($0.10/hour)</p>
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q3: Where does Kubernetes store all cluster state data?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="1.3">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What role does etcd play in a Kubernetes cluster?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',0,false)">It schedules pods onto nodes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',0,true)">It is a distributed key-value store and the single source of truth for cluster state</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',0,false)">It proxies network traffic between pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',0,false)">It runs the application containers</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. For a highly available etcd setup, how many nodes should you use?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',1,false)">An even number such as 2, 4, or 6</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',1,false)">Exactly 1 always</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',1,true)">An odd number such as 3, 5, or 7</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',1,false)">It does not matter</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. Which component is permitted to write to etcd?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',2,false)">Any component directly</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',2,true)">Only the API Server</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',2,false)">kubelet on each node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.3',2,false)">kube-scheduler</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-1.3" onchange="handleCheckboxChange(this)">
                         <label for="check-1.3">✅ Mark section 1.3 as completed</label>
                     </div>
@@ -986,14 +1063,26 @@ kubectl cluster-info dump
                             Using <code class="command">nodeName</code> in pod spec skips all scheduling logic
                         </div>
             
-                        <div class="test-questions">
-                            <h4>🎯 This Section Covers Test Questions:</h4>
-                            <ul style="color: inherit;">
-                                <li>Q2: Which component is responsible for scheduling pods onto nodes?</li>
-                            </ul>
+                                            <div class="section-quiz" data-sec="1.4">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does the kube-scheduler do?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',0,false)">Restarts failed containers</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',0,true)">Watches for pods with no assigned node and selects the best node for them</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',0,false)">Stores cluster state</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',0,false)">Maintains iptables rules on each node</div>
+                            <div class="sq-feedback"></div>
                         </div>
-            
-                        <div class="section-complete">
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which sequence correctly describes the scheduling process?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',1,false)">Bind, then Filter, then Score</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',1,false)">Score, then Bind, then Watch</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',1,true)">Watch, Filter, Score, then Bind</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.4',1,false)">Filter only, no scoring</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                             <input type="checkbox" id="check-1.4" onchange="handleCheckboxChange(this)">
                             <label for="check-1.4">✅ Mark section 1.4 as completed</label>
                         </div>
@@ -1087,14 +1176,26 @@ kubectl cluster-info dump
                             All controllers run in one process (kube-controller-manager)
                         </div>
             
-                        <div class="test-questions">
-                            <h4>🎯 This Section Covers Test Questions:</h4>
-                            <ul style="color: inherit;">
-                                <li>Q4: Which component continuously monitors cluster state?</li>
-                            </ul>
+                                            <div class="section-quiz" data-sec="1.5">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is the purpose of the reconciliation loop run by controllers?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',0,false)">To delete etcd data periodically</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',0,true)">To continuously move the current state toward the desired state</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',0,false)">To assign IP addresses to pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',0,false)">To authenticate API requests</div>
+                            <div class="sq-feedback"></div>
                         </div>
-            
-                        <div class="section-complete">
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which controller ensures the correct number of pod replicas are running?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',1,false)">Node Controller</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',1,false)">Service Account Controller</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',1,true)">Replication/ReplicaSet Controller</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.5',1,false)">Endpoints Controller</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                             <input type="checkbox" id="check-1.5" onchange="handleCheckboxChange(this)">
                             <label for="check-1.5">✅ Mark section 1.5 as completed</label>
                         </div>
@@ -1181,15 +1282,26 @@ kubectl cluster-info dump
                             If container runtime fails, kubelet can't start containers
                         </div>
             
-                        <div class="test-questions">
-                            <h4>🎯 This Section Covers Test Questions:</h4>
-                            <ul style="color: inherit;">
-                                <li>Q5: Which component runs on each worker node?</li>
-                                <li>Q6: What does kubelet do? (True/False)</li>
-                            </ul>
+                                            <div class="section-quiz" data-sec="1.6">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Where does the kubelet run?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',0,false)">Only on the control plane</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',0,true)">On every worker node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',0,false)">Inside etcd</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',0,false)">As part of the API Server</div>
+                            <div class="sq-feedback"></div>
                         </div>
-            
-                        <div class="section-complete">
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which of these is a responsibility of the kubelet?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',1,false)">Scheduling pods to nodes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',1,false)">Storing cluster state</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',1,true)">Starting/stopping containers and reporting pod status to the API server</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.6',1,false)">Maintaining Service load-balancing rules</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                             <input type="checkbox" id="check-1.6" onchange="handleCheckboxChange(this)">
                             <label for="check-1.6">✅ Mark section 1.6 as completed</label>
                         </div>
@@ -1308,14 +1420,26 @@ kubectl cluster-info dump
                             Pods can still communicate directly, but Services won't work
                         </div>
             
-                        <div class="test-questions">
-                            <h4>🎯 This Section Covers Test Questions:</h4>
-                            <ul style="color: inherit;">
-                                <li>Q9: What does kube-proxy maintain on each node?</li>
-                            </ul>
+                                            <div class="section-quiz" data-sec="1.7">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is the primary responsibility of kube-proxy?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',0,false)">Pulling container images</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',0,true)">Maintaining network rules on nodes to route traffic from Service IPs to Pod IPs</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',0,false)">Scheduling pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',0,false)">Writing to etcd</div>
+                            <div class="sq-feedback"></div>
                         </div>
-            
-                        <div class="section-complete">
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which is the default operating mode of kube-proxy?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',1,false)">ipvs mode</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',1,false)">userspace mode</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',1,true)">iptables mode</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.7',1,false)">ebpf mode</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                             <input type="checkbox" id="check-1.7" onchange="handleCheckboxChange(this)">
                             <label for="check-1.7">✅ Mark section 1.7 as completed</label>
                         </div>
@@ -1432,16 +1556,26 @@ kubectl get nodes
                         ⚠️ Use commands for quick testing only
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q7: The kubectl CLI tool (Fill in the blank)</li>
-                            <li>Q13: kubectl create deployment command</li>
-                            <li>Q14: kubectl scale command</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="1.8">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Which kubectl command lists pods across every namespace?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',0,false)">kubectl get pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',0,true)">kubectl get pods -A</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',0,false)">kubectl describe pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',0,false)">kubectl logs pods</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What is the difference between the imperative and declarative approaches shown?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',1,false)">Imperative uses kubectl apply -f; declarative uses kubectl run</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',1,true)">Imperative creates resources directly (e.g. kubectl run); declarative applies from YAML (kubectl apply -f)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',1,false)">They are identical</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.8',1,false)">Declarative only works on EKS</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-1.8" onchange="handleCheckboxChange(this)">
                         <label for="check-1.8">✅ Mark section 1.8 as completed</label>
                     </div>
@@ -1528,17 +1662,26 @@ kubectl get nodes
                     </ul>
                 </div>
         
-                <div class="test-questions">
-                    <h4>🎯 This Section Covers:</h4>
-                    <ul>
-                        <li>What does <code>kubeadm init</code> do?</li>
-                        <li>How do you generate a new join token?</li>
-                        <li>Why might nodes stay in NotReady state after joining?</li>
-                        <li>What is the purpose of <code>--pod-network-cidr</code> flag?</li>
-                    </ul>
-                </div>
-        
-                <div class="section-complete">
+                                    <div class="section-quiz" data-sec="1.9">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is the primary purpose of kubeadm?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',0,false)">To proxy network traffic</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',0,true)">To bootstrap (initialize and join) a Kubernetes cluster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',0,false)">To store secrets</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',0,false)">To autoscale pods</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which command initializes the control plane with kubeadm?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',1,false)">kubeadm join</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',1,false)">kubeadm reset</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',1,true)">kubeadm init</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.9',1,false)">kubeadm config</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                     <input type="checkbox" id="check-1.9" onchange="handleCheckboxChange(this)">
                     <label for="check-1.9">✅ Mark section as completed</label>
                 </div>
@@ -1672,17 +1815,26 @@ kubectl get nodes
                     </ul>
                 </div>
         
-                <div class="test-questions">
-                    <h4>🎯 This Section Covers:</h4>
-                    <ul>
-                        <li>What's the difference between <code>drain</code> and <code>cordon</code>?</li>
-                        <li>What does NotReady status mean?</li>
-                        <li>What is the difference between Capacity and Allocatable?</li>
-                        <li>How do you prevent new pods from scheduling on a node?</li>
-                    </ul>
-                </div>
-        
-                <div class="section-complete">
+                                    <div class="section-quiz" data-sec="1.10">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is a node in Kubernetes?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',0,false)">A group of clusters</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',0,true)">A single worker machine (VM or physical) that runs pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',0,false)">A networking rule</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',0,false)">A type of Service</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which components run on a worker node to manage pods and networking?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',1,false)">API Server and Scheduler</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',1,false)">etcd and Controller Manager</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',1,true)">kubelet and kube-proxy</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'1.10',1,false)">Ingress and DNS</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                     <input type="checkbox" id="check-1.10" onchange="handleCheckboxChange(this)">
                     <label for="check-1.10">✅ Mark section as completed</label>
                 </div>
@@ -1903,6 +2055,50 @@ kubectl get nodes
                 }, 500);
             }
         });
+    
+        // ── Inline section quiz gating ──────────────────────────────────
+        window.sqAnswer = function(optEl, sec, qIdx, isCorrect) {
+            const item = optEl.closest('.sq-item');
+            const fb = item.querySelector('.sq-feedback');
+            if (isCorrect) {
+                optEl.classList.add('correct');
+                item.querySelectorAll('.sq-opt').forEach(function(o){ o.classList.add('locked'); });
+                fb.className = 'sq-feedback show ok';
+                fb.textContent = '\u2705 Correct.';
+                item.dataset.answered = 'true';
+                sqRefreshGate(sec);
+            } else {
+                optEl.classList.add('incorrect');
+                fb.className = 'sq-feedback show no';
+                fb.textContent = '\u274C Not quite \u2014 review the section above and try again.';
+            }
+        };
+        function sqRefreshGate(sec) {
+            const quiz = document.querySelector('.section-quiz[data-sec="' + sec + '"]');
+            if (!quiz) return;
+            const items = quiz.querySelectorAll('.sq-item');
+            const allOk = Array.from(items).every(function(it){ return it.dataset.answered === 'true'; });
+            const cb = document.getElementById('check-' + sec);
+            if (!cb) return;
+            if (allOk) {
+                cb.disabled = false;
+                const note = quiz.parentElement.querySelector('.sq-gate-note');
+                if (note) note.style.display = 'none';
+            }
+        }
+        // Lock checkboxes that still have an attached unanswered quiz on load
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.section-quiz').forEach(function(quiz){
+                const sec = quiz.getAttribute('data-sec');
+                const cb = document.getElementById('check-' + sec);
+                if (cb && !cb.checked) cb.disabled = true;
+            });
+        });
+        // When progress loads from Firestore and re-checks a box, ensure it is enabled
+        (function(){
+            const _origLoad = window.k8sLoadProgress;
+        })();
+
     </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1930,7 +2126,7 @@ async function k8sLoadProgress(uid) {
             _completed = snap.data()[MODULE_KEY] || [];
             _completed.forEach(function(cbId) {
                 const cb = document.getElementById(cbId);
-                if (cb) cb.checked = true;
+                if (cb) { cb.checked = true; cb.disabled = false; }
             });
         } else {
             _completed = [];
