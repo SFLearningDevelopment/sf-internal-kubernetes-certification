@@ -1433,6 +1433,14 @@ kubectl logs cache-pod -c reader
         <div class="knowledge-check" id="knowledge-check">
             <h3>✅ Module 4 Knowledge Check</h3>
             <p style="margin-bottom: 25px;" id="quiz-status">Complete all 4 sections above to unlock the quiz!</p>
+            <div id="cp-module-complete-bar" style="margin-top:28px;padding:20px;border-top:1px solid var(--border,#e2e8f0);text-align:center;">
+                <button id="cp-mark-module-btn" onclick="cpMarkModuleComplete()"
+                    style="opacity:.5;pointer-events:none;background:var(--blue,#1a6eb5);color:#fff;border:none;padding:12px 28px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">
+                    Mark module as complete
+                </button>
+                <div id="cp-module-complete-hint" style="margin-top:10px;font-size:13px;color:var(--muted,#64748b);">Complete all sections to enable.</div>
+            </div>
+
 
             <div id="quiz-content" style="display:none;">
                 <p style="margin-bottom: 25px;">Test your understanding before moving to Module 5!</p>
@@ -1523,6 +1531,7 @@ kubectl logs cache-pod -c reader
 
             updateAccordionStyles();
             updateQuizAccess(completed);
+            if (typeof cpSyncModuleCompleteUI === 'function') cpSyncModuleCompleteUI();
         }
 
         function updateAccordionStyles() {
@@ -1742,13 +1751,104 @@ _k8sAuth.onAuthStateChanged(async function(user) {
             await _k8sAuth.signOut(); return;
         }
         _currentUid = user.uid;
+        _currentUserEmail = user.email || null;
+        _currentUserName  = user.displayName || user.email || null;
         document.getElementById('k8s-auth-overlay').style.display = 'none';
         await k8sLoadProgress(user.uid);
+        cpSyncModuleCompleteUI();
     } else {
         _currentUid = null;
         document.getElementById('k8s-auth-overlay').style.display = 'flex';
     }
 });
+
+// ---------- courseProgress (v2): module-level completion ----------
+// Dual-write alongside legacy progress/{uid}. Surfaces in the SF Knowledge Hub
+// admin Course Progress reader, which keys modules by filename-minus-.html.
+const CP_COURSE_ID  = 'ymfsFxUvNoJxOY8suZnY';
+const CP_MODULE_KEY = 'kubernetes-module-4';   // filename minus .html
+let _currentUserEmail = null;
+let _currentUserName  = null;
+
+function cpNow() {
+    const d = new Date();
+    const pad = function(x){ return String(x).padStart(2,'0'); };
+    return {
+        date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+        time: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())
+    };
+}
+
+function cpAllSectionsDone() {
+    const checkboxes = document.querySelectorAll('.section-complete input[type="checkbox"]');
+    const completed = Array.from(checkboxes).filter(function(cb){ return cb.checked; }).length;
+    return completed >= totalSections;
+}
+
+async function cpSyncModuleCompleteUI() {
+    const bar    = document.getElementById('cp-module-complete-bar');
+    const markBtn= document.getElementById('cp-mark-module-btn');
+    const hint   = document.getElementById('cp-module-complete-hint');
+    if (!bar || !markBtn) return;
+
+    let alreadyComplete = false;
+    try {
+        if (_currentUid) {
+            const cpSnap = await _k8sDb.collection('courseProgress').doc(_currentUid).get();
+            const data = cpSnap.exists ? (cpSnap.data() || {}) : {};
+            const courseObj = (data.courses && data.courses[CP_COURSE_ID]) || {};
+            const mods = courseObj.modules || {};
+            alreadyComplete = !!(mods[CP_MODULE_KEY] && mods[CP_MODULE_KEY].completedOn);
+        }
+    } catch(e) {}
+
+    if (alreadyComplete) {
+        markBtn.textContent = '\u2705 Module completed';
+        markBtn.style.opacity = '1';
+        markBtn.style.pointerEvents = 'none';
+        if (hint) hint.textContent = '';
+    } else if (cpAllSectionsDone()) {
+        markBtn.textContent = 'Mark module as complete';
+        markBtn.style.opacity = '1';
+        markBtn.style.pointerEvents = 'auto';
+        if (hint) hint.textContent = '';
+    } else {
+        markBtn.textContent = 'Mark module as complete';
+        markBtn.style.opacity = '.5';
+        markBtn.style.pointerEvents = 'none';
+        if (hint) hint.textContent = 'Complete all sections to enable.';
+    }
+}
+
+window.cpMarkModuleComplete = async function() {
+    if (!_currentUid || !cpAllSectionsDone()) return;
+    const t = cpNow();
+    let courseObj = {};
+    try {
+        const snap = await _k8sDb.collection('courseProgress').doc(_currentUid).get();
+        const data = snap.exists ? (snap.data() || {}) : {};
+        courseObj = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    } catch(e) {}
+    const mods = courseObj.modules || {};
+
+    const courseUpdate = { modules: {} };
+    if (!courseObj.courseStartedOn) { courseUpdate.courseStartedOn = t.date; courseUpdate.courseStartedAt = t.time; }
+    if (!mods[CP_MODULE_KEY] || !mods[CP_MODULE_KEY].completedOn) {
+        courseUpdate.modules[CP_MODULE_KEY] = { completedOn: t.date, completedAt: t.time };
+    }
+    const update = { email: _currentUserEmail, name: _currentUserName, courses: {} };
+    update.courses[CP_COURSE_ID] = courseUpdate;
+
+    try {
+        await _k8sDb.collection('courseProgress').doc(_currentUid).set(update, { merge: true });
+    } catch(e) { console.warn('[courseProgress] write failed:', e.message); }
+
+    const markBtn = document.getElementById('cp-mark-module-btn');
+    const hint    = document.getElementById('cp-module-complete-hint');
+    if (markBtn) { markBtn.textContent = '\u2705 Module completed'; markBtn.style.pointerEvents = 'none'; }
+    if (hint) hint.textContent = '';
+};
+
 </script>
 </body>
 </html>
