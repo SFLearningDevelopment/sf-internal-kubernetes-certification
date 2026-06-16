@@ -515,6 +515,32 @@
             .module-header h1 { font-size: 1.8em; }
             .nav-buttons { flex-direction: column; }
         }
+    
+        /* Inline section quiz (gates Mark-as-complete) */
+        .section-quiz { background: #fef3c7; border: 2px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin-top: 25px; }
+        [data-theme="dark"] .section-quiz { background: #3a2f12; border-color: #b45309; }
+        .section-quiz > h4 { margin-bottom: 14px; color: #92400e; }
+        [data-theme="dark"] .section-quiz > h4 { color: #fef3c7; }
+        .sq-item { margin-bottom: 18px; }
+        .sq-item:last-child { margin-bottom: 4px; }
+        .sq-q { font-weight: 600; margin-bottom: 10px; color: #0f172a; }
+        [data-theme="dark"] .sq-q { color: #e2e8f0; }
+        .sq-opt { padding: 10px 14px; margin: 8px 0; background: white; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .25s; }
+        [data-theme="dark"] .sq-opt { background: var(--bg-dark); }
+        .sq-opt:hover { border-color: var(--primary); }
+        .sq-opt.correct { border-color: var(--success); background: #dcfce7; pointer-events: none; }
+        [data-theme="dark"] .sq-opt.correct { background: #14331f; }
+        .sq-opt.incorrect { border-color: var(--danger); background: #fee2e2; }
+        [data-theme="dark"] .sq-opt.incorrect { background: #3a1414; }
+        .sq-opt.locked { pointer-events: none; opacity: .85; }
+        .sq-feedback { margin-top: 8px; font-size: .92em; display: none; }
+        .sq-feedback.show { display: block; }
+        .sq-feedback.ok { color: var(--success); }
+        .sq-feedback.no { color: var(--danger); }
+        .section-complete input[type="checkbox"]:disabled + label { opacity: .5; cursor: not-allowed; }
+        .sq-gate-note { margin-top: 6px; font-size: .85em; color: #92400e; }
+        [data-theme="dark"] .sq-gate-note { color: #fcd34d; }
+
     </style>
 </head>
 <body>
@@ -702,14 +728,34 @@ kubectl logs cache-pod -c reader
                         Multiple containers in a pod can share the same volume
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q30: What type of volume is temporary and deleted with the pod?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="4.1">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Why are Volumes used in Kubernetes?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',0,false)">To schedule pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',0,true)">Container filesystems are ephemeral; volumes persist data across container restarts</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',0,false)">To load balance traffic</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',0,false)">To store cluster state</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What characterizes an emptyDir volume?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',1,false)">It persists forever on cloud storage</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',1,true)">It is created when the pod is assigned to a node and deleted when the pod is removed</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',1,false)">It mounts a host directory</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',1,false)">It is read-only across all nodes</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. What is a key risk of using a hostPath volume?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',2,false)">It cannot store data</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',2,true)">It ties the pod to a specific node and poses a security risk</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',2,false)">It is always read-only</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.1',2,false)">It requires a LoadBalancer</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-4.1" onchange="handleCheckboxChange(this)">
                         <label for="check-4.1">✅ Mark section 4.1 as completed</label>
                     </div>
@@ -870,15 +916,26 @@ kubectl logs cache-pod -c reader
                         "Delete" policy removes data permanently when PVC is deleted
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q27: What is a PersistentVolume in Kubernetes?</li>
-                            <li>Q28: Which access mode allows a volume to be mounted by multiple nodes for reading and writing?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="4.2">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is a PersistentVolume (PV)?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',0,false)">A pod-scoped temporary directory</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',0,true)">A cluster resource representing storage that exists independently of pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',0,false)">A networking rule</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',0,false)">A label selector</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which access mode allows a volume to be mounted read-write by a single node?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',1,false)">ReadOnlyMany (ROX)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',1,false)">ReadWriteMany (RWX)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',1,true)">ReadWriteOnce (RWO)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.2',1,false)">WriteOnly</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-4.2" onchange="handleCheckboxChange(this)">
                         <label for="check-4.2">✅ Mark section 4.2 as completed</label>
                     </div>
@@ -1083,14 +1140,34 @@ kubectl logs cache-pod -c reader
                         • Delete = data gone forever
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q29: How do pods request storage in Kubernetes?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="4.3">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is a PersistentVolumeClaim (PVC)?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',0,false)">A cluster-wide storage device</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',0,true)">A request for storage by a user that consumes PV resources</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',0,false)">A scheduling policy</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',0,false)">A type of Service</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. On what basis does Kubernetes bind a PVC to a PV?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',1,false)">Pod name only</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',1,true)">Matching access mode, sufficient storage size, and storage class</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',1,false)">Node IP address</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',1,false)">Random assignment</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. How does a PVC differ in scope from a PV?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',2,false)">A PVC is cluster-scoped; a PV is namespaced</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',2,true)">A PVC is namespaced; a PV is cluster-scoped</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',2,false)">Both are namespaced</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.3',2,false)">Both are cluster-scoped</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-4.3" onchange="handleCheckboxChange(this)">
                         <label for="check-4.3">✅ Mark section 4.3 as completed</label>
                     </div>
@@ -1325,14 +1402,26 @@ kubectl logs cache-pod -c reader
                         • Most common approach today
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Related to Q27-Q30: General storage concepts</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="4.4">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does a StorageClass enable?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',0,false)">Manual pre-creation of every PV</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',0,true)">Dynamic provisioning, automatically creating PVs when PVCs are created</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',0,false)">Pod scheduling</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',0,false)">Network policies</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. In dynamic provisioning, what triggers the creation of a new PV?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',1,false)">An admin creating it manually</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',1,true)">A user creating a PVC that references a StorageClass</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',1,false)">A node joining the cluster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'4.4',1,false)">A Service being created</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-4.4" onchange="handleCheckboxChange(this)">
                         <label for="check-4.4">✅ Mark section 4.4 as completed</label>
                     </div>
@@ -1522,6 +1611,50 @@ kubectl logs cache-pod -c reader
         document.getElementById('logo-img').onerror = function() {
             this.parentElement.innerHTML = '<span style="font-weight:bold;color:#0078D4;font-size:1.2em">SF</span>';
         };
+    
+        // ── Inline section quiz gating ──────────────────────────────────
+        window.sqAnswer = function(optEl, sec, qIdx, isCorrect) {
+            const item = optEl.closest('.sq-item');
+            const fb = item.querySelector('.sq-feedback');
+            if (isCorrect) {
+                optEl.classList.add('correct');
+                item.querySelectorAll('.sq-opt').forEach(function(o){ o.classList.add('locked'); });
+                fb.className = 'sq-feedback show ok';
+                fb.textContent = '\u2705 Correct.';
+                item.dataset.answered = 'true';
+                sqRefreshGate(sec);
+            } else {
+                optEl.classList.add('incorrect');
+                fb.className = 'sq-feedback show no';
+                fb.textContent = '\u274C Not quite \u2014 review the section above and try again.';
+            }
+        };
+        function sqRefreshGate(sec) {
+            const quiz = document.querySelector('.section-quiz[data-sec="' + sec + '"]');
+            if (!quiz) return;
+            const items = quiz.querySelectorAll('.sq-item');
+            const allOk = Array.from(items).every(function(it){ return it.dataset.answered === 'true'; });
+            const cb = document.getElementById('check-' + sec);
+            if (!cb) return;
+            if (allOk) {
+                cb.disabled = false;
+                const note = quiz.parentElement.querySelector('.sq-gate-note');
+                if (note) note.style.display = 'none';
+            }
+        }
+        // Lock checkboxes that still have an attached unanswered quiz on load
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.section-quiz').forEach(function(quiz){
+                const sec = quiz.getAttribute('data-sec');
+                const cb = document.getElementById('check-' + sec);
+                if (cb && !cb.checked) cb.disabled = true;
+            });
+        });
+        // When progress loads from Firestore and re-checks a box, ensure it is enabled
+        (function(){
+            const _origLoad = window.k8sLoadProgress;
+        })();
+
     </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1547,7 +1680,7 @@ async function k8sLoadProgress(uid) {
             _completed = snap.data()[MODULE_KEY] || [];
             _completed.forEach(function(cbId) {
                 const cb = document.getElementById(cbId);
-                if (cb) cb.checked = true;
+                if (cb) { cb.checked = true; cb.disabled = false; }
             });
         } else {
             _completed = [];
