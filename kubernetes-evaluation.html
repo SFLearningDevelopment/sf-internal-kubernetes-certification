@@ -192,9 +192,14 @@ a{color:inherit;text-decoration:none}
     <div style="font-size:32px;margin-bottom:8px">🔒</div>
     <h2>SF Certified Kubernetes Practitioner</h2>
     <p>Sign in with your SourceFuse account to access the certification exam.</p>
+    <button class="auth-btn primary" id="googleSignin">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.167 6.656 3.58 9 3.58z"/></svg>
+      Sign in with Google
+    </button>
+    <div class="auth-divider">Or, sign in with your email/password</div>
     <input type="email" class="auth-input" id="emailInput" placeholder="you@sourcefuse.com" autocomplete="email" />
     <input type="password" class="auth-input" id="passwordInput" placeholder="Password" autocomplete="current-password" />
-    <button class="auth-btn primary" id="emailSignin">Sign in with Email</button>
+    <button class="auth-btn" id="emailSignin">Sign in with Email</button>
     <div class="auth-error" id="authErr"></div>
   </div>
 </div>
@@ -238,7 +243,7 @@ a{color:inherit;text-decoration:none}
   <div class="rules-card">
     <h3>📋 Exam Rules</h3>
     <ul>
-      <li><strong>Question sampling:</strong> Each attempt picks 40 questions at random from a bank of 114, weighted by module exam-weight. Two attempts will not see identical questions.</li>
+      <li><strong>Question sampling:</strong> Each attempt draws 40 questions from a bank of ~140, weighted by module exam-weight, and includes 10–12 scenario-based questions interspersed with multiple-choice questions. The exact mix varies each attempt, and your set will not match the most recent attempt's questions.</li>
       <li><strong>Navigation:</strong> You can move between questions freely. Flag questions to revisit. The sidebar shows answered (orange), unanswered (white), and flagged (amber) states.</li>
       <li><strong>Timer:</strong> 45 minutes from when you click Start. Timer turns amber under 5 minutes, red under 1 minute, and the exam auto-submits at zero.</li>
       <li><strong>Attempts:</strong> 3 attempts maximum. Highest score is recorded. Pass on any attempt and you're certified.</li>
@@ -330,12 +335,14 @@ a{color:inherit;text-decoration:none}
 
 <!-- ============ Question bank ============ -->
 <script src="kubernetes-question-bank.js"></script>
+<!-- Scenario questions are appended inside kubernetes-question-bank.js (window.K8S_SCENARIO_BANK) -->
+
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup }
   from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion }
+import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp }
   from 'https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -362,8 +369,24 @@ const MODULE_WEIGHTS = {
   m1: 0.20, m2: 0.20, m3: 0.20, m4: 0.15, m5: 0.25
 };
 
-// Difficulty target mix for sampled exam
+// Difficulty target mix for sampled exam (applies to the MCQ portion)
 const DIFFICULTY_MIX = { easy: 0.30, medium: 0.55, hard: 0.15 };
+
+// Scenario questions per attempt: a random count in [MIN,MAX] that also
+// differs from the most-recent attempt's scenario count (when possible).
+// The remainder of TOTAL_QUESTIONS are MCQ.
+const SCENARIO_MIN = 10;
+const SCENARIO_MAX = 12;
+
+// Rolling log doc used to avoid repeating the most-recent attempt's
+// questions and scenario count. One read on Start, one write on Submit.
+const QLOG_PATH = ['examQuestionLog', COURSE_ID];   // examQuestionLog/kubernetes
+const QLOG_KEEP = 5;                                 // cap rolling history length
+
+// Populated on Start from the most-recent log entry; consumed by the sampler.
+let _excludeIds = new Set();
+let _recentScenarioCount = null;
+let _attemptScenarioCount = null;   // the count chosen for the current attempt
 
 function $(id){return document.getElementById(id)}
 
@@ -377,47 +400,72 @@ function shuffle(arr){
   return a;
 }
 
-function flatBank(){
+// Flatten the MCQ bank (questions WITHOUT type:'scenario') as {..,module,section}.
+function flatMcqBank(){
   const bank = window.K8S_QUESTION_BANK;
   const all = [];
   Object.keys(bank).forEach(m => {
     Object.keys(bank[m]).forEach(s => {
-      bank[m][s].forEach(q => all.push({...q, module:m, section:s}));
+      bank[m][s].forEach(q => {
+        if(q.type !== 'scenario') all.push({...q, module:m, section:s});
+      });
     });
   });
   return all;
 }
 
-// Sample N questions weighted by module weight + difficulty mix.
-// Strategy: compute per-module quota from MODULE_WEIGHTS, then within each
-// module pick the difficulty mix proportionally; backfill with any-difficulty
-// from same module if a difficulty bucket is short.
-function sampleQuestions(){
-  const bank = window.K8S_QUESTION_BANK;
-  const out = [];
+// Flatten the scenario bank (window.K8S_SCENARIO_BANK), normalised to the
+// same shape as MCQ questions.
+function flatScenarioBank(){
+  const sc = window.K8S_SCENARIO_BANK || [];
+  return sc.map(q => ({...q, type:'scenario'}));
+}
 
-  // Compute target count per module (rounded, then adjusted to match TOTAL)
+// Pick the scenario count for this attempt: a random int in
+// [SCENARIO_MIN, SCENARIO_MAX] that differs from the most-recent attempt's
+// count when the range allows it.
+function pickScenarioCount(){
+  const choices = [];
+  for(let n = SCENARIO_MIN; n <= SCENARIO_MAX; n++){
+    if(_recentScenarioCount == null || n !== _recentScenarioCount) choices.push(n);
+  }
+  // If exclusion emptied the list (shouldn't, range has >1 value), fall back to full range.
+  const pool = choices.length ? choices : (() => {
+    const a = []; for(let n = SCENARIO_MIN; n <= SCENARIO_MAX; n++) a.push(n); return a;
+  })();
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// Weighted MCQ pick: distribute `total` MCQs across modules by MODULE_WEIGHTS,
+// honour difficulty mix within each module, prefer non-excluded ids, and
+// backfill from the full bank so the target is always met.
+function sampleMcq(total, excludeIds){
+  const flat = flatMcqBank();
+  const byModule = {};
+  flat.forEach(q => { (byModule[q.module] = byModule[q.module] || []).push(q); });
+
+  // Per-module quota
   const moduleTargets = {};
   let assigned = 0;
   Object.keys(MODULE_WEIGHTS).forEach(m => {
-    moduleTargets[m] = Math.round(MODULE_WEIGHTS[m] * TOTAL_QUESTIONS);
+    moduleTargets[m] = Math.round(MODULE_WEIGHTS[m] * total);
     assigned += moduleTargets[m];
   });
-  // Adjust rounding drift: bump or reduce m3 (largest weight) until matches
-  while(assigned < TOTAL_QUESTIONS){ moduleTargets.m5++; assigned++; }
-  while(assigned > TOTAL_QUESTIONS){ moduleTargets.m5--; assigned--; }
+  while(assigned < total){ moduleTargets.m5++; assigned++; }
+  while(assigned > total){ moduleTargets.m5--; assigned--; }
+
+  const out = [];
+  const usedGlobal = new Set();
 
   Object.keys(moduleTargets).forEach(m => {
     const need = moduleTargets[m];
-    if(need <= 0) return;
-    // Collect all questions in this module, shuffled
-    const pool = [];
-    Object.keys(bank[m]).forEach(s => {
-      bank[m][s].forEach(q => pool.push({...q, module:m, section:s}));
-    });
-    const shuffled = shuffle(pool);
+    if(need <= 0 || !byModule[m]) return;
 
-    // Compute difficulty quotas for this module
+    // Prefer questions not in excludeIds; keep excluded ones as backfill tail.
+    const fresh = shuffle(byModule[m].filter(q => !excludeIds.has(q.id)));
+    const stale = shuffle(byModule[m].filter(q =>  excludeIds.has(q.id)));
+    const ordered = [...fresh, ...stale];
+
     const diffQuotas = {
       easy:   Math.round(need * DIFFICULTY_MIX.easy),
       medium: Math.round(need * DIFFICULTY_MIX.medium),
@@ -428,35 +476,106 @@ function sampleQuestions(){
     while(dSum > need){ diffQuotas.medium--; dSum--; }
 
     const picked = [];
-    const used = new Set();
-    // First pass: try to satisfy difficulty quotas
-    ['easy', 'medium', 'hard'].forEach(diff => {
+    ['easy','medium','hard'].forEach(diff => {
       let count = 0;
-      for(const q of shuffled){
+      for(const q of ordered){
         if(count >= diffQuotas[diff]) break;
-        if(used.has(q.id)) continue;
-        if(q.difficulty === diff){
-          picked.push(q);
-          used.add(q.id);
-          count++;
-        }
+        if(usedGlobal.has(q.id)) continue;
+        if(q.difficulty === diff){ picked.push(q); usedGlobal.add(q.id); count++; }
       }
     });
-    // Backfill: if we couldn't hit difficulty quotas (e.g. not enough hard questions in this module), top up with any unused
-    for(const q of shuffled){
+    // Backfill within module (any difficulty, fresh-first then stale).
+    for(const q of ordered){
       if(picked.length >= need) break;
-      if(!used.has(q.id)){
-        picked.push(q);
-        used.add(q.id);
-      }
+      if(!usedGlobal.has(q.id)){ picked.push(q); usedGlobal.add(q.id); }
     }
     out.push(...picked);
   });
 
-  return shuffle(out);
+  // Global backfill across the whole MCQ bank if module quotas under-filled
+  // (e.g. a small module ran out). Guarantees we reach `total`.
+  if(out.length < total){
+    const all = shuffle([...flat.filter(q=>!excludeIds.has(q.id)), ...flat.filter(q=>excludeIds.has(q.id))]);
+    for(const q of all){
+      if(out.length >= total) break;
+      if(!usedGlobal.has(q.id)){ out.push(q); usedGlobal.add(q.id); }
+    }
+  }
+  return out;
+}
+
+// Scenario pick: `count` scenarios, prefer non-excluded, backfill from the
+// full scenario bank; weight selection toward module exam-weights by
+// shuffling within a weighted module order.
+function sampleScenarios(count, excludeIds){
+  const flat = flatScenarioBank();
+  const fresh = shuffle(flat.filter(q => !excludeIds.has(q.id)));
+  const stale = shuffle(flat.filter(q =>  excludeIds.has(q.id)));
+  const ordered = [...fresh, ...stale];
+  return ordered.slice(0, Math.min(count, ordered.length));
+}
+
+// Build the full attempt: TOTAL_QUESTIONS = scenarioCount + mcqCount.
+// Uses module-level _excludeIds (most-recent attempt) best-effort.
+function sampleQuestions(){
+  const scenarioCount = _attemptScenarioCount != null ? _attemptScenarioCount : pickScenarioCount();
+  _attemptScenarioCount = scenarioCount;
+
+  const scenarios = sampleScenarios(scenarioCount, _excludeIds);
+  const mcqNeed = TOTAL_QUESTIONS - scenarios.length;   // if scenario pool short, MCQ covers the rest
+  const mcqs = sampleMcq(mcqNeed, _excludeIds);
+
+  return shuffle([...scenarios, ...mcqs]);
 }
 
 // ---------- Firestore ----------
+
+// Read the rolling question log and populate exclusion state from the most
+// recent attempt entry. Best-effort: failures leave exclusion empty so the
+// exam still starts. Email/password sessions use localStorage instead.
+async function loadQuestionLog(isEmail){
+  _excludeIds = new Set();
+  _recentScenarioCount = null;
+  try{
+    let entries = [];
+    if(isEmail){
+      entries = JSON.parse(localStorage.getItem('k8s_qlog_'+COURSE_ID) || '[]');
+    }else{
+      const ref = doc(db, QLOG_PATH[0], QLOG_PATH[1]);
+      const snap = await getDoc(ref);
+      entries = snap.exists() ? (snap.data().recentAttempts || []) : [];
+    }
+    if(entries.length){
+      const last = entries[entries.length - 1];
+      (last.ids || []).forEach(id => _excludeIds.add(id));
+      _recentScenarioCount = (typeof last.scenarioCount === 'number') ? last.scenarioCount : null;
+    }
+  }catch(e){ console.error('Question-log read failed (continuing):', e); }
+}
+
+// Append this attempt to the rolling log (capped at QLOG_KEEP). Stored fields:
+// { uid, ts, ids:[...], scenarioCount }. Cross-user by design so the next
+// user's Start excludes the most-recent set.
+async function writeQuestionLog(uid, isEmail, ids, scenarioCount){
+  const entry = { uid, ts: new Date().toISOString(), ids, scenarioCount };
+  try{
+    if(isEmail){
+      const key = 'k8s_qlog_'+COURSE_ID;
+      const cur = JSON.parse(localStorage.getItem(key) || '[]');
+      cur.push(entry);
+      while(cur.length > QLOG_KEEP) cur.shift();
+      localStorage.setItem(key, JSON.stringify(cur));
+      return;
+    }
+    const ref = doc(db, QLOG_PATH[0], QLOG_PATH[1]);
+    const snap = await getDoc(ref);
+    let entries = snap.exists() ? (snap.data().recentAttempts || []) : [];
+    entries.push(entry);
+    while(entries.length > QLOG_KEEP) entries.shift();
+    await setDoc(ref, { recentAttempts: entries, updatedAt: serverTimestamp() }, {merge:true});
+  }catch(e){ console.error('Question-log write failed (non-fatal):', e); }
+}
+
 async function loadResults(uid, isEmail){
   if(isEmail){
     return JSON.parse(localStorage.getItem('k8s_results_'+uid) || '{}');
@@ -550,13 +669,24 @@ function renderAttemptsCard(){
 }
 
 // ---------- Exam phase ----------
-function startExam(){
+async function startExam(){
+  const btn = $('startBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Preparing your exam…'; }
+
+  // Read most-recent attempt's question set + scenario count, then choose a
+  // scenario count that differs from it and sample with ID exclusion.
+  _attemptScenarioCount = null;
+  await loadQuestionLog(currentUser._isEmail);
+  _attemptScenarioCount = pickScenarioCount();
+
   questions = sampleQuestions();
   answers = {};
   flagged = new Set();
   currentIdx = 0;
   secondsLeft = TIME_LIMIT_MIN * 60;
   startTime = Date.now();
+
+  if(btn){ btn.disabled = false; btn.textContent = '🚀 Start Exam'; }
 
   $('introPhase').style.display = 'none';
   $('topbar').style.display = 'none';
@@ -700,6 +830,7 @@ window.submitExam = async function(timedOut){
       module: q.module,
       section: q.section,
       difficulty: q.difficulty,
+      type: q.type === 'scenario' ? 'scenario' : 'mcq',
       questionIdx: i,
       selectedIndex: sel ?? null,
       correctIndex: q.correctIndex,
@@ -709,6 +840,7 @@ window.submitExam = async function(timedOut){
 
   const score = Math.round((correct / TOTAL_QUESTIONS) * 100);
   const passed = score >= PASS_PERCENT;
+  const scenarioCount = questions.filter(q => q.type === 'scenario').length;
 
   const attempt = {
     completedAt,
@@ -717,12 +849,23 @@ window.submitExam = async function(timedOut){
     correct, wrong, skipped,
     score, passed,
     questionCount: TOTAL_QUESTIONS,
+    scenarioCount,
     detail
   };
 
   try{
     await saveAttempt(currentUser.uid, currentUser._isEmail, attempt);
   }catch(e){ console.error('Save failed', e); }
+
+  // Update rolling question log so the next attempt (any user) excludes this set.
+  try{
+    await writeQuestionLog(
+      currentUser.uid,
+      currentUser._isEmail,
+      questions.map(q => q.id),
+      scenarioCount
+    );
+  }catch(e){ console.error('Question-log update failed', e); }
 
   showResults(attempt);
 };
@@ -813,6 +956,19 @@ async function bootUser(u, isEmail=false){
 }
 
 onAuthStateChanged(auth, u => { if(u) bootUser(u, false); });
+
+$('googleSignin').onclick = async () => {
+  const errEl = $('authErr');
+  errEl.textContent = '';
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ hd: 'sourcefuse.com' });
+  try {
+    await signInWithPopup(auth, provider);
+  } catch(e) {
+    if(e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
+    errEl.textContent = e.message || 'Google sign-in failed.';
+  }
+};
 
 $('emailSignin').onclick = async () => {
   const email = ($('emailInput').value || '').trim().toLowerCase();
