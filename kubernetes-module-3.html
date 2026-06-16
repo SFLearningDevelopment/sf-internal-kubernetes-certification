@@ -569,6 +569,32 @@
             .module-header h1 { font-size: 1.8em; }
             .nav-buttons { flex-direction: column; }
         }
+    
+        /* Inline section quiz (gates Mark-as-complete) */
+        .section-quiz { background: #fef3c7; border: 2px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin-top: 25px; }
+        [data-theme="dark"] .section-quiz { background: #3a2f12; border-color: #b45309; }
+        .section-quiz > h4 { margin-bottom: 14px; color: #92400e; }
+        [data-theme="dark"] .section-quiz > h4 { color: #fef3c7; }
+        .sq-item { margin-bottom: 18px; }
+        .sq-item:last-child { margin-bottom: 4px; }
+        .sq-q { font-weight: 600; margin-bottom: 10px; color: #0f172a; }
+        [data-theme="dark"] .sq-q { color: #e2e8f0; }
+        .sq-opt { padding: 10px 14px; margin: 8px 0; background: white; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .25s; }
+        [data-theme="dark"] .sq-opt { background: var(--bg-dark); }
+        .sq-opt:hover { border-color: var(--primary); }
+        .sq-opt.correct { border-color: var(--success); background: #dcfce7; pointer-events: none; }
+        [data-theme="dark"] .sq-opt.correct { background: #14331f; }
+        .sq-opt.incorrect { border-color: var(--danger); background: #fee2e2; }
+        [data-theme="dark"] .sq-opt.incorrect { background: #3a1414; }
+        .sq-opt.locked { pointer-events: none; opacity: .85; }
+        .sq-feedback { margin-top: 8px; font-size: .92em; display: none; }
+        .sq-feedback.show { display: block; }
+        .sq-feedback.ok { color: var(--success); }
+        .sq-feedback.no { color: var(--danger); }
+        .section-complete input[type="checkbox"]:disabled + label { opacity: .5; cursor: not-allowed; }
+        .sq-gate-note { margin-top: 6px; font-size: .85em; color: #92400e; }
+        [data-theme="dark"] .sq-gate-note { color: #fcd34d; }
+
     </style>
 </head>
 <body>
@@ -656,14 +682,26 @@
                         <li>The phone system (Service) handles the routing</li>
                     </ul>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q20: What is the default Service type in Kubernetes?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="3.1">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Why are Services needed in Kubernetes?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',0,false)">Pods never change IP, so a stable name is redundant</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',0,true)">Pods are ephemeral with changing IPs, so Services provide a stable endpoint and load balancing</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',0,false)">Services store cluster state</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',0,false)">Services schedule pods</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What does a Service define?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',1,false)">A single physical machine</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',1,true)">A logical set of Pods and a policy to access them</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',1,false)">A storage volume</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.1',1,false)">A node label</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-3.1" onchange="handleCheckboxChange(this)">
                         <label for="check-3.1">✅ Mark section 3.1 as completed</label>
                     </div>
@@ -801,16 +839,34 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                         You cannot access ClusterIP services from outside the cluster
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q19: Which Service type uses a cloud provider's load balancer?</li>
-                            <li>Q20: What is the default Service type?</li>
-                            <li>Q22: What is the valid port range for NodePort?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="3.2">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Which Service type is the default and exposes the service only on an internal cluster IP?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',0,false)">NodePort</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',0,false)">LoadBalancer</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',0,true)">ClusterIP</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',0,false)">ExternalName</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which Service type provisions an external cloud load balancer (e.g. AWS ELB)?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',1,false)">ClusterIP</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',1,false)">NodePort</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',1,true)">LoadBalancer</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',1,false)">Headless</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. A NodePort Service exposes the service on each node&#x27;s IP using a port in which range?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',2,false)">80-443</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',2,false)">1000-2000</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',2,true)">30000-32767</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.2',2,false)">0-1024</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-3.2" onchange="handleCheckboxChange(this)">
                         <label for="check-3.2">✅ Mark section 3.2 as completed</label>
                     </div>
@@ -928,14 +984,26 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                         New services may take a few seconds to be resolvable
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul style="color: inherit;">
-                            <li>Q21: Kubernetes DNS FQDN format (Fill in blank)</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="3.3">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is the FQDN format for a Kubernetes Service?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',0,false)">service-name.cluster.local</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',0,true)">service-name.namespace.svc.cluster.local</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',0,false)">namespace.service-name.local</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',0,false)">svc.service-name.namespace</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. From a pod in the same namespace, how can another service be reached?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',1,false)">Only by full FQDN</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',1,true)">By its short name (e.g. curl http://webapp)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',1,false)">Only by IP address</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.3',1,false)">It cannot be reached</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-3.3" onchange="handleCheckboxChange(this)">
                         <label for="check-3.3">✅ Mark section 3.3 as completed</label>
                     </div>
@@ -1061,15 +1129,26 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                             Pods must match ALL selectors, not just one
                         </div>
             
-                        <div class="test-questions">
-                            <h4>🎯 This Section Covers Test Questions:</h4>
-                            <ul style="color: inherit;">
-                                <li>Q25: Service selector field (Fill in blank)</li>
-                                <li>Q26: kubectl expose command</li>
-                            </ul>
+                                            <div class="section-quiz" data-sec="3.4">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. How does a Service determine which Pods receive its traffic?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',0,false)">By pod name only</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',0,true)">By label selectors matching pod labels</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',0,false)">By node IP</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',0,false)">Randomly</div>
+                            <div class="sq-feedback"></div>
                         </div>
-            
-                        <div class="section-complete">
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What happens when a new pod with matching labels is added?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',1,false)">It must be manually added to the Service</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',1,true)">It automatically joins the Service (dynamic selection)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',1,false)">The Service is deleted</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.4',1,false)">Nothing, selectors are static</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                             <input type="checkbox" id="check-3.4" onchange="handleCheckboxChange(this)">
                             <label for="check-3.4">✅ Mark section 3.4 as completed</label>
                         </div>
@@ -1167,14 +1246,34 @@ kubectl get svc webapp -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
                             You must explicitly create deny rules
                         </div>
             
-                        <div class="test-questions">
-                            <h4>🎯 This Section Covers Test Questions:</h4>
-                            <ul style="color: inherit;">
-                                <li>Q23: Which object defines rules for traffic control?</li>
-                            </ul>
+                                            <div class="section-quiz" data-sec="3.5">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does a NetworkPolicy control?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',0,false)">Pod scheduling</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',0,true)">Ingress and egress network traffic between pods (like a firewall)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',0,false)">Storage provisioning</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',0,false)">Container image pulls</div>
+                            <div class="sq-feedback"></div>
                         </div>
-            
-                        <div class="section-complete">
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What is the default traffic behavior when no NetworkPolicy exists?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',1,false)">All traffic is denied</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',1,true)">All traffic is allowed</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',1,false)">Only ingress is allowed</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',1,false)">Only egress is allowed</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. What does a NetworkPolicy with an empty podSelector ({}) and no rules accomplish?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',2,false)">Allows all traffic</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',2,true)">Applies to all pods and denies the specified traffic types (default deny)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',2,false)">Deletes all pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.5',2,false)">Has no effect</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                             <input type="checkbox" id="check-3.5" onchange="handleCheckboxChange(this)">
                             <label for="check-3.5">✅ Mark section 3.5 as completed</label>
                         </div>
@@ -1358,14 +1457,26 @@ kubectl get ingress webapp-ingress
                 • <code class="command">Exact</code> only matches /path exactly
             </div>
 
-            <div class="test-questions">
-                <h4>🎯 This Section Covers Test Questions:</h4>
-                <ul style="color: inherit;">
-                    <li>Q24: What does an Ingress resource do?</li>
-                </ul>
-            </div>
-
-            <div class="section-complete">
+                                <div class="section-quiz" data-sec="3.6">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is the main advantage of Ingress over multiple LoadBalancer Services?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',0,false)">It schedules pods faster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',0,true)">It provides a single entry point for multiple services with path/host-based routing, more cost-effective</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',0,false)">It stores cluster state</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',0,false)">It replaces etcd</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What is required for Ingress resources to actually work?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',1,false)">Nothing extra is needed</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',1,true)">An Ingress Controller must be installed</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',1,false)">A DaemonSet on every node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.6',1,false)">A PersistentVolume</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                 <input type="checkbox" id="check-3.6" onchange="handleCheckboxChange(this)">
                 <label for="check-3.6">✅ Mark section 3.6 as completed</label>
             </div>
@@ -1476,6 +1587,27 @@ kubectl describe service my-service | grep Selector
                 <strong>3. You rarely create Endpoints manually</strong><br>
                 Kubernetes manages them — manual creation is advanced use case
             </div>
+                    <div class="section-quiz" data-sec="3.7">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What do Endpoints track?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',0,false)">Node CPU usage</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',0,true)">The IP addresses of pods matching a Service&#x27;s selector</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',0,false)">Storage classes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',0,false)">Cluster events</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Why were EndpointSlices introduced?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',1,false)">To replace Services</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',1,true)">For better scalability and reduced API server load with large numbers of endpoints</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',1,false)">To store secrets</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.7',1,false)">To schedule pods</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div>
+
 
             <div class="section-complete">
                 <input type="checkbox" id="check-3.7" onchange="handleCheckboxChange(this)">
@@ -1643,6 +1775,27 @@ kubectl describe service nginx
                 □ Is the application listening? (<code class="command">kubectl logs pod-name</code>)<br>
                 □ Are ports correct? (Check service YAML)
             </div>
+                    <div class="section-quiz" data-sec="3.8">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. If a Service is not reachable, what is a key first check?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',0,false)">Delete the cluster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',0,true)">Check whether the Service has endpoints (kubectl get endpoints)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',0,false)">Restart etcd</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',0,false)">Reinstall kubelet</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. An empty endpoints list for a Service most likely indicates what?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',1,false)">The cluster is down</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',1,true)">The Service selector does not match any running pod labels</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',1,false)">DNS is disabled</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'3.8',1,false)">etcd is corrupt</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div>
+
 
             <div class="section-complete">
                 <input type="checkbox" id="check-3.8" onchange="handleCheckboxChange(this)">
@@ -1841,6 +1994,50 @@ kubectl describe service nginx
         document.getElementById('logo-img').onerror = function() {
             this.parentElement.innerHTML = '<span style="font-weight:bold;color:#0078D4;font-size:1.2em">SF</span>';
         };
+    
+        // ── Inline section quiz gating ──────────────────────────────────
+        window.sqAnswer = function(optEl, sec, qIdx, isCorrect) {
+            const item = optEl.closest('.sq-item');
+            const fb = item.querySelector('.sq-feedback');
+            if (isCorrect) {
+                optEl.classList.add('correct');
+                item.querySelectorAll('.sq-opt').forEach(function(o){ o.classList.add('locked'); });
+                fb.className = 'sq-feedback show ok';
+                fb.textContent = '\u2705 Correct.';
+                item.dataset.answered = 'true';
+                sqRefreshGate(sec);
+            } else {
+                optEl.classList.add('incorrect');
+                fb.className = 'sq-feedback show no';
+                fb.textContent = '\u274C Not quite \u2014 review the section above and try again.';
+            }
+        };
+        function sqRefreshGate(sec) {
+            const quiz = document.querySelector('.section-quiz[data-sec="' + sec + '"]');
+            if (!quiz) return;
+            const items = quiz.querySelectorAll('.sq-item');
+            const allOk = Array.from(items).every(function(it){ return it.dataset.answered === 'true'; });
+            const cb = document.getElementById('check-' + sec);
+            if (!cb) return;
+            if (allOk) {
+                cb.disabled = false;
+                const note = quiz.parentElement.querySelector('.sq-gate-note');
+                if (note) note.style.display = 'none';
+            }
+        }
+        // Lock checkboxes that still have an attached unanswered quiz on load
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.section-quiz').forEach(function(quiz){
+                const sec = quiz.getAttribute('data-sec');
+                const cb = document.getElementById('check-' + sec);
+                if (cb && !cb.checked) cb.disabled = true;
+            });
+        });
+        // When progress loads from Firestore and re-checks a box, ensure it is enabled
+        (function(){
+            const _origLoad = window.k8sLoadProgress;
+        })();
+
     </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1866,7 +2063,7 @@ async function k8sLoadProgress(uid) {
             _completed = snap.data()[MODULE_KEY] || [];
             _completed.forEach(function(cbId) {
                 const cb = document.getElementById(cbId);
-                if (cb) cb.checked = true;
+                if (cb) { cb.checked = true; cb.disabled = false; }
             });
         } else {
             _completed = [];
