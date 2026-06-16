@@ -572,6 +572,32 @@
             .module-header h1 { font-size: 1.8em; }
             .nav-buttons { flex-direction: column; }
         }
+    
+        /* Inline section quiz (gates Mark-as-complete) */
+        .section-quiz { background: #fef3c7; border: 2px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin-top: 25px; }
+        [data-theme="dark"] .section-quiz { background: #3a2f12; border-color: #b45309; }
+        .section-quiz > h4 { margin-bottom: 14px; color: #92400e; }
+        [data-theme="dark"] .section-quiz > h4 { color: #fef3c7; }
+        .sq-item { margin-bottom: 18px; }
+        .sq-item:last-child { margin-bottom: 4px; }
+        .sq-q { font-weight: 600; margin-bottom: 10px; color: #0f172a; }
+        [data-theme="dark"] .sq-q { color: #e2e8f0; }
+        .sq-opt { padding: 10px 14px; margin: 8px 0; background: white; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .25s; }
+        [data-theme="dark"] .sq-opt { background: var(--bg-dark); }
+        .sq-opt:hover { border-color: var(--primary); }
+        .sq-opt.correct { border-color: var(--success); background: #dcfce7; pointer-events: none; }
+        [data-theme="dark"] .sq-opt.correct { background: #14331f; }
+        .sq-opt.incorrect { border-color: var(--danger); background: #fee2e2; }
+        [data-theme="dark"] .sq-opt.incorrect { background: #3a1414; }
+        .sq-opt.locked { pointer-events: none; opacity: .85; }
+        .sq-feedback { margin-top: 8px; font-size: .92em; display: none; }
+        .sq-feedback.show { display: block; }
+        .sq-feedback.ok { color: var(--success); }
+        .sq-feedback.no { color: var(--danger); }
+        .section-complete input[type="checkbox"]:disabled + label { opacity: .5; cursor: not-allowed; }
+        .sq-gate-note { margin-top: 6px; font-size: .85em; color: #92400e; }
+        [data-theme="dark"] .sq-gate-note { color: #fcd34d; }
+
     </style>
 </head>
 <body>
@@ -684,6 +710,27 @@ ImagePullBackOff    → Image name, Registry credentials
 Error               → Logs, Resource limits
 Terminating         → Finalizers, Grace period
                     </div>
+                    <div class="section-quiz" data-sec="5.1">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is the recommended first step in the systematic debugging process?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',0,false)">Delete the pod</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',0,true)">Identify the problem — determine what is not working</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',0,false)">Restart the cluster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',0,false)">Reinstall kubectl</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. According to the diagnostic chart, a Pending pod points you to check what?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',1,false)">Container exit codes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',1,true)">Events, node resources, and scheduling issues</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',1,false)">Registry credentials</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.1',1,false)">Application logs only</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div>
+
 
                     <div class="section-complete">
                         <input type="checkbox" id="check-5.1" onchange="handleCheckboxChange(this)">
@@ -782,15 +829,26 @@ kubectl logs logger --timestamps --tail=5
                         Without it, you'll get an error
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q31: Which command shows pod logs?</li>
-                            <li>Q32: kubectl logs --previous (True/False)</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.2">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Which kubectl logs flag shows logs from the previous container instance after a crash?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',0,false)">--tail=100</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',0,false)">--follow</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',0,true)">--previous</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',0,false)">--timestamps</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which flag follows logs in real-time, similar to tail -f?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',1,false)">--since=1h</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',1,true)">-f (--follow)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',1,false)">--previous</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.2',1,false)">--tail</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.2" onchange="handleCheckboxChange(this)">
                         <label for="check-5.2">✅ Mark section 5.2 as completed</label>
                     </div>
@@ -885,14 +943,26 @@ kubectl describe pod broken
                         </div>
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q33: Which command shows detailed pod information including events?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.3">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Why is kubectl describe especially useful for troubleshooting?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',0,false)">It deletes failed pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',0,true)">It shows Events, which reveal what Kubernetes tried to do</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',0,false)">It restarts containers</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',0,false)">It edits the pod spec</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. A &#x27;Failed to pull image&#x27; event most likely indicates what?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',1,false)">Insufficient CPU</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',1,true)">A wrong image name, missing image, or missing registry credentials</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',1,false)">A taint on the node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.3',1,false)">A network policy block</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.3" onchange="handleCheckboxChange(this)">
                         <label for="check-5.3">✅ Mark section 5.3 as completed</label>
                     </div>
@@ -1006,14 +1076,26 @@ exit
                         May not have root permissions
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q34: Which command executes commands inside a container?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.4">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does kubectl exec allow you to do?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',0,false)">Schedule pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',0,true)">Execute commands inside a running container</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',0,false)">Provision storage</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',0,false)">Create Services</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which command opens an interactive shell inside a pod?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',1,false)">kubectl logs -it my-pod</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',1,true)">kubectl exec -it my-pod -- /bin/bash</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',1,false)">kubectl describe pod my-pod</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.4',1,false)">kubectl get pod my-pod -o yaml</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.4" onchange="handleCheckboxChange(this)">
                         <label for="check-5.4">✅ Mark section 5.4 as completed</label>
                     </div>
@@ -1058,6 +1140,27 @@ kubectl get events --all-namespaces
                         <strong>Important:</strong> Events are automatically deleted after 1 hour by default!<br>
                         For long-term tracking, use a logging solution.
                     </div>
+                    <div class="section-quiz" data-sec="5.5">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What do cluster events represent?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',0,false)">Application stdout logs</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',0,true)">Time-ordered records of what happened in the cluster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',0,false)">Node CPU graphs</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',0,false)">Stored secrets</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. By default, how long are events retained before automatic deletion?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',1,false)">24 hours</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',1,true)">1 hour</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',1,false)">Forever</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.5',1,false)">10 minutes</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div>
+
 
                     <div class="section-complete">
                         <input type="checkbox" id="check-5.5" onchange="handleCheckboxChange(this)">
@@ -1119,15 +1222,26 @@ kubectl get pod my-pod -o yaml | grep -A 10 env
                         Add init containers or readiness probes
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q35: What does CrashLoopBackOff indicate?</li>
-                            <li>Q37: What's the first step when debugging CrashLoopBackOff?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.6">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does CrashLoopBackOff mean?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',0,false)">The image cannot be pulled</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',0,true)">The container keeps crashing and Kubernetes restarts it with exponential backoff</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',0,false)">The pod cannot be scheduled</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',0,false)">The node is NotReady</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which command is most useful to see why a container crashed in a CrashLoopBackOff?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',1,false)">kubectl get nodes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',1,true)">kubectl logs my-pod --previous</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',1,false)">kubectl scale deployment</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.6',1,false)">kubectl label pod</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.6" onchange="handleCheckboxChange(this)">
                         <label for="check-5.6">✅ Mark section 5.6 as completed</label>
                     </div>
@@ -1182,14 +1296,26 @@ docker pull <image-name>
                         <strong>Missing tag:</strong> Specify correct tag or use 'latest'
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q36: What causes ImagePullBackOff?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.7">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does ImagePullBackOff indicate?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',0,false)">The container crashed after starting</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',0,true)">Kubernetes cannot pull the container image from the registry</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',0,false)">The pod cannot be scheduled due to resources</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',0,false)">The node failed</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which is a common cause of ImagePullBackOff?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',1,false)">Application crashes on startup</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',1,true)">Incorrect image name, missing tag, or missing private-registry credentials</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',1,false)">Insufficient node CPU</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.7',1,false)">A NetworkPolicy block</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.7" onchange="handleCheckboxChange(this)">
                         <label for="check-5.7">✅ Mark section 5.7 as completed</label>
                     </div>
@@ -1236,14 +1362,26 @@ kubectl top nodes
 kubectl describe nodes
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q38: What should you check when a pod is Pending?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.8">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does a pod stuck in Pending state mean?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',0,false)">The container is crashing</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',0,true)">The scheduler cannot find a suitable node to run it</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',0,false)">The image cannot be pulled</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',0,false)">The node is being deleted</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which message would you expect when nodes lack capacity for a Pending pod?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',1,false)">manifest unknown</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',1,true)">0/3 nodes are available: insufficient cpu</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',1,false)">CrashLoopBackOff</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.8',1,false)">authentication required</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.8" onchange="handleCheckboxChange(this)">
                         <label for="check-5.8">✅ Mark section 5.8 as completed</label>
                     </div>
@@ -1280,14 +1418,26 @@ kubectl describe node <node-name>
 kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.conditions[?(@.type=="Ready")].status
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q39: How do you check if a node is healthy?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.9">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. A healthy node should show which STATUS in kubectl get nodes?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',0,false)">NotReady</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',0,false)">Unknown</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',0,true)">Ready</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',0,false)">Pending</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What can unhealthy nodes cause?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',1,false)">Faster scheduling</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',1,true)">Widespread pod failures</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',1,false)">Automatic image pulls</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.9',1,false)">Lower storage costs</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.9" onchange="handleCheckboxChange(this)">
                         <label for="check-5.9">✅ Mark section 5.9 as completed</label>
                     </div>
@@ -1337,14 +1487,26 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
                         □ Volume mounts working?
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q40: What is the first command to run when debugging?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="5.10">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. According to the checklist, which command checks events at the bottom of its output?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',0,false)">kubectl get pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',0,true)">kubectl describe pod &lt;pod&gt;</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',0,false)">kubectl scale</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',0,false)">kubectl label</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. When checking networking in the troubleshooting checklist, which command helps verify a Service has backend pods?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',1,true)">kubectl get endpoints</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',1,false)">kubectl logs</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',1,false)">kubectl top nodes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'5.10',1,false)">kubectl exec</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-5.10" onchange="handleCheckboxChange(this)">
                         <label for="check-5.10">✅ Mark section 5.10 as completed</label>
                     </div>
@@ -1578,6 +1740,50 @@ kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.condition
         document.getElementById('logo-img').onerror = function() {
             this.parentElement.innerHTML = '<span style="font-weight:bold;color:#0078D4;font-size:1.2em">SF</span>';
         };
+    
+        // ── Inline section quiz gating ──────────────────────────────────
+        window.sqAnswer = function(optEl, sec, qIdx, isCorrect) {
+            const item = optEl.closest('.sq-item');
+            const fb = item.querySelector('.sq-feedback');
+            if (isCorrect) {
+                optEl.classList.add('correct');
+                item.querySelectorAll('.sq-opt').forEach(function(o){ o.classList.add('locked'); });
+                fb.className = 'sq-feedback show ok';
+                fb.textContent = '\u2705 Correct.';
+                item.dataset.answered = 'true';
+                sqRefreshGate(sec);
+            } else {
+                optEl.classList.add('incorrect');
+                fb.className = 'sq-feedback show no';
+                fb.textContent = '\u274C Not quite \u2014 review the section above and try again.';
+            }
+        };
+        function sqRefreshGate(sec) {
+            const quiz = document.querySelector('.section-quiz[data-sec="' + sec + '"]');
+            if (!quiz) return;
+            const items = quiz.querySelectorAll('.sq-item');
+            const allOk = Array.from(items).every(function(it){ return it.dataset.answered === 'true'; });
+            const cb = document.getElementById('check-' + sec);
+            if (!cb) return;
+            if (allOk) {
+                cb.disabled = false;
+                const note = quiz.parentElement.querySelector('.sq-gate-note');
+                if (note) note.style.display = 'none';
+            }
+        }
+        // Lock checkboxes that still have an attached unanswered quiz on load
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.section-quiz').forEach(function(quiz){
+                const sec = quiz.getAttribute('data-sec');
+                const cb = document.getElementById('check-' + sec);
+                if (cb && !cb.checked) cb.disabled = true;
+            });
+        });
+        // When progress loads from Firestore and re-checks a box, ensure it is enabled
+        (function(){
+            const _origLoad = window.k8sLoadProgress;
+        })();
+
     </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1603,7 +1809,7 @@ async function k8sLoadProgress(uid) {
             _completed = snap.data()[MODULE_KEY] || [];
             _completed.forEach(function(cbId) {
                 const cb = document.getElementById(cbId);
-                if (cb) cb.checked = true;
+                if (cb) { cb.checked = true; cb.disabled = false; }
             });
         } else {
             _completed = [];
