@@ -1550,3 +1550,420 @@ window.K8S_QUESTION_BANK = {
   }
 
 };
+// =========================================================================
+//  SCENARIO QUESTION BANK  (appended 2026-06-16)
+//  Scenario-based questions for the final evaluation ONLY (not used in
+//  inline module section quizzes). Same schema as K8S_QUESTION_BANK plus
+//  type:'scenario'. The evaluation merges these into the sampling pool and
+//  reserves 10-12 scenario slots per attempt.
+//
+//  Schema: { id, q, options:[..], correctIndex, explanation, difficulty,
+//            type:'scenario', module:'mN', section:'sM' }
+//
+//  Distribution by module exam-weight:
+//    m1 .20 -> 6 | m2 .20 -> 6 | m3 .20 -> 6 | m4 .15 -> 4 | m5 .25 -> 8
+//  Total: 30
+// =========================================================================
+window.K8S_SCENARIO_BANK = [
+
+  // ---------------- MODULE 1: Cluster Architecture (6) ----------------
+  {
+    id: 'k8s-scn-m1-1', module: 'm1', section: 's2', type: 'scenario',
+    q: 'A developer reports that every kubectl command suddenly fails with "Unable to connect to the server." Pods that were already running continue to serve traffic normally. Which control-plane component is the most likely culprit?',
+    options: [
+      'kubelet on the worker nodes',
+      'The API Server',
+      'kube-proxy',
+      'The container runtime'
+    ],
+    correctIndex: 1,
+    explanation: 'kubectl talks only to the API Server. Running pods keep serving because the data plane is independent of the control plane, but no new API requests can be processed if the API Server is down.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m1-2', module: 'm1', section: 's3', type: 'scenario',
+    q: 'After a power event, two of your three etcd members are permanently lost and unrecoverable. The cluster API becomes read-only and rejects writes. What is the root cause?',
+    options: [
+      'kube-scheduler crashed',
+      'etcd lost quorum, since a 3-member cluster needs at least 2 healthy members',
+      'kube-proxy rules were flushed',
+      'The container runtime stopped'
+    ],
+    correctIndex: 1,
+    explanation: 'etcd uses Raft consensus and needs a majority (quorum). With only 1 of 3 members healthy, quorum is lost and the cluster cannot commit writes.',
+    difficulty: 'hard'
+  },
+  {
+    id: 'k8s-scn-m1-3', module: 'm1', section: 's4', type: 'scenario',
+    q: 'You create a pod and it stays Pending. Events show "0/3 nodes are available: 3 Insufficient memory." Which component made this decision, and why is the pod Pending?',
+    options: [
+      'kubelet rejected it because the image was too large',
+      'The kube-scheduler could not find a node that passes the filtering stage due to insufficient resources',
+      'kube-proxy blocked the pod network',
+      'etcd refused to store the pod'
+    ],
+    correctIndex: 1,
+    explanation: 'The scheduler filters out nodes lacking required resources. If no node survives filtering, the pod has no node assigned and remains Pending.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m1-4', module: 'm1', section: 's5', type: 'scenario',
+    q: 'You delete a pod that belongs to a Deployment with 3 replicas. Within seconds a new pod appears to replace it. Which mechanism is responsible?',
+    options: [
+      'The kube-scheduler recreated it',
+      'The controller-manager reconciliation loop detected current (2) != desired (3) and created a replacement',
+      'kubelet cloned the pod',
+      'The API Server duplicated the request'
+    ],
+    correctIndex: 1,
+    explanation: 'Controllers continuously reconcile observed state toward desired state. The ReplicaSet controller noticed the replica count dropped and created a new pod.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m1-5', module: 'm1', section: 's6', type: 'scenario',
+    q: 'A single worker node shows status NotReady, and only the pods on that node are affected. Other nodes are fine. Which on-node component failing best explains a node going NotReady?',
+    options: [
+      'The API Server',
+      'etcd',
+      'The kubelet on that node stopped reporting status',
+      'The kube-controller-manager'
+    ],
+    correctIndex: 2,
+    explanation: 'The kubelet registers the node and reports its status. If the kubelet stops, the node is marked NotReady while the rest of the cluster is unaffected.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m1-6', module: 'm1', section: 's7', type: 'scenario',
+    q: 'Traffic to a ClusterIP Service intermittently fails to reach healthy backend pods on one specific node, while the same Service works from other nodes. Which node-level component most likely has stale or broken rules?',
+    options: [
+      'kube-scheduler',
+      'kube-proxy on that node',
+      'etcd',
+      'The Deployment controller'
+    ],
+    correctIndex: 1,
+    explanation: 'kube-proxy maintains the per-node iptables/ipvs rules that route Service IPs to pod IPs. Broken rules on one node cause node-local Service routing failures.',
+    difficulty: 'hard'
+  },
+
+  // ---------------- MODULE 2: Workloads & Scheduling (6) ----------------
+  {
+    id: 'k8s-scn-m2-1', module: 'm2', section: 's1', type: 'scenario',
+    q: 'A teammate runs "kubectl run web --image=nginx" in production. A node is drained for maintenance and the pod disappears, never coming back. What should they have used instead?',
+    options: [
+      'A bare pod is correct; the node should not have been drained',
+      'A Deployment, so a controller recreates the pod on another node',
+      'A NetworkPolicy',
+      'A PersistentVolume'
+    ],
+    correctIndex: 1,
+    explanation: 'Bare pods are not rescheduled when their node goes away. A Deployment (via its ReplicaSet) maintains the desired replica count and recreates pods on healthy nodes.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m2-2', module: 'm2', section: 's2', type: 'scenario',
+    q: 'A pod has been in Pending for several minutes. describe shows it is still pulling a large image. Is this necessarily a problem?',
+    options: [
+      'Yes, Pending always indicates a failure',
+      'No, Pending is normal during image download and scheduling; investigate only if it persists abnormally',
+      'Yes, the pod should be deleted immediately',
+      'No, but only if restartPolicy is Never'
+    ],
+    correctIndex: 1,
+    explanation: 'Pending is an expected transient phase while the image downloads or a node is selected. It is only a concern if it persists without progress.',
+    difficulty: 'easy'
+  },
+  {
+    id: 'k8s-scn-m2-3', module: 'm2', section: 's3', type: 'scenario',
+    q: 'You apply a ReplicaSet with replicas: 3 and selector app=web, but it reports 0 ready pods even though 3 pods labelled app=web already exist and are Running. What is the most likely cause?',
+    options: [
+      'The pods are on the wrong node',
+      'The ReplicaSet selector does not actually match the pods\u2019 labels',
+      'ReplicaSets cannot manage pre-existing pods ever',
+      'The cluster is out of memory'
+    ],
+    correctIndex: 1,
+    explanation: 'A ReplicaSet only manages pods whose labels match its selector. A label/selector mismatch means it sees none of them and would create its own.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m2-4', module: 'm2', section: 's5', type: 'scenario',
+    q: 'An HPA is configured on a Deployment. An engineer also runs "kubectl scale deployment web --replicas=10" manually. Replica count then keeps fluctuating unexpectedly. Why?',
+    options: [
+      'The cluster autoscaler is broken',
+      'Manual scaling conflicts with the HPA, which keeps adjusting replicas based on metrics',
+      'The Deployment is corrupted',
+      'NodePort is interfering'
+    ],
+    correctIndex: 1,
+    explanation: 'When HPA is enabled, it owns the replica count. Manual scaling fights the HPA, producing oscillation as both try to set replicas.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m2-5', module: 'm2', section: 's6', type: 'scenario',
+    q: 'You need a log-collection agent running on every node, including any new nodes added later, with exactly one copy per node. Which workload type fits?',
+    options: [
+      'A Deployment with replicas equal to the node count',
+      'A DaemonSet',
+      'A single bare pod',
+      'A StatefulSet'
+    ],
+    correctIndex: 1,
+    explanation: 'A DaemonSet ensures one pod per node and automatically adds pods to new nodes, which is ideal for node-level agents like log collectors.',
+    difficulty: 'easy'
+  },
+  {
+    id: 'k8s-scn-m2-6', module: 'm2', section: 's8', type: 'scenario',
+    q: 'A batch job pod runs a script that should retry only when it fails, and stop permanently once it succeeds. Which restartPolicy is correct?',
+    options: [
+      'Always',
+      'OnFailure',
+      'Never',
+      'Default'
+    ],
+    correctIndex: 1,
+    explanation: 'OnFailure restarts the container only on a non-zero exit code and does not restart after a successful (exit 0) completion, matching retry-on-failure semantics.',
+    difficulty: 'medium'
+  },
+
+  // ---------------- MODULE 3: Services & Networking (6) ----------------
+  {
+    id: 'k8s-scn-m3-1', module: 'm3', section: 's2', type: 'scenario',
+    q: 'An internal microservice should be reachable only by other pods inside the cluster, never from outside. Which Service type should you choose?',
+    options: [
+      'NodePort',
+      'LoadBalancer',
+      'ClusterIP',
+      'ExternalName pointing to a public host'
+    ],
+    correctIndex: 2,
+    explanation: 'ClusterIP exposes the service on an internal cluster IP only, which is exactly right for internal-only microservices.',
+    difficulty: 'easy'
+  },
+  {
+    id: 'k8s-scn-m3-2', module: 'm3', section: 's2', type: 'scenario',
+    q: 'You expose 6 different production web apps externally. Using a LoadBalancer Service per app is becoming expensive in cloud charges. What is the more cost-effective approach for HTTP routing?',
+    options: [
+      'Switch them all to NodePort',
+      'Use a single Ingress with host/path rules in front of ClusterIP Services',
+      'Use one LoadBalancer and share its IP manually',
+      'Move them to DaemonSets'
+    ],
+    correctIndex: 1,
+    explanation: 'Ingress provides a single entry point that routes by host/path to multiple backend Services, avoiding one cloud load balancer (and bill) per app.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m3-3', module: 'm3', section: 's3', type: 'scenario',
+    q: 'A pod in namespace "default" needs to reach service "db" in namespace "prod". Using "curl http://db" fails, but the full name works. What is the correct FQDN?',
+    options: [
+      'db.default.svc.cluster.local',
+      'db.prod.svc.cluster.local',
+      'prod.db.cluster.local',
+      'db.cluster.local.prod'
+    ],
+    correctIndex: 1,
+    explanation: 'Cross-namespace access requires the FQDN service-name.namespace.svc.cluster.local. The short name resolves within the caller\u2019s own namespace only.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m3-4', module: 'm3', section: 's4', type: 'scenario',
+    q: 'A Service has 0 endpoints even though several pods are Running. "kubectl get pods --show-labels" reveals the pods are labelled app=webapp but the Service selector is app=web-app. What fixes it?',
+    options: [
+      'Restart the API Server',
+      'Align the Service selector with the pods\u2019 actual labels (or relabel the pods)',
+      'Change the Service to NodePort',
+      'Recreate etcd'
+    ],
+    correctIndex: 1,
+    explanation: 'Services select pods by exact label match. A mismatch (web-app vs webapp) yields zero endpoints; aligning selector and labels restores routing.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m3-5', module: 'm3', section: 's5', type: 'scenario',
+    q: 'Security requires that only "frontend" pods may reach "database" pods on port 5432, and all other traffic to the database is denied. Which resource enforces this?',
+    options: [
+      'A LoadBalancer Service',
+      'A NetworkPolicy selecting the database pods that allows ingress only from frontend on port 5432',
+      'An Ingress resource',
+      'A nodeSelector'
+    ],
+    correctIndex: 1,
+    explanation: 'A NetworkPolicy with a podSelector for the database and an ingress rule limited to frontend on 5432 enforces pod-to-pod traffic control (requires a supporting CNI).',
+    difficulty: 'hard'
+  },
+  {
+    id: 'k8s-scn-m3-6', module: 'm3', section: 's8', type: 'scenario',
+    q: 'A Service is unreachable. You confirm endpoints exist and pods are Running, but DNS lookups for the service name fail from a test pod. Which cluster component should you check next?',
+    options: [
+      'etcd disk usage',
+      'CoreDNS pods in kube-system',
+      'The kube-scheduler logs',
+      'The container runtime version'
+    ],
+    correctIndex: 1,
+    explanation: 'In-cluster DNS resolution is handled by CoreDNS. If endpoints are healthy but name resolution fails, CoreDNS health is the logical next check.',
+    difficulty: 'hard'
+  },
+
+  // ---------------- MODULE 4: Storage (4) ----------------
+  {
+    id: 'k8s-scn-m4-1', module: 'm4', section: 's1', type: 'scenario',
+    q: 'A container writes important data to its own filesystem. After a crash and restart, the data is gone. What should have been used to preserve it across restarts?',
+    options: [
+      'A larger container image',
+      'A Volume mounted into the container',
+      'A NodePort Service',
+      'A higher restart count'
+    ],
+    correctIndex: 1,
+    explanation: 'Container filesystems are ephemeral. A Volume persists data across container restarts within the pod, unlike the container\u2019s own writable layer.',
+    difficulty: 'easy'
+  },
+  {
+    id: 'k8s-scn-m4-2', module: 'm4', section: 's2', type: 'scenario',
+    q: 'You need block storage that can be mounted read-write by exactly one node at a time (typical for AWS EBS). Which access mode must the PersistentVolume use?',
+    options: [
+      'ReadWriteMany (RWX)',
+      'ReadOnlyMany (ROX)',
+      'ReadWriteOnce (RWO)',
+      'WriteOnce'
+    ],
+    correctIndex: 2,
+    explanation: 'ReadWriteOnce permits read-write mounting by a single node, which matches typical cloud block volumes such as AWS EBS.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m4-3', module: 'm4', section: 's3', type: 'scenario',
+    q: 'A pod stays Pending with the event "pod has unbound immediate PersistentVolumeClaims." A 5Gi PVC exists but no matching PV. What is the most likely fix in a dynamic-provisioning cluster?',
+    options: [
+      'Delete the PVC and run the pod without storage',
+      'Ensure the PVC references a StorageClass so a PV is dynamically provisioned',
+      'Increase the pod CPU request',
+      'Switch the Service to LoadBalancer'
+    ],
+    correctIndex: 1,
+    explanation: 'If no static PV matches, binding requires dynamic provisioning via a StorageClass. Without one, the PVC stays unbound and the pod stays Pending.',
+    difficulty: 'hard'
+  },
+  {
+    id: 'k8s-scn-m4-4', module: 'm4', section: 's4', type: 'scenario',
+    q: 'Your team wants storage created automatically whenever a PVC is submitted, with different performance tiers (fast SSD vs standard). Which mechanism provides this?',
+    options: [
+      'Pre-creating every PV manually',
+      'StorageClasses with dynamic provisioning',
+      'hostPath volumes on each node',
+      'emptyDir volumes'
+    ],
+    correctIndex: 1,
+    explanation: 'StorageClasses describe storage tiers and enable dynamic provisioning, so a matching PV is created automatically when a PVC referencing the class is submitted.',
+    difficulty: 'medium'
+  },
+
+  // ---------------- MODULE 5: Troubleshooting (8) ----------------
+  {
+    id: 'k8s-scn-m5-1', module: 'm5', section: 's1', type: 'scenario',
+    q: 'A pod shows STATUS CrashLoopBackOff. Following the systematic workflow, which command gives the most direct insight into why the container keeps dying?',
+    options: [
+      'kubectl get nodes',
+      'kubectl logs <pod> --previous',
+      'kubectl scale deployment',
+      'kubectl top nodes'
+    ],
+    correctIndex: 1,
+    explanation: 'For a crashing container, the logs of the previous (crashed) instance usually reveal the startup error, making --previous the key diagnostic.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m5-2', module: 'm5', section: 's2', type: 'scenario',
+    q: 'You want to watch a misbehaving pod\u2019s log output live as you reproduce a bug. Which kubectl logs option do you use?',
+    options: [
+      '--tail=10',
+      '--since=24h',
+      '-f (follow)',
+      '--timestamps only'
+    ],
+    correctIndex: 2,
+    explanation: 'The -f/--follow flag streams logs in real time, similar to tail -f, which is ideal for observing live behaviour during reproduction.',
+    difficulty: 'easy'
+  },
+  {
+    id: 'k8s-scn-m5-3', module: 'm5', section: 's3', type: 'scenario',
+    q: 'A pod will not start and you suspect a scheduling or image problem. Which single command shows the Events that reveal what Kubernetes tried and failed to do?',
+    options: [
+      'kubectl logs <pod>',
+      'kubectl describe pod <pod>',
+      'kubectl get pods -o wide',
+      'kubectl exec -it <pod> -- sh'
+    ],
+    correctIndex: 1,
+    explanation: 'kubectl describe shows the Events section at the bottom, which records scheduling, image-pull, and container lifecycle failures.',
+    difficulty: 'easy'
+  },
+  {
+    id: 'k8s-scn-m5-4', module: 'm5', section: 's6', type: 'scenario',
+    q: 'A container enters CrashLoopBackOff immediately on startup. Logs show "missing required environment variable DB_HOST." What is the appropriate fix?',
+    options: [
+      'Increase the node memory',
+      'Add the required environment variable (or its ConfigMap/Secret) to the pod spec',
+      'Change the Service type',
+      'Add more replicas'
+    ],
+    correctIndex: 1,
+    explanation: 'The crash is a configuration issue. Supplying the missing env var (directly or via ConfigMap/Secret) lets the app start normally.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m5-5', module: 'm5', section: 's7', type: 'scenario',
+    q: 'A pod is stuck in ImagePullBackOff. describe shows "manifest unknown." What does this most likely indicate?',
+    options: [
+      'The node is out of CPU',
+      'The image name or tag is wrong / does not exist in the registry',
+      'A NetworkPolicy is blocking the pod',
+      'The PVC is unbound'
+    ],
+    correctIndex: 1,
+    explanation: '"manifest unknown" means the registry has no image matching that name/tag, typically a typo or a non-existent tag.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m5-6', module: 'm5', section: 's7', type: 'scenario',
+    q: 'Pods pulling from a private registry fail with ImagePullBackOff and "authentication required." What is the correct remedy?',
+    options: [
+      'Use a public image only',
+      'Add imagePullSecrets referencing valid registry credentials',
+      'Increase the pod restart limit',
+      'Switch restartPolicy to Never'
+    ],
+    correctIndex: 1,
+    explanation: 'Private registries need credentials. Configuring imagePullSecrets (and referencing them in the pod/service account) authenticates the pull.',
+    difficulty: 'hard'
+  },
+  {
+    id: 'k8s-scn-m5-7', module: 'm5', section: 's8', type: 'scenario',
+    q: 'A pod stays Pending and describe shows "0/3 nodes are available: 3 node(s) didn\'t match node selector." What is wrong?',
+    options: [
+      'The image is missing',
+      'No node carries the label required by the pod\u2019s nodeSelector',
+      'etcd lost quorum',
+      'The container crashed'
+    ],
+    correctIndex: 1,
+    explanation: 'A nodeSelector restricts scheduling to labelled nodes. If no node has the matching label, the scheduler cannot place the pod and it stays Pending.',
+    difficulty: 'medium'
+  },
+  {
+    id: 'k8s-scn-m5-8', module: 'm5', section: 's9', type: 'scenario',
+    q: 'Several pods across one node suddenly fail. "kubectl get nodes" shows that node as NotReady. What is the most appropriate next diagnostic step?',
+    options: [
+      'Delete all pods in the cluster',
+      'Run "kubectl describe node <node>" to inspect node conditions and events',
+      'Recreate the Service',
+      'Increase replica counts everywhere'
+    ],
+    correctIndex: 1,
+    explanation: 'Describing the node surfaces its conditions (MemoryPressure, DiskPressure, Ready) and events, which explain why it went NotReady.',
+    difficulty: 'medium'
+  }
+
+];
