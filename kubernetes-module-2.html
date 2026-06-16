@@ -569,6 +569,32 @@
             .module-header h1 { font-size: 1.8em; }
             .nav-buttons { flex-direction: column; }
         }
+    
+        /* Inline section quiz (gates Mark-as-complete) */
+        .section-quiz { background: #fef3c7; border: 2px solid #f59e0b; padding: 18px 22px; border-radius: 8px; margin-top: 25px; }
+        [data-theme="dark"] .section-quiz { background: #3a2f12; border-color: #b45309; }
+        .section-quiz > h4 { margin-bottom: 14px; color: #92400e; }
+        [data-theme="dark"] .section-quiz > h4 { color: #fef3c7; }
+        .sq-item { margin-bottom: 18px; }
+        .sq-item:last-child { margin-bottom: 4px; }
+        .sq-q { font-weight: 600; margin-bottom: 10px; color: #0f172a; }
+        [data-theme="dark"] .sq-q { color: #e2e8f0; }
+        .sq-opt { padding: 10px 14px; margin: 8px 0; background: white; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .25s; }
+        [data-theme="dark"] .sq-opt { background: var(--bg-dark); }
+        .sq-opt:hover { border-color: var(--primary); }
+        .sq-opt.correct { border-color: var(--success); background: #dcfce7; pointer-events: none; }
+        [data-theme="dark"] .sq-opt.correct { background: #14331f; }
+        .sq-opt.incorrect { border-color: var(--danger); background: #fee2e2; }
+        [data-theme="dark"] .sq-opt.incorrect { background: #3a1414; }
+        .sq-opt.locked { pointer-events: none; opacity: .85; }
+        .sq-feedback { margin-top: 8px; font-size: .92em; display: none; }
+        .sq-feedback.show { display: block; }
+        .sq-feedback.ok { color: var(--success); }
+        .sq-feedback.no { color: var(--danger); }
+        .section-complete input[type="checkbox"]:disabled + label { opacity: .5; cursor: not-allowed; }
+        .sq-gate-note { margin-top: 6px; font-size: .85em; color: #92400e; }
+        [data-theme="dark"] .sq-gate-note { color: #fcd34d; }
+
     </style>
 </head>
 <body>
@@ -727,14 +753,34 @@ kubectl get pod my-app -o wide
                         Never store data directly in a pod — use volumes!
                     </div>
 
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul style="color: #78350f;">
-                            <li>Q11: What is the smallest deployable unit in Kubernetes?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="2.1">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is a Pod in Kubernetes?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',0,false)">A physical server</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',0,true)">The smallest deployable unit, representing one instance of a running process</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',0,false)">A networking policy</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',0,false)">A storage volume</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. How do containers within the same pod communicate?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',1,false)">Through the API Server only</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',1,true)">Via localhost, since they share the network namespace</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',1,false)">They cannot communicate</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',1,false)">Through a LoadBalancer Service</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. Why should you avoid creating bare pods directly in production?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',2,false)">Pods cannot run containers</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',2,true)">Pods created with kubectl run are not recreated if they die</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',2,false)">Pods require a LoadBalancer</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.1',2,false)">Pods cannot have IP addresses</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-2.1" onchange="handleCheckboxChange(this)">
                         <label for="check-2.1">✅ Mark section 2.1 as completed</label>
                     </div>
@@ -817,6 +863,27 @@ kubectl get pod my-app -o wide
                         <strong>3. Terminating pods can get stuck</strong><br>
                         Use <code class="command">kubectl delete pod --force --grace-period=0</code> as last resort
                     </div>
+                    <div class="section-quiz" data-sec="2.2">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Which pod phase means the pod has been accepted but is not yet running (e.g. image downloading or scheduling)?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',0,false)">Running</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',0,false)">Succeeded</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',0,true)">Pending</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',0,false)">Failed</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. During graceful termination, what signal is sent first to containers before the grace period?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',1,false)">SIGKILL immediately</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',1,true)">SIGTERM, allowing graceful shutdown</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',1,false)">SIGHUP</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.2',1,false)">No signal is sent</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                    </div>
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div>
+
         
                     <div class="section-complete">
                         <input type="checkbox" id="check-2.2" onchange="handleCheckboxChange(this)">
@@ -892,14 +959,26 @@ kubectl get pod my-app -o wide
                         Use <code class="command">--cascade=orphan</code> to keep pods
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q12: What ensures a specified number of pod replicas are running?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="2.3">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does a ReplicaSet guarantee?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',0,false)">That pods are scheduled to specific nodes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',0,true)">That a specified number of pod replicas are running at any time</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',0,false)">That traffic is load balanced externally</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',0,false)">That storage persists across restarts</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Why is using Deployments preferred over creating ReplicaSets directly?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',1,false)">ReplicaSets cannot run pods</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',1,true)">ReplicaSets do not support rolling updates; Deployments manage them and do</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',1,false)">ReplicaSets require manual scaling only</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.3',1,false)">Deployments are deprecated</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-2.3" onchange="handleCheckboxChange(this)">
                         <label for="check-2.3">✅ Mark section 2.3 as completed</label>
                     </div>
@@ -935,15 +1014,26 @@ kubectl get pod my-app -o wide
 
                     <p><em>Detailed content for Deployments following the pattern...</em></p>
                     
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q13: Which kubectl command creates a deployment?</li>
-                            <li>Q16: What happens when a Deployment is deleted?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="2.4">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does a Deployment provide?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',0,false)">Node-level storage</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',0,true)">Declarative updates for Pods and ReplicaSets</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',0,false)">Network firewall rules</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',0,false)">A cluster database</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. A Deployment is the recommended way to manage which kind of application?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',1,false)">Stateful databases requiring stable identity</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',1,true)">Stateless applications</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',1,false)">Node-level logging agents</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.4',1,false)">etcd backups</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-2.4" onchange="handleCheckboxChange(this)">
                         <label for="check-2.4">✅ Mark section 2.4 as completed</label>
                     </div>
@@ -1017,14 +1107,26 @@ kubectl get pod my-app -o wide
                         Scaling fails if nodes don't have enough CPU/memory
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q14: Which command scales a deployment?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="2.5">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. Which scaling type automatically adjusts replica count based on CPU/memory?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',0,false)">Manual scaling</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',0,true)">Horizontal Pod Autoscaling (HPA)</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',0,false)">Vertical scaling</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',0,false)">Cluster autoscaling</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. What happens when you scale a deployment to --replicas=0?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',1,false)">The deployment is deleted</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',1,true)">All pods stop but the deployment is kept</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',1,false)">It triggers an error</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.5',1,false)">It scales to one pod</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-2.5" onchange="handleCheckboxChange(this)">
                         <label for="check-2.5">✅ Mark section 2.5 as completed</label>
                     </div>
@@ -1162,14 +1264,34 @@ kubectl get pod my-app -o wide
                         One pod per node is the rule — scaling doesn't apply
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q15: Which resource ensures one pod runs on every node?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="2.6">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does a DaemonSet ensure?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',0,false)">A fixed total number of replicas across the cluster</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',0,true)">That all (or some) nodes run a copy of a pod</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',0,false)">External load balancing</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',0,false)">Persistent storage for pods</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. Which is a typical use case for a DaemonSet?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',1,false)">A stateless web frontend</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',1,true)">Running a logging or monitoring agent on every node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',1,false)">A one-time batch job</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',1,false)">An external LoadBalancer</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. How does a DaemonSet differ from a Deployment?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',2,false)">A DaemonSet specifies a replica count; a Deployment does not</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',2,true)">A DaemonSet runs one pod per node automatically; a Deployment runs a specified replica count across nodes</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',2,false)">They are identical</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.6',2,false)">A Deployment runs one pod per node</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-2.6" onchange="handleCheckboxChange(this)">
                         <label for="check-2.6">✅ Mark section 2.6 as completed</label>
                     </div>
@@ -1296,14 +1418,26 @@ kubectl get pod my-app -o wide
                         For complex rules, use Node Affinity (not covered in basic test)
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q17: Fill in the blank - To schedule a pod on a specific node, use the ______ field.</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="2.7">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What does setting nodeName on a pod do?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',0,false)">Lets the scheduler pick any node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',0,true)">Assigns the pod to a specific named node, bypassing the scheduler</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',0,false)">Labels the node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',0,false)">Creates a Service</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. How does nodeSelector decide where a pod runs?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',1,false)">It bypasses the scheduler entirely</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',1,true)">The scheduler finds a node whose labels match the selector</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',1,false)">It always picks the first node</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.7',1,false)">It requires a LoadBalancer</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-2.7" onchange="handleCheckboxChange(this)">
                         <label for="check-2.7">✅ Mark section 2.7 as completed</label>
                     </div>
@@ -1440,14 +1574,34 @@ kubectl get pod my-app -o wide
                         Kubernetes adds exponential backoff (10s, 20s, 40s... up to 5min)
                     </div>
         
-                    <div class="test-questions">
-                        <h4>🎯 This Section Covers Test Questions:</h4>
-                        <ul>
-                            <li>Q18: What is the default restartPolicy for a pod?</li>
-                        </ul>
+                                        <div class="section-quiz" data-sec="2.8">
+                        <h4>🎯 Section Check — answer all to unlock completion:</h4>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q1. What is the default restartPolicy for a pod?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',0,false)">Never</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',0,false)">OnFailure</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',0,true)">Always</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',0,false)">Once</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q2. With restartPolicy: OnFailure, when does the container restart?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',1,false)">Always, even on success</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',1,true)">Only when it exits with a non-zero (error) exit code</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',1,false)">Never</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',1,false)">Only on the control plane</div>
+                            <div class="sq-feedback"></div>
+                        </div>
+                        <div class="sq-item" data-answered="false">
+                            <div class="sq-q">Q3. Which restartPolicy suits a one-time task that should not restart?</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',2,false)">Always</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',2,false)">OnFailure</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',2,true)">Never</div>
+                            <div class="sq-opt" onclick="sqAnswer(this,'2.8',2,false)">Default</div>
+                            <div class="sq-feedback"></div>
+                        </div>
                     </div>
-        
-                    <div class="section-complete">
+                    <div class="sq-gate-note">ℹ️ Answer all questions above correctly to enable “Mark section as completed.”</div><div class="section-complete">
                         <input type="checkbox" id="check-2.8" onchange="handleCheckboxChange(this)">
                         <label for="check-2.8">✅ Mark section 2.8 as completed</label>
                     </div>
@@ -1646,6 +1800,50 @@ kubectl get pod my-app -o wide
         document.getElementById('logo-img').onerror = function() {
             this.parentElement.innerHTML = '<span style="font-weight:bold;color:#0078D4;font-size:1.2em">SF</span>';
         };
+    
+        // ── Inline section quiz gating ──────────────────────────────────
+        window.sqAnswer = function(optEl, sec, qIdx, isCorrect) {
+            const item = optEl.closest('.sq-item');
+            const fb = item.querySelector('.sq-feedback');
+            if (isCorrect) {
+                optEl.classList.add('correct');
+                item.querySelectorAll('.sq-opt').forEach(function(o){ o.classList.add('locked'); });
+                fb.className = 'sq-feedback show ok';
+                fb.textContent = '\u2705 Correct.';
+                item.dataset.answered = 'true';
+                sqRefreshGate(sec);
+            } else {
+                optEl.classList.add('incorrect');
+                fb.className = 'sq-feedback show no';
+                fb.textContent = '\u274C Not quite \u2014 review the section above and try again.';
+            }
+        };
+        function sqRefreshGate(sec) {
+            const quiz = document.querySelector('.section-quiz[data-sec="' + sec + '"]');
+            if (!quiz) return;
+            const items = quiz.querySelectorAll('.sq-item');
+            const allOk = Array.from(items).every(function(it){ return it.dataset.answered === 'true'; });
+            const cb = document.getElementById('check-' + sec);
+            if (!cb) return;
+            if (allOk) {
+                cb.disabled = false;
+                const note = quiz.parentElement.querySelector('.sq-gate-note');
+                if (note) note.style.display = 'none';
+            }
+        }
+        // Lock checkboxes that still have an attached unanswered quiz on load
+        window.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.section-quiz').forEach(function(quiz){
+                const sec = quiz.getAttribute('data-sec');
+                const cb = document.getElementById('check-' + sec);
+                if (cb && !cb.checked) cb.disabled = true;
+            });
+        });
+        // When progress loads from Firestore and re-checks a box, ensure it is enabled
+        (function(){
+            const _origLoad = window.k8sLoadProgress;
+        })();
+
     </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1671,7 +1869,7 @@ async function k8sLoadProgress(uid) {
             _completed = snap.data()[MODULE_KEY] || [];
             _completed.forEach(function(cbId) {
                 const cb = document.getElementById(cbId);
-                if (cb) cb.checked = true;
+                if (cb) { cb.checked = true; cb.disabled = false; }
             });
         } else {
             _completed = [];
