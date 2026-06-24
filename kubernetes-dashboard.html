@@ -534,6 +534,11 @@
                 <button class="resume-btn" id="resumeBtn" onclick="resumeLearning()">
                     📖 Resume Learning
                 </button>
+                <!-- Sync completed-module progress to the SF Knowledge Hub admin reader -->
+                <button class="resume-btn" id="cpSyncBtn" onclick="cpSyncCourseProgress()" style="margin-top:12px;background:#475569;">
+                    🔄 Sync my course progress
+                </button>
+                <div id="cpSyncStatus" style="margin-top:10px;font-size:0.9rem;line-height:1.5;"></div>
             </div>
         </div>
 
@@ -950,6 +955,78 @@ _k8sAuth.onAuthStateChanged(async function(user) {
         document.getElementById('k8s-auth-overlay').style.display = 'flex';
     }
 });
+
+// ---------- Sync completed modules → courseProgress (admin reader) ----------
+// Reads progress/{uid} (section checkboxes), writes fully-complete modules to
+// courseProgress/{uid}.courses[CP_COURSE_ID].modules[...]. Read-then-merge so
+// existing completions and other courses are preserved. Safe to re-run.
+window.cpSyncCourseProgress = async function() {
+    const CP_COURSE_ID = 'ymfsFxUvNoJxOY8suZnY';
+    const SECTION_TOTALS = { k8s_m1:10, k8s_m2:8, k8s_m3:8, k8s_m4:4, k8s_m5:10 };
+    const KEY_TO_MODULE  = {
+        k8s_m1:'kubernetes-module-1', k8s_m2:'kubernetes-module-2',
+        k8s_m3:'kubernetes-module-3', k8s_m4:'kubernetes-module-4',
+        k8s_m5:'kubernetes-module-5'
+    };
+    const statusEl = document.getElementById('cpSyncStatus');
+    const setStatus = function(msg, color){ if(statusEl){ statusEl.textContent = msg; statusEl.style.color = color || 'var(--text-light)'; } };
+
+    const user = _k8sAuth.currentUser;
+    if (!user || !_currentUid) { setStatus('Please sign in first.', '#e67e22'); return; }
+    setStatus('Syncing…');
+
+    try {
+        const pad = function(n){ return String(n).padStart(2,'0'); };
+        const d = new Date();
+        const t = { date:d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+                    time:pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()) };
+
+        const pSnap = await _k8sDb.collection('progress').doc(_currentUid).get();
+        const pData = pSnap.exists ? (pSnap.data() || {}) : {};
+        const completeKeys = Object.keys(SECTION_TOTALS).filter(function(k){
+            return Array.isArray(pData[k]) && pData[k].length >= SECTION_TOTALS[k];
+        });
+        if (!completeKeys.length) { setStatus('No fully-completed modules found to sync yet.', '#e67e22'); return; }
+
+        const cpRef = _k8sDb.collection('courseProgress').doc(_currentUid);
+        const cpSnap = await cpRef.get();
+        const cpData = cpSnap.exists ? (cpSnap.data() || {}) : {};
+        const courseObj = (cpData.courses && cpData.courses[CP_COURSE_ID]) || {};
+        const existingMods = courseObj.modules || {};
+
+        const courseUpdate = { modules: {} };
+        if (!courseObj.courseStartedOn) { courseUpdate.courseStartedOn = t.date; courseUpdate.courseStartedAt = t.time; }
+
+        const written = [];
+        completeKeys.forEach(function(k){
+            const mk = KEY_TO_MODULE[k];
+            if (existingMods[mk] && existingMods[mk].completedOn) return;
+            courseUpdate.modules[mk] = { completedOn: t.date, completedAt: t.time };
+            written.push(mk);
+        });
+
+        const allKeys = Object.keys(KEY_TO_MODULE).map(function(k){ return KEY_TO_MODULE[k]; });
+        const willBeComplete = allKeys.every(function(mk){
+            return (existingMods[mk] && existingMods[mk].completedOn) || courseUpdate.modules[mk];
+        });
+        if (willBeComplete && !courseObj.courseCompletedOn) {
+            courseUpdate.courseCompletedOn = t.date; courseUpdate.courseCompletedAt = t.time;
+            courseUpdate.moduleInProgress = null;
+        }
+
+        const update = { email: user.email, name: user.displayName || user.email, courses: {} };
+        update.courses[CP_COURSE_ID] = courseUpdate;
+        await cpRef.set(update, { merge: true });
+
+        const total = Object.keys(SECTION_TOTALS).length;
+        setStatus('✓ Synced ' + completeKeys.length + ' of ' + total + ' module(s)'
+            + (willBeComplete ? ' — course complete.' : '.')
+            + ' It will appear in the admin Course Progress view.', '#1a8a4a');
+    } catch (e) {
+        setStatus('Sync failed: ' + e.message, '#c0392b');
+        console.warn('[courseProgress sync] failed:', e);
+    }
+};
 </script>
 </body>
 </html>
