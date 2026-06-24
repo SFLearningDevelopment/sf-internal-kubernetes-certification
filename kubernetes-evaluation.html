@@ -358,6 +358,8 @@ const auth = getAuth(app);
 const db   = getFirestore(app);
 
 const COURSE_ID    = 'kubernetes';
+// Catalog courses doc id — the admin Exam Results reader keys on this.
+const CP_COURSE_ID = 'ymfsFxUvNoJxOY8suZnY';
 const COURSE_TITLE = 'SF Certified Kubernetes Practitioner';
 const TOTAL_QUESTIONS = 40;
 const TIME_LIMIT_MIN  = 45;
@@ -596,6 +598,8 @@ async function saveAttempt(uid, isEmail, attempt){
     cur[COURSE_ID].passed = cur[COURSE_ID].passed || attempt.passed;
     cur[COURSE_ID].lastAttemptAt = attempt.completedAt;
     localStorage.setItem(key, JSON.stringify(cur));
+    // Also surface email/password learners in the admin Exam Results console.
+    await writeCourseExamResult(attempt, cur[COURSE_ID].attemptCount);
     return;
   }
   const ref = doc(db, 'results', uid);
@@ -614,6 +618,39 @@ async function saveAttempt(uid, isEmail, attempt){
     }
   };
   await setDoc(ref, merged, {merge:true});
+  await writeCourseExamResult(attempt, (courseExisting.attemptCount || 0) + 1);
+}
+
+// ---- Parallel write to courseExamResults (admin Exam Results reader) ----
+// Path: courseExamResults/{email}/courses/{CP_COURSE_ID}/attempts/{id}
+// Email-keyed + attempts subcollection, matching the other certified courses.
+// Fires for both Google-SSO and email/password learners.
+async function writeCourseExamResult(attempt, attemptNumber){
+  try {
+    const u = (typeof currentUser === 'object' && currentUser) ? currentUser : null;
+    const email = u && u.email ? u.email.toLowerCase().trim() : null;
+    if (!email) return;
+    const total = attempt.questionCount || TOTAL_QUESTIONS || 0;
+    const pct = (typeof attempt.score === 'number') ? attempt.score / 100 : (total ? attempt.correct/total : 0);
+    const attemptId = 'att-' + Date.now();
+    const cerRec = {
+      email,
+      name: (u.displayName || u.email),
+      courseId: CP_COURSE_ID,
+      attemptNumber: attemptNumber,
+      correct: attempt.correct,
+      total: total,
+      pct: pct,
+      pass: !!attempt.passed,
+      submittedAt: attempt.completedAt,
+      durationSeconds: (typeof attempt.timeTakenSec === 'number') ? attempt.timeTakenSec : null,
+      timeUp: !!attempt.timedOut,
+      detail: attempt.detail || [],
+      questions: []
+    };
+    const cerRef = doc(db, 'courseExamResults', email, 'courses', CP_COURSE_ID, 'attempts', attemptId);
+    await setDoc(cerRef, cerRec, {merge:true});
+  } catch(e) { console.warn('[k8s] courseExamResults write failed (non-fatal):', e.message); }
 }
 
 // ---------- State ----------
