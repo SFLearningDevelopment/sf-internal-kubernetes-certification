@@ -832,7 +832,7 @@
                 resumeBtn.textContent = '🚀 Start Learning';
             } else if (totalCompleted === totalSections) {
                 resumeBtn.textContent = '🎉 Course Complete - Take Test';
-                resumeBtn.onclick = () => window.location.href = 'kubernetes-basic-test.html?v=1';
+                resumeBtn.onclick = () => window.location.href = 'kubernetes-evaluation.html';
             } else {
                 resumeBtn.textContent = '📖 Resume Learning';
             }
@@ -851,7 +851,7 @@
                     return;
                 }
             }
-            window.location.href = 'kubernetes-basic-test.html?v=1';
+            window.location.href = 'kubernetes-evaluation.html';
         }
         const moduleVersions = { '1': 2, '2': 1, '3': 1, '4': 1, '5': 1 };
         function navigateToModule(num) {
