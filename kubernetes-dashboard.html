@@ -467,7 +467,11 @@
             </div>
             <h1>⎈ Kubernetes Basic Course</h1>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <span id="k8s-welcome" style="color:white;font-size:0.95em;opacity:0.95;"></span>
+            <button class="theme-toggle" id="k8s-signout-btn" onclick="k8sSignOut()" style="display:none;">🚪 Sign out</button>
+            <button class="theme-toggle" onclick="toggleTheme()">🌓 Toggle Theme</button>
+        </div>
     </div>
     </div>
 
@@ -940,6 +944,10 @@ window.k8sEmailSignIn = function() {
     });
 };
 
+window.k8sSignOut = function() {
+    _k8sAuth.signOut().catch(function(e) { console.error('Sign out failed', e); });
+};
+
 _k8sAuth.onAuthStateChanged(async function(user) {
     if (user) {
         if (!user.email || !user.email.endsWith('@sourcefuse.com')) {
@@ -948,10 +956,14 @@ _k8sAuth.onAuthStateChanged(async function(user) {
             await _k8sAuth.signOut(); return;
         }
         _currentUid = user.uid;
+        document.getElementById('k8s-welcome').textContent = 'Welcome, ' + (user.displayName || user.email);
+        document.getElementById('k8s-signout-btn').style.display = '';
         document.getElementById('k8s-auth-overlay').style.display = 'none';
         await k8sLoadProgress(user.uid);
     } else {
         _currentUid = null;
+        document.getElementById('k8s-welcome').textContent = '';
+        document.getElementById('k8s-signout-btn').style.display = 'none';
         document.getElementById('k8s-auth-overlay').style.display = 'flex';
     }
 });
