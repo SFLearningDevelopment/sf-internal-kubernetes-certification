@@ -902,7 +902,7 @@ const _K8S_CONFIG = {
     messagingSenderId: "227322696511",
     appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
 };
-if (!window._k8sApp) window._k8sApp = firebase.initializeApp(_K8S_CONFIG, 'k8s');
+if (!window._k8sApp) window._k8sApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(_K8S_CONFIG);
 const _k8sAuth = firebase.auth(window._k8sApp);
 const _k8sDb   = firebase.firestore(window._k8sApp);
 
